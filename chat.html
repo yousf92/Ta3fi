@@ -47,9 +47,6 @@
             border-bottom: 1px solid #dee2e6; 
             flex-shrink: 0;
         }
-        .chat-header .nav-pills {
-            margin-top: 0.5rem !important;
-        }
         
         #pinned-message-container {
             padding: 10px 15px;
@@ -60,9 +57,6 @@
             flex-shrink: 0;
             cursor: pointer;
         }
-        #pinned-message-container .pinned-by { font-weight: bold; }
-        #pinned-message-container .pinned-text { color: #664d03; }
-        #unpin-button { cursor: pointer; font-size: 1.2rem; float: left; }
 
         .main-content { 
             flex-grow: 1; 
@@ -81,16 +75,13 @@
             flex-grow: 1;
             overflow-y: auto;
             padding: 20px; 
-            background-image: url('https://user-images.githubusercontent.com/15870356/228171131-d5f83463-06b3-472c-85df-829344d56b63.jpg');
+            background-image: url('https://images.unsplash.com/photo-1500964757637-c85e8a162699?q=80&w=2103&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
         }
 
         #articles-section { 
             padding: 20px;
-            background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
             height: 100%;
             overflow-y: auto;
         }
@@ -99,86 +90,72 @@
             margin-bottom: 1rem; 
             background-color: rgba(255, 255, 255, 0.9);
         }
-        .article-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 5px; }
-        
-        #articleModal .modal-content {
-            background-color: #f5f5dc;
-        }
-
-        .article-modal-body img { max-width: 100%; border-radius: 10px; margin-bottom: 1rem; }
         
         /* === چارەسەری کۆتایی === */
         .message { 
             margin-bottom: 15px; 
             display: flex; 
-            flex-direction: column; /* گرنگە بۆ ئەوەی نامە و کۆنترۆڵەکان لەسەر یەک بن */
+            align-items: flex-end; /* گرنگە بۆ ڕێکخستنی دوگمەکان */
             position: relative; 
         }
         .message.own { 
-            align-items: flex-end; /* نامەی خۆت دەباتە لای ڕاست */
+            justify-content: flex-end; /* نامەی خۆت دەباتە لای ڕاست */
         }
         .message.other { 
-            align-items: flex-start; /* نامەی بەرامبەر دەباتە لای چەپ */
+            justify-content: flex-start; /* نامەی بەرامبەر دەباتە لای چەپ */
         }
         
         .message-content { 
-            padding: 10px 15px; 
-            border-radius: 20px; 
-            max-width: 85%; /* زۆرترین پانی کە نامەکە وەری بگرێت */
-            width: -moz-fit-content; /* بۆ Firefox */
-            width: fit-content;    /* وا دەکات پانیی نامەکە بەقەدەر نووسینەکە بێت */
+            padding: 8px 12px; 
+            border-radius: 18px; 
+            max-width: 80%;
             position: relative; 
             box-shadow: 0 1px 1px rgba(0,0,0,0.1);
             word-wrap: break-word;
-            overflow-wrap: break-word;
-            display: flex; /* بۆ ڕێکخستنی ناوەڕۆک */
-            flex-direction: column; /* بۆ ڕێکخستنی ناوەڕۆک */
+            display: flex;
+            flex-direction: column;
         }
-        /* === کۆتایی چارەسەر === */
 
-        .message.own .message-content { background-color: #056162; color: white; border-bottom-right-radius: 5px; }
+        .message.own .message-content { background-color: #005c4b; color: white; border-bottom-right-radius: 5px; }
         .message.other .message-content { background-color: #202c33; color: white; border-bottom-left-radius: 5px; }
         
-        .sender { font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; color: #53bdeb; }
-        
-        .role-badge { font-size: 0.8rem; margin-left: 5px; padding: 2px 6px; border-radius: 5px; color: white; }
-        .role-badge.developer { background-color: #fdc107; color: #212529; }
-        .role-badge.admin { background-color: #198754; }
+        .sender { font-weight: bold; font-size: 0.9rem; margin-bottom: 4px; color: #53bdeb; }
         
         .timestamp-wrapper {
-            align-self: flex-end; /* کات و نیشانەکان دەباتە کۆتایی */
+            align-self: flex-end;
             display: flex;
             align-items: center;
-            margin-top: 5px;
+            margin-top: 4px;
+            margin-left: 15px; /* بۆشایی بۆ کاتەکە */
         }
         .timestamp { font-size: 0.75rem; color: #a0a0a0; }
-        .edited-badge { font-size: 0.7rem; color: #a0a0a0; margin-left: 5px; }
+        .edited-badge { font-size: 0.7rem; color: #a0a0a0; margin-right: 5px; }
         
-        .message-actions { font-size: 0.8rem; margin: 0 10px; display: none; position: relative; }
-        .message:hover .message-actions { display: block; }
-        .message-actions a { cursor: pointer; color: #a0a0a0; text-decoration: none; margin-left: 8px; }
-        
+        .message-actions { 
+            font-size: 1rem; 
+            display: none; /* بە شاردراوەیی دەمێنێتەوە */
+            align-items: center;
+            gap: 8px;
+            margin: 0 10px;
+        }
+        .message:hover .message-actions { 
+            display: flex; /* کاتێک ماوس دەچێتە سەری، دەردەکەوێت */
+        }
+        .message-actions a { cursor: pointer; color: #a0a0a0; text-decoration: none; }
+        .message-actions a:hover { color: white; }
+        /* === کۆتایی چارەسەر === */
+
         .reply-preview { background-color: #2a3942; padding: 8px 12px; border-bottom: 1px solid #3a4a55; font-size: 0.9rem; display: none; position: relative; flex-shrink: 0; }
-        .reply-preview-sender { font-weight: bold; color: #53bdeb; }
-        .reply-preview-text { color: #a0a0a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .cancel-reply { position: absolute; top: 5px; left: 10px; cursor: pointer; font-size: 1.2rem; color: #a0a0a0; }
-        
         .replied-to-box { background-color: rgba(0,0,0,0.2); padding: 8px; margin-bottom: 8px; border-radius: 10px; border-left: 3px solid #53bdeb; font-size: 0.9rem; }
-        .replied-to-sender { font-weight: bold; color: #53bdeb; }
-        .replied-to-text { opacity: 0.8; }
         
         .reactions-container { position: absolute; top: -35px; background-color: #202c33; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; padding: 5px; opacity: 0; visibility: hidden; transition: all 0.2s; z-index: 10; }
-        .message:hover .reactions-container { opacity: 1; visibility: visible; }
-        .reaction-emoji { cursor: pointer; font-size: 1.2rem; margin: 0 4px; transition: transform 0.1s; }
-        .reaction-emoji:hover { transform: scale(1.3); }
+        .message-content:hover .reactions-container { opacity: 1; visibility: visible; }
         
-        .message-reactions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
-        .reaction-chip { background-color: #2a3942; border-radius: 10px; padding: 2px 8px; font-size: 0.8rem; display: flex; align-items: center; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .message-reactions { display: flex; flex-wrap: wrap; gap: 5px; position: absolute; bottom: -5px; right: 5px; }
+        .message.own .message-reactions { left: 5px; right: auto; }
+        .reaction-chip { background-color: #2a3942; border-radius: 10px; padding: 1px 6px; font-size: 0.8rem; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
         
         .mute-dropdown { display: none; position: absolute; background-color: #202c33; min-width: 160px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 5px; padding: 5px 0; }
-        .mute-dropdown a { color: white; padding: 8px 12px; text-decoration: none; display: block; font-size: 0.9rem; }
-        .mute-dropdown a:hover { background-color: #2a3942; }
-        .show-dropdown { display: block; }
         
         #chat-footer {
             flex-shrink: 0;
@@ -272,7 +249,7 @@
                     <h5 class="modal-title" id="articleModalTitle"></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body article-modal-body" id="articleModalBody"></div>
+                <div class="modal-body" id="articleModalBody"></div>
             </div>
         </div>
     </div>
@@ -544,38 +521,35 @@
                     msgDiv.id = `message-${msgId}`;
                     const time = msg.createdAt ? new Date(msg.createdAt.toDate()).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '';
                     const canModerate = currentUserRole === 'developer' || currentUserRole === 'admin';
+                    
                     let controls = '';
-                    const pinButton = canModerate ? `<a onclick="window.pinMessage('${msgId}')" title="تثبيت الرسالة"><i class="bi bi-pin-angle-fill"></i></a>` : '';
+                    const pinButton = canModerate ? `<a onclick="window.pinMessage('${msgId}')" title="تثبيت"><i class="bi bi-pin-angle-fill"></i></a>` : '';
                     const replyButton = `<a onclick="window.setReply('${msgId}', '${msg.senderName}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="رد"><i class="bi bi-reply-fill"></i></a>`;
-                    const availableReactions = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
-                    let reactionsHtml = '<div class="reactions-container">';
-                    availableReactions.forEach(emoji => { reactionsHtml += `<span class="reaction-emoji" onclick="window.toggleReaction('${msgId}', '${emoji}')">${emoji}</span>`; });
-                    reactionsHtml += '</div>';
-                    if (isOwn) { controls = `<div class="message-actions">${replyButton}<a onclick="window.editMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a><a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`; }
-                    else if (canModerate) {
+                    
+                    if (isOwn) {
+                        controls = `<div class="message-actions">${replyButton}<a onclick="window.editMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a><a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`;
+                    } else if (canModerate) {
                         const isTargetAdmin = msg.senderRole === 'admin' || msg.senderRole === 'developer';
-                        const muteDropdownId = `mute-dropdown-${msgId}`;
-                        const muteOptions = `<div id="${muteDropdownId}" class="mute-dropdown">
-                            <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 1)">دقيقة واحدة</a><a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 2)">دقيقتان</a>
-                            <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 5)">5 دقائق</a><a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 15)">ربع ساعة</a>
-                            <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 120)">ساعتان</a><a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 1440)">يوم واحد</a>
-                            <a href="#" onclick="window.unmuteUser('${msg.senderId}', '${msg.senderName}')" style="color: green;">إلغاء الكتم</a></div>`;
-                        const muteButton = `<a onclick="window.toggleMuteDropdown('${muteDropdownId}')" title="كتم"><i class="bi bi-bell-slash-fill"></i></a>`;
-                        controls = `<div class="message-actions">${replyButton}<a onclick="window.deleteOtherMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${!isTargetAdmin ? `${muteButton}<a onclick="window.banUser('${msg.senderId}', '${msg.senderName}')" title="حظر"><i class="bi bi-slash-circle-fill"></i></a>${pinButton}${muteOptions}` : pinButton}</div>`;
-                    } else { controls = `<div class="message-actions">${replyButton}</div>`; }
+                        const muteButton = `<a onclick="window.toggleMuteDropdown('mute-dropdown-${msgId}')" title="كتم"><i class="bi bi-bell-slash-fill"></i></a>`;
+                        controls = `<div class="message-actions">${replyButton}<a onclick="window.deleteOtherMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${!isTargetAdmin ? `${muteButton}<a onclick="window.banUser('${msg.senderId}', '${msg.senderName}')" title="حظر"><i class="bi bi-slash-circle-fill"></i></a>${pinButton}` : pinButton}</div>`;
+                    } else {
+                        controls = `<div class="message-actions">${replyButton}</div>`;
+                    }
+
                     const editedBadge = msg.isEdited ? `<span class="edited-badge">(تم التعديل)</span>` : '';
                     let roleBadge = '';
                     if (msg.senderRole === 'developer') roleBadge = '<span class="role-badge developer">⭐ (مطور)</span>';
                     else if (msg.senderRole === 'admin') roleBadge = '<span class="role-badge admin">🛡️ (مشرف)</span>';
                     const senderNameDisplay = `${msg.senderName} ${roleBadge}`;
+                    
                     let repliedToHtml = '';
                     if (msg.replyTo) { repliedToHtml = `<div class="replied-to-box"><div class="replied-to-sender">${msg.replyTo.senderName}</div><div class="replied-to-text">${msg.replyTo.text}</div></div>`; }
+                    
                     let displayedReactionsHtml = '<div class="message-reactions">';
                     if (msg.reactions) { const reactionGroups = msg.reactions.reduce((acc, r) => { acc[r.emoji] = (acc[r.emoji] || 0) + 1; return acc; }, {}); for (const e in reactionGroups) { displayedReactionsHtml += `<div class="reaction-chip">${e} ${reactionGroups[e]}</div>`; } }
                     displayedReactionsHtml += '</div>';
-                    
-                    // === گۆڕانکاری لە دروستکردنی HTMLی نامە ===
-                    msgDiv.innerHTML = `
+
+                    const messageContentHtml = `
                         <div class="message-content">
                             ${!isOwn ? `<div class="sender">${senderNameDisplay}</div>` : ''}
                             ${repliedToHtml}
@@ -585,8 +559,14 @@
                                 ${editedBadge}
                             </div>
                             ${displayedReactionsHtml}
-                        </div>
-                        ${controls}`;
+                        </div>`;
+                    
+                    // ڕێکخستنی کۆتایی بۆ دانانی دوگمەکان
+                    if (isOwn) {
+                        msgDiv.innerHTML = controls + messageContentHtml;
+                    } else {
+                        msgDiv.innerHTML = messageContentHtml + controls;
+                    }
 
                     messagesBox.appendChild(msgDiv);
                 });
@@ -636,7 +616,6 @@
         pinnedMessageContainer.addEventListener('click', () => {
             const messageId = pinnedMessageContainer.dataset.messageId;
             if (!messageId) return;
-
             const messageElement = document.getElementById(`message-${messageId}`);
             if (messageElement) {
                 messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -647,7 +626,6 @@
                 }, 2000);
             }
         });
-
 
         window.toggleMuteDropdown = (id) => document.getElementById(id).classList.toggle("show-dropdown");
         window.onclick = (e) => { if (!e.target.matches('.bi-bell-slash-fill')) { document.querySelectorAll(".mute-dropdown.show-dropdown").forEach(d => d.classList.remove('show-dropdown')); } }
