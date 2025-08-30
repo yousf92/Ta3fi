@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>غرفة الدردشة لا أبرح حتى أبلغ بواسطة يوسف الكردي</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* === گۆڕانکارییەکە لێرەدایە === */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* ڕێگری لە سکڕۆڵی لاشەی پەڕەکە */
+        }
+        body { 
+            background-color: #f0f2f5; 
+            font-family: 'Tajawal', sans-serif;
+        }
+        .chat-wrapper { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100%; /* بەکارهێنانی ١٠٠٪ لە جیاتی vh */
+        }
+        .chat-container { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; /* پڕکردنەوەی تەواوی باوکەکەی */
+            width: 100%; 
+            max-width: 800px; 
+            background: white; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.1); 
+            border-radius: 0; /* لابردنی بۆ ئەوەی لەسەر مۆبایل جوانتر بێت */
+        }
+        @media (min-width: 801px) {
+            .chat-container {
+                height: 95vh; /* گەڕاندنەوەی بۆ دیسکتۆپ */
+                border-radius: 15px;
+            }
+        }
+        /* === کۆتایی گۆڕانکاری === */
+
+        .chat-header { 
+            padding: 0.5rem 1rem; 
+            background-color: #f8f9fa; 
+            border-bottom: 1px solid #dee2e6; 
+            flex-shrink: 0; /* ڕێگری لە بچووکبوونەوەی */
+        }
+        .chat-header .nav-pills {
+            margin-top: 0.5rem !important;
+        }
+        
+        #pinned-message-container {
+            padding: 10px 15px;
+            background-color: #fffbe6;
+            border-bottom: 1px solid #ffe58f;
+            display: none; 
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        #pinned-message-container .pinned-by { font-weight: bold; }
+        #pinned-message-container .pinned-text { color: #664d03; }
+        #unpin-button { cursor: pointer; font-size: 1.2rem; float: left; }
+
+        .main-content { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #chat-section {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        #messages-box { 
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px; 
+            background-image: url('https://images.unsplash.com/photo-1500964757637-c85e8a162699?q=80&w=2103&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+
+        #articles-section { 
+            padding: 20px;
+            background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .article-card { 
+            margin-bottom: 1rem; 
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+        .article-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 5px; }
+        .article-modal-body img { max-width: 100%; border-radius: 10px; margin-bottom: 1rem; }
+        .message { margin-bottom: 15px; display: flex; align-items: flex-end; position: relative; }
+        .message.own { justify-content: flex-end; }
+        .message.other { justify-content: flex-start; }
+        .message-content { padding: 10px 15px; border-radius: 20px; max-width: 75%; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .message.own .message-content { background-color: #dcf8c6; color: #303030; border-bottom-right-radius: 5px; }
+        .message.other .message-content { background-color: #ffffff; color: #303030; border-bottom-left-radius: 5px; }
+        .sender { font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; color: #0d6efd; }
+        .role-badge { font-size: 0.8rem; margin-left: 5px; padding: 2px 6px; border-radius: 5px; color: white; }
+        .role-badge.developer { background-color: #fdc107; color: #212529; }
+        .role-badge.admin { background-color: #198754; }
+        .timestamp { font-size: 0.75rem; color: #6c757d; }
+        .message.own .timestamp { color: #587458; }
+        .message-actions { font-size: 0.8rem; margin: 0 10px; display: none; position: relative; }
+        .message:hover .message-actions { display: block; }
+        .message-actions a { cursor: pointer; color: #6c757d; text-decoration: none; margin-left: 8px; }
+        .message.own .message-actions a { color: #6c757d; }
+        .edited-badge { font-size: 0.7rem; color: #adb5bd; margin-left: 5px; }
+        .reply-preview { background-color: #f8f9fa; padding: 8px 12px; border-bottom: 1px solid #dee2e6; font-size: 0.9rem; display: none; position: relative; flex-shrink: 0; }
+        .reply-preview-sender { font-weight: bold; color: #0d6efd; }
+        .reply-preview-text { color: #6c757d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cancel-reply { position: absolute; top: 5px; left: 10px; cursor: pointer; font-size: 1.2rem; }
+        .replied-to-box { background-color: rgba(0,0,0,0.05); padding: 8px; margin-bottom: 8px; border-radius: 10px; border-left: 3px solid #0d6efd; font-size: 0.9rem; }
+        .message.own .replied-to-box { border-left-color: #87ceeb; background-color: rgba(0,0,0,0.05); }
+        .replied-to-sender { font-weight: bold; }
+        .message.own .replied-to-sender { color: #0d6efd; }
+        .replied-to-text { opacity: 0.8; }
+        .reactions-container { position: absolute; top: -35px; background-color: white; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; padding: 5px; opacity: 0; visibility: hidden; transition: all 0.2s; z-index: 10; }
+        .message:hover .reactions-container { opacity: 1; visibility: visible; }
+        .reaction-emoji { cursor: pointer; font-size: 1.2rem; margin: 0 4px; transition: transform 0.1s; }
+        .reaction-emoji:hover { transform: scale(1.3); }
+        .message-reactions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; justify-content: flex-start; }
+        .message.own .message-reactions { justify-content: flex-end; }
+        .reaction-chip { background-color: #e9ecef; border-radius: 10px; padding: 2px 8px; font-size: 0.8rem; display: flex; align-items: center; }
+        .message.own .reaction-chip { background-color: #c5eec8; }
+        .mute-dropdown { display: none; position: absolute; background-color: white; min-width: 160px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 5px; padding: 5px 0; }
+        .mute-dropdown a { color: black; padding: 8px 12px; text-decoration: none; display: block; font-size: 0.9rem; }
+        .mute-dropdown a:hover { background-color: #f1f1f1; }
+        .show-dropdown { display: block; }
+        #chat-footer {
+            flex-shrink: 0; /* ڕێگری لە بچووکبوونەوەی فووتەر */
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-wrapper">
+        <div class="chat-container">
+            <!-- Header -->
+            <div class="chat-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0" id="header-title">المجموعة لا أبرح حتى أبلغ</h6>
+                        <small id="user-display-name" class="text-muted"></small>
+                    </div>
+                    <button id="logout-button" class="btn btn-sm btn-outline-danger">تسجيل الخروج</button>
+                </div>
+                <ul class="nav nav-pills nav-fill mt-2">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="chat-tab" href="#">الدردشة</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="articles-tab" href="#">مقالات</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Chat Section -->
+                <div id="chat-section">
+                    <div id="pinned-message-container">
+                        <span id="unpin-button" title="إلغاء تثبيت الرسالة">&times;</span>
+                        <div class="pinned-by"><i class="bi bi-pin-angle-fill"></i> <span id="pinned-by-text"></span></div>
+                        <div class="pinned-text" id="pinned-message-text"></div>
+                    </div>
+                    <div id="messages-box"></div>
+                </div>
+                <!-- Articles Section -->
+                <div id="articles-section" style="display: none;">
+                    <div id="admin-article-form" class="mb-4 p-3 border rounded bg-light" style="display: none;">
+                        <h6>إضافة/تعديل مقال (للمشرفين فقط)</h6>
+                        <input type="hidden" id="article-id-input">
+                        <div class="mb-3">
+                            <label for="article-title-input" class="form-label">عنوان المقال</label>
+                            <input type="text" class="form-control" id="article-title-input">
+                        </div>
+                        <div class="mb-3">
+                            <label for="article-image-input" class="form-label">صورة للمقال</label>
+                            <input type="file" class="form-control" id="article-image-input" accept="image/*">
+                            <small id="upload-status" class="form-text text-muted"></small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="article-content-input" class="form-label">محتوى المقال</label>
+                            <textarea class="form-control" id="article-content-input" rows="5"></textarea>
+                        </div>
+                        <button id="save-article-button" class="btn btn-success w-100">حفظ المقال</button>
+                        <button id="cancel-edit-button" class="btn btn-secondary w-100 mt-2" style="display: none;">إلغاء التعديل</button>
+                    </div>
+                    <div id="articles-list"></div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div id="chat-footer">
+                <div id="reply-preview" class="reply-preview">
+                    <div id="cancel-reply" class="cancel-reply">&times;</div>
+                    <div class="reply-preview-sender" id="reply-preview-sender"></div>
+                    <div class="reply-preview-text" id="reply-preview-text"></div>
+                </div>
+                <div class="card-footer p-3 bg-light border-top">
+                    <div class="input-group">
+                        <input type="text" id="message-input" class="form-control" placeholder="اكتب رسالتك...">
+                        <button id="send-button" class="btn btn-primary"><i class="bi bi-send-fill"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Article Modal -->
+    <div class="modal fade" id="articleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="articleModalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="articleModalBody"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, limit, doc, getDoc, deleteDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const CLOUDINARY_CLOUD_NAME = "dbkzk1oe2";
+        const CLOUDINARY_UPLOAD_PRESET = "my-articles";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
+            authDomain: "my-chat-app-daaf8.firebaseapp.com",
+            projectId: "my-chat-app-daaf8",
+            storageBucket: "my-chat-app-daaf8.firebasestorage.app",
+            messagingSenderId: "789086064752",
+            appId: "1:789086064752:web:d081f1b6832dabca1d64b5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserRole = 'user';
+        let replyToMessage = null;
+
+        // UI Elements
+        const userDisplayName = document.getElementById('user-display-name');
+        const logoutButton = document.getElementById('logout-button');
+        const messagesBox = document.getElementById('messages-box');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const replyPreview = document.getElementById('reply-preview');
+        const cancelReplyButton = document.getElementById('cancel-reply');
+        const adminArticleForm = document.getElementById('admin-article-form');
+        const articlesList = document.getElementById('articles-list');
+        const saveArticleButton = document.getElementById('save-article-button');
+        const articleTitleInput = document.getElementById('article-title-input');
+        const articleContentInput = document.getElementById('article-content-input');
+        const articleImageInput = document.getElementById('article-image-input');
+        const articleIdInput = document.getElementById('article-id-input');
+        const cancelEditButton = document.getElementById('cancel-edit-button');
+        const uploadStatus = document.getElementById('upload-status');
+        const chatTab = document.getElementById('chat-tab');
+        const articlesTab = document.getElementById('articles-tab');
+        const chatSection = document.getElementById('chat-section');
+        const articlesSection = document.getElementById('articles-section');
+        const chatFooter = document.getElementById('chat-footer');
+        const headerTitle = document.getElementById('header-title');
+        const articleModalEl = document.getElementById('articleModal');
+        const articleModal = new bootstrap.Modal(articleModalEl);
+        
+        const pinnedMessageContainer = document.getElementById('pinned-message-container');
+        const pinnedByText = document.getElementById('pinned-by-text');
+        const pinnedMessageText = document.getElementById('pinned-message-text');
+        const unpinButton = document.getElementById('unpin-button');
+
+        // Tab Switching Logic
+        chatTab.addEventListener('click', (e) => {
+            e.preventDefault();
+            chatSection.style.display = 'flex'; // Changed to flex
+            articlesSection.style.display = 'none';
+            chatFooter.style.display = 'block';
+            chatTab.classList.add('active');
+            articlesTab.classList.remove('active');
+            headerTitle.textContent = 'المجموعة لا أبرح حتى أبلغ';
+        });
+
+        articlesTab.addEventListener('click', (e) => {
+            e.preventDefault();
+            chatSection.style.display = 'none';
+            articlesSection.style.display = 'block';
+            chatFooter.style.display = 'none';
+            articlesTab.classList.add('active');
+            chatTab.classList.remove('active');
+            headerTitle.textContent = 'مقالات عن التعافي';
+        });
+
+        async function checkUserStatus(userId) {
+            const userDocRef = doc(db, "users", userId);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                if (userData.isBanned) {
+                    alert("لقد تم حظرك من هذه الدردشة.");
+                    signOut(auth);
+                    return 'banned';
+                }
+                if (userData.mutedUntil && userData.mutedUntil.toDate() > new Date()) {
+                    return 'muted';
+                }
+                currentUserRole = userData.role || 'user';
+            } else {
+                currentUserRole = 'user';
+            }
+            adminArticleForm.style.display = (currentUserRole === 'developer' || currentUserRole === 'admin') ? 'block' : 'none';
+            return 'active';
+        }
+
+        onAuthStateChanged(auth, async user => {
+            if (user && user.emailVerified) {
+                const status = await checkUserStatus(user.uid);
+                if (status === 'banned') return;
+                
+                let roleText = '';
+                if (currentUserRole === 'developer') roleText = '⭐ (مطور)';
+                else if (currentUserRole === 'admin') roleText = '🛡️ (مشرف)';
+
+                userDisplayName.textContent = `مرحبا، ${user.displayName || user.email} ${roleText}`;
+                loadMessages();
+                loadArticles();
+                loadPinnedMessage();
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        logoutButton.addEventListener('click', () => {
+            signOut(auth).then(() => { window.location.href = 'index.html'; });
+        });
+
+        async function uploadToCloudinary(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            uploadStatus.textContent = 'جاري رفع الصورة...';
+            try {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.secure_url) {
+                    uploadStatus.textContent = 'تم رفع الصورة بنجاح.';
+                    return data.secure_url;
+                } else { throw new Error('Cloudinary upload failed'); }
+            } catch (error) {
+                console.error("Cloudinary Upload Error:", error);
+                uploadStatus.textContent = 'خطأ في رفع الصورة.';
+                return null;
+            }
+        }
+
+        saveArticleButton.addEventListener('click', async () => {
+            const title = articleTitleInput.value.trim();
+            const content = articleContentInput.value.trim();
+            const imageFile = articleImageInput.files[0];
+            const articleId = articleIdInput.value;
+
+            if (!title || !content) { alert("يرجى ملء العنوان والمحتوى."); return; }
+
+            saveArticleButton.disabled = true;
+            let imageUrl = document.querySelector(`#article-card-${articleId} img`)?.src;
+
+            if (imageFile) {
+                imageUrl = await uploadToCloudinary(imageFile);
+            }
+
+            const articleData = {
+                title,
+                content,
+                imageUrl: imageUrl || null,
+                author: auth.currentUser.displayName,
+                authorId: auth.currentUser.uid,
+                lastUpdatedAt: serverTimestamp()
+            };
+
+            if (articleId) {
+                await updateDoc(doc(db, "articles", articleId), articleData);
+                alert("تم تحديث المقال بنجاح!");
+            } else {
+                articleData.createdAt = serverTimestamp();
+                await addDoc(collection(db, "articles"), articleData);
+                alert("تم إضافة المقال بنجاح!");
+            }
+
+            articleIdInput.value = '';
+            articleTitleInput.value = '';
+            articleContentInput.value = '';
+            articleImageInput.value = '';
+            uploadStatus.textContent = '';
+            saveArticleButton.textContent = 'حفظ المقال';
+            cancelEditButton.style.display = 'none';
+            saveArticleButton.disabled = false;
+        });
+
+        cancelEditButton.addEventListener('click', () => {
+            articleIdInput.value = '';
+            articleTitleInput.value = '';
+            articleContentInput.value = '';
+            articleImageInput.value = '';
+            saveArticleButton.textContent = 'حفظ المقال';
+            cancelEditButton.style.display = 'none';
+        });
+        function loadArticles() {
+            const q = query(collection(db, "articles"), orderBy("lastUpdatedAt", "desc"));
+            onSnapshot(q, (snapshot) => {
+                articlesList.innerHTML = "";
+                snapshot.forEach(doc => {
+                    const article = doc.data(); const articleId = doc.id;
+                    const card = document.createElement('div'); card.className = 'card article-card'; card.id = `article-card-${articleId}`;
+                    const contentPreview = article.content.substring(0, 100) + (article.content.length > 100 ? '...' : '');
+                    let adminButtonsHtml = '';
+                    if (currentUserRole === 'developer' || currentUserRole === 'admin') {
+                        adminButtonsHtml = `
+                            <button class="btn btn-sm btn-outline-secondary me-2 btn-edit" data-id="${articleId}" data-title="${article.title.replace(/"/g, '&quot;')}" data-content="${article.content.replace(/"/g, '&quot;')}">تعديل</button>
+                            <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${articleId}">حذف</button>`;
+                    }
+                    card.innerHTML = `
+                        ${article.imageUrl ? `<img src="${article.imageUrl}" class="card-img-top" alt="${article.title}">` : ''}
+                        <div class="card-body">
+                            <h5 class="card-title">${article.title}</h5><p class="card-text">${contentPreview}</p>
+                            <button class="btn btn-primary btn-read-more" data-title="${article.title.replace(/"/g, '&quot;')}" data-content="${article.content.replace(/"/g, '&quot;')}" data-image="${article.imageUrl || ''}">قراءة المزيد</button>
+                            <div class="mt-3">${adminButtonsHtml}</div>
+                        </div>
+                        <div class="card-footer text-muted">آخر تحديث: ${article.lastUpdatedAt ? new Date(article.lastUpdatedAt.toDate()).toLocaleString('ar-EG') : 'غير معروف'}</div>`;
+                    articlesList.appendChild(card);
+                });
+            });
+        }
+
+        articlesList.addEventListener('click', async (e) => {
+            const target = e.target;
+            if (target.classList.contains('btn-read-more')) {
+                document.getElementById('articleModalTitle').textContent = target.dataset.title;
+                document.getElementById('articleModalBody').innerHTML = `${target.dataset.image ? `<img src="${target.dataset.image}" class="img-fluid rounded mb-3" alt="${target.dataset.title}">` : ''}<p>${target.dataset.content.replace(/\n/g, '<br>')}</p>`;
+                articleModal.show();
+            }
+            if (target.classList.contains('btn-edit')) {
+                articlesTab.click();
+                articleIdInput.value = target.dataset.id; articleTitleInput.value = target.dataset.title; articleContentInput.value = target.dataset.content;
+                saveArticleButton.textContent = 'تحديث المقال'; cancelEditButton.style.display = 'block';
+                adminArticleForm.scrollIntoView({ behavior: 'smooth' });
+            }
+            if (target.classList.contains('btn-delete')) {
+                if (confirm("هل أنت متأكد من حذف هذا المقال؟")) { await deleteDoc(doc(db, "articles", target.dataset.id)); alert("تم حذف المقال."); }
+            }
+        });
+
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text || !auth.currentUser) return;
+            const userStatus = await checkUserStatus(auth.currentUser.uid);
+            if (userStatus === 'muted') { alert("أنت مكتوم حاليا ولا يمكنك إرسال رسائل."); return; }
+            const messageData = { text, senderName: auth.currentUser.displayName || auth.currentUser.email, senderId: auth.currentUser.uid, senderRole: currentUserRole, createdAt: serverTimestamp() };
+            if (replyToMessage) { messageData.replyTo = replyToMessage; }
+            await addDoc(collection(db, "messages"), messageData);
+            messageInput.value = ""; cancelReply();
+        }
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+        
+        function cancelReply() { replyToMessage = null; replyPreview.style.display = 'none'; }
+        cancelReplyButton.addEventListener('click', cancelReply);
+
+        function loadMessages() {
+            const q = query(collection(db, "messages"), orderBy("createdAt"));
+            onSnapshot(q, (snapshot) => {
+                const wasScrolledToBottom = messagesBox.scrollHeight - messagesBox.clientHeight <= messagesBox.scrollTop + 1;
+                
+                messagesBox.innerHTML = "";
+                snapshot.forEach(messageDoc => {
+                    const msg = messageDoc.data(); const msgId = messageDoc.id; const isOwn = msg.senderId === auth.currentUser.uid;
+                    const msgDiv = document.createElement('div'); msgDiv.className = `message ${isOwn ? 'own' : 'other'}`;
+                    const time = msg.createdAt ? new Date(msg.createdAt.toDate()).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '';
+                    const canModerate = currentUserRole === 'developer' || currentUserRole === 'admin';
+                    let controls = '';
+                    const pinButton = canModerate ? `<a onclick="window.pinMessage('${msgId}')" title="تثبيت الرسالة"><i class="bi bi-pin-angle-fill"></i></a>` : '';
+                    const replyButton = `<a onclick="window.setReply('${msgId}', '${msg.senderName}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="رد"><i class="bi bi-reply-fill"></i></a>`;
+                    const availableReactions = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+                    let reactionsHtml = '<div class="reactions-container">';
+                    availableReactions.forEach(emoji => { reactionsHtml += `<span class="reaction-emoji" onclick="window.toggleReaction('${msgId}', '${emoji}')">${emoji}</span>`; });
+                    reactionsHtml += '</div>';
+                    if (isOwn) { controls = `<div class="message-actions">${replyButton}<a onclick="window.editMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a><a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`; }
+                    else if (canModerate) {
+                        const isTargetAdmin = msg.senderRole === 'admin' || msg.senderRole === 'developer';
+                        const muteDropdownId = `mute-dropdown-${msgId}`;
+                        const muteOptions = `<div id="${muteDropdownId}" class="mute-dropdown">
+                            <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 1)">دقيقة واحدة</a><a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 2)">دقيقتان</a>
+                            <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 5)">5 دقائق</a><a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 15)">ربع ساعة</a>
+                            <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 120)">ساعتان</a><a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 1440)">يوم واحد</a>
+                            <a href="#" onclick="window.unmuteUser('${msg.senderId}', '${msg.senderName}')" style="color: green;">إلغاء الكتم</a></div>`;
+                        const muteButton = `<a onclick="window.toggleMuteDropdown('${muteDropdownId}')" title="كتم"><i class="bi bi-bell-slash-fill"></i></a>`;
+                        controls = `<div class="message-actions">${replyButton}<a onclick="window.deleteOtherMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${!isTargetAdmin ? `${muteButton}<a onclick="window.banUser('${msg.senderId}', '${msg.senderName}')" title="حظر"><i class="bi bi-slash-circle-fill"></i></a>${pinButton}${muteOptions}` : pinButton}</div>`;
+                    } else { controls = `<div class="message-actions">${replyButton}</div>`; }
+                    const editedBadge = msg.isEdited ? `<span class="edited-badge">(تم التعديل)</span>` : '';
+                    let roleBadge = '';
+                    if (msg.senderRole === 'developer') roleBadge = '<span class="role-badge developer">⭐ (مطور)</span>';
+                    else if (msg.senderRole === 'admin') roleBadge = '<span class="role-badge admin">🛡️ (مشرف)</span>';
+                    const senderNameDisplay = `${msg.senderName} ${roleBadge}`;
+                    let repliedToHtml = '';
+                    if (msg.replyTo) { repliedToHtml = `<div class="replied-to-box"><div class="replied-to-sender">${msg.replyTo.senderName}</div><div class="replied-to-text">${msg.replyTo.text}</div></div>`; }
+                    let displayedReactionsHtml = '<div class="message-reactions">';
+                    if (msg.reactions) { const reactionGroups = msg.reactions.reduce((acc, r) => { acc[r.emoji] = (acc[r.emoji] || 0) + 1; return acc; }, {}); for (const e in reactionGroups) { displayedReactionsHtml += `<div class="reaction-chip">${e} ${reactionGroups[e]}</div>`; } }
+                    displayedReactionsHtml += '</div>';
+                    msgDiv.innerHTML = `${isOwn ? controls : ''}<div class="message-content">${reactionsHtml}${!isOwn ? `<div class="sender">${senderNameDisplay}</div>` : ''}${repliedToHtml}<div>${msg.text}</div><div class="timestamp text-end w-100 mt-1">${time} ${editedBadge}</div>${displayedReactionsHtml}</div>${!isOwn ? controls : ''}`;
+                    messagesBox.appendChild(msgDiv);
+                });
+                
+                if (wasScrolledToBottom) {
+                    messagesBox.scrollTop = messagesBox.scrollHeight;
+                }
+            });
+        }
+        
+        const pinnedDocRef = doc(db, "chat_config", "pinned_message");
+        window.pinMessage = async (messageId) => {
+            const messageDoc = await getDoc(doc(db, "messages", messageId));
+            if (!messageDoc.exists()) return;
+            const messageData = messageDoc.data();
+            await setDoc(pinnedDocRef, { text: messageData.text, senderName: messageData.senderName, pinnedBy: auth.currentUser.displayName, pinnedAt: serverTimestamp() });
+        };
+        unpinButton.addEventListener('click', async () => { await setDoc(pinnedDocRef, { text: null, senderName: null, pinnedBy: null }); });
+        function loadPinnedMessage() {
+            onSnapshot(pinnedDocRef, (doc) => {
+                if (doc.exists() && doc.data().text) {
+                    const data = doc.data();
+                    pinnedByText.textContent = `تم التثبيت بواسطة: ${data.pinnedBy}`;
+                    pinnedMessageText.textContent = `${data.senderName}: ${data.text}`;
+                    pinnedMessageContainer.style.display = 'block';
+                    unpinButton.style.display = (currentUserRole === 'developer' || currentUserRole === 'admin') ? 'block' : 'none';
+                } else { pinnedMessageContainer.style.display = 'none'; }
+            });
+        }
+
+        window.toggleMuteDropdown = (id) => document.getElementById(id).classList.toggle("show-dropdown");
+        window.onclick = (e) => { if (!e.target.matches('.bi-bell-slash-fill')) { document.querySelectorAll(".mute-dropdown.show-dropdown").forEach(d => d.classList.remove('show-dropdown')); } }
+        window.muteUser = async (uid, name, min) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; await setDoc(doc(db, "users", uid), { mutedUntil: new Date(Date.now() + min * 60000) }, { merge: true }); alert(`تم كتم ${name} لمدة ${min} دقيقة.`); };
+        window.unmuteUser = async (uid, name) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; await setDoc(doc(db, "users", uid), { mutedUntil: null }, { merge: true }); alert(`تم إلغاء كتم ${name}.`); };
+        window.setReply = (id, name, text) => { replyToMessage = { messageId: id, senderName: name, text }; document.getElementById('reply-preview-sender').textContent = `الرد على ${name}`; document.getElementById('reply-preview-text').textContent = text; replyPreview.style.display = 'block'; messageInput.focus(); };
+        window.toggleReaction = async (msgId, emoji) => { if (!auth.currentUser) return; const msgRef = doc(db, "messages", msgId); const msgDoc = await getDoc(msgRef); const msgData = msgDoc.data(); const uid = auth.currentUser.uid; const existing = msgData.reactions?.find(r => r.userId === uid); if (existing) { await updateDoc(msgRef, { reactions: arrayRemove(existing) }); if (existing.emoji !== emoji) { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } } else { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } };
+        window.deleteOwnMessage = async (id) => { if (confirm("هل أنت متأكد من حذف رسالتك؟")) { await deleteDoc(doc(db, "messages", id)); } };
+        window.deleteOtherMessage = async (id) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; if (confirm("هل أنت متأكد من حذف هذه الرسالة؟")) { await deleteDoc(doc(db, "messages", id)); } };
+        window.editMessage = async (id, text) => { const newText = prompt("قم بتعديل رسالتك:", text); if (newText && newText.trim() !== "" && newText !== text) { await updateDoc(doc(db, "messages", id), { text: newText, isEdited: true, lastEditedAt: serverTimestamp() }); } };
+        window.banUser = async (uid, name) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; const userToBan = await getDoc(doc(db, "users", uid)); if (userToBan.exists() && (userToBan.data().role === 'admin' || userToBan.data().role === 'developer')) { alert("لا يمكنك حظر مشرف آخر."); return; } if (confirm(`هل أنت متأكد من حظر ${name}؟`)) { await setDoc(doc(db, "users", uid), { isBanned: true }, { merge: true }); alert(`تم حظر ${name}.`); } };
+    </script>
+</body>
+</html>
