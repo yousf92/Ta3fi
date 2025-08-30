@@ -58,6 +58,7 @@
             display: none; 
             font-size: 0.9rem;
             flex-shrink: 0;
+            cursor: pointer; /* === گۆڕانکاری یەکەم === */
         }
         #pinned-message-container .pinned-by { font-weight: bold; }
         #pinned-message-container .pinned-text { color: #664d03; }
@@ -100,11 +101,9 @@
         }
         .article-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 5px; }
         
-        /* === گۆڕانکارییەکە لێرەدایە === */
         #articleModal .modal-content {
-            background-color: #f5f5dc; /* ڕەنگی کرێمی-کاڵ */
+            background-color: #f5f5dc;
         }
-        /* === کۆتایی گۆڕانکاری === */
 
         .article-modal-body img { max-width: 100%; border-radius: 10px; margin-bottom: 1rem; }
         .message { margin-bottom: 15px; display: flex; align-items: flex-end; position: relative; }
@@ -500,7 +499,9 @@
                 messagesBox.innerHTML = "";
                 snapshot.forEach(messageDoc => {
                     const msg = messageDoc.data(); const msgId = messageDoc.id; const isOwn = msg.senderId === auth.currentUser.uid;
-                    const msgDiv = document.createElement('div'); msgDiv.className = `message ${isOwn ? 'own' : 'other'}`;
+                    const msgDiv = document.createElement('div'); 
+                    msgDiv.className = `message ${isOwn ? 'own' : 'other'}`;
+                    msgDiv.id = `message-${msgId}`; // === گۆڕانکاری دووەم: زیادکردنی ئایدی بۆ نامەکە ===
                     const time = msg.createdAt ? new Date(msg.createdAt.toDate()).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '';
                     const canModerate = currentUserRole === 'developer' || currentUserRole === 'admin';
                     let controls = '';
@@ -543,13 +544,27 @@
         }
         
         const pinnedDocRef = doc(db, "chat_config", "pinned_message");
+        
+        // === گۆڕانکاری سێیەم: نوێکردنەوەی فەنکشنی پینکردن ===
         window.pinMessage = async (messageId) => {
             const messageDoc = await getDoc(doc(db, "messages", messageId));
             if (!messageDoc.exists()) return;
             const messageData = messageDoc.data();
-            await setDoc(pinnedDocRef, { text: messageData.text, senderName: messageData.senderName, pinnedBy: auth.currentUser.displayName, pinnedAt: serverTimestamp() });
+            await setDoc(pinnedDocRef, {
+                messageId: messageId, // زیادکردنی ئایدی نامەکە
+                text: messageData.text,
+                senderName: messageData.senderName,
+                pinnedBy: auth.currentUser.displayName,
+                pinnedAt: serverTimestamp()
+            });
         };
-        unpinButton.addEventListener('click', async () => { await setDoc(pinnedDocRef, { text: null, senderName: null, pinnedBy: null }); });
+
+        unpinButton.addEventListener('click', async (e) => {
+            e.stopPropagation(); // ڕێگری لەوەی کلیکی پینەکەش کاربکات
+            await setDoc(pinnedDocRef, { messageId: null, text: null, senderName: null, pinnedBy: null });
+        });
+
+        // === گۆڕانکاری چوارەم: نوێکردنەوەی فەنکشنی پیشاندانی پین ===
         function loadPinnedMessage() {
             onSnapshot(pinnedDocRef, (doc) => {
                 if (doc.exists() && doc.data().text) {
@@ -557,10 +572,31 @@
                     pinnedByText.textContent = `تم التثبيت بواسطة: ${data.pinnedBy}`;
                     pinnedMessageText.textContent = `${data.senderName}: ${data.text}`;
                     pinnedMessageContainer.style.display = 'block';
+                    pinnedMessageContainer.dataset.messageId = data.messageId; // هەڵگرتنی ئایدی نامەکە
                     unpinButton.style.display = (currentUserRole === 'developer' || currentUserRole === 'admin') ? 'block' : 'none';
-                } else { pinnedMessageContainer.style.display = 'none'; }
+                } else {
+                    pinnedMessageContainer.style.display = 'none';
+                    pinnedMessageContainer.dataset.messageId = '';
+                }
             });
         }
+
+        // === گۆڕانکاری پێنجەم: زیادکردنی فەنکشنی کلیک بۆ پینەکە ===
+        pinnedMessageContainer.addEventListener('click', () => {
+            const messageId = pinnedMessageContainer.dataset.messageId;
+            if (!messageId) return;
+
+            const messageElement = document.getElementById(`message-${messageId}`);
+            if (messageElement) {
+                messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                messageElement.style.transition = 'background-color 0.5s';
+                messageElement.style.backgroundColor = 'rgba(255, 255, 0, 0.3)';
+                setTimeout(() => {
+                    messageElement.style.backgroundColor = '';
+                }, 2000); // لابردنی ڕەنگەکە دوای ٢ چرکە
+            }
+        });
+
 
         window.toggleMuteDropdown = (id) => document.getElementById(id).classList.toggle("show-dropdown");
         window.onclick = (e) => { if (!e.target.matches('.bi-bell-slash-fill')) { document.querySelectorAll(".mute-dropdown.show-dropdown").forEach(d => d.classList.remove('show-dropdown')); } }
