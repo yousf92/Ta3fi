@@ -80,8 +80,12 @@
             background-position: center;
         }
 
+        /* === گۆڕانکاری یەکەم === */
         #articles-section { 
             padding: 20px;
+            background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
             height: 100%;
             overflow-y: auto;
         }
@@ -91,18 +95,24 @@
             background-color: rgba(255, 255, 255, 0.9);
         }
         
-        /* === چارەسەری کۆتایی === */
+        /* === گۆڕانکاری دووەم === */
+        #articleModal .modal-content {
+            background-color: #f5f5dc; /* ڕەنگی بێجی وەک پێشوو */
+        }
+
+        .article-modal-body img { max-width: 100%; border-radius: 10px; margin-bottom: 1rem; }
+        
         .message { 
             margin-bottom: 15px; 
             display: flex; 
-            align-items: flex-end; /* گرنگە بۆ ڕێکخستنی دوگمەکان */
+            align-items: flex-end;
             position: relative; 
         }
         .message.own { 
-            justify-content: flex-end; /* نامەی خۆت دەباتە لای ڕاست */
+            justify-content: flex-end;
         }
         .message.other { 
-            justify-content: flex-start; /* نامەی بەرامبەر دەباتە لای چەپ */
+            justify-content: flex-start;
         }
         
         .message-content { 
@@ -126,24 +136,23 @@
             display: flex;
             align-items: center;
             margin-top: 4px;
-            margin-left: 15px; /* بۆشایی بۆ کاتەکە */
+            margin-left: 15px;
         }
         .timestamp { font-size: 0.75rem; color: #a0a0a0; }
         .edited-badge { font-size: 0.7rem; color: #a0a0a0; margin-right: 5px; }
         
         .message-actions { 
             font-size: 1rem; 
-            display: none; /* بە شاردراوەیی دەمێنێتەوە */
+            display: none;
             align-items: center;
             gap: 8px;
             margin: 0 10px;
         }
         .message:hover .message-actions { 
-            display: flex; /* کاتێک ماوس دەچێتە سەری، دەردەکەوێت */
+            display: flex;
         }
         .message-actions a { cursor: pointer; color: #a0a0a0; text-decoration: none; }
         .message-actions a:hover { color: white; }
-        /* === کۆتایی چارەسەر === */
 
         .reply-preview { background-color: #2a3942; padding: 8px 12px; border-bottom: 1px solid #3a4a55; font-size: 0.9rem; display: none; position: relative; flex-shrink: 0; }
         .replied-to-box { background-color: rgba(0,0,0,0.2); padding: 8px; margin-bottom: 8px; border-radius: 10px; border-left: 3px solid #53bdeb; font-size: 0.9rem; }
@@ -249,7 +258,7 @@
                     <h5 class="modal-title" id="articleModalTitle"></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" id="articleModalBody"></div>
+                <div class="modal-body article-modal-body" id="articleModalBody"></div>
             </div>
         </div>
     </div>
@@ -561,7 +570,6 @@
                             ${displayedReactionsHtml}
                         </div>`;
                     
-                    // ڕێکخستنی کۆتایی بۆ دانانی دوگمەکان
                     if (isOwn) {
                         msgDiv.innerHTML = controls + messageContentHtml;
                     } else {
