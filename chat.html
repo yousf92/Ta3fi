@@ -33,6 +33,7 @@
             background: white; 
             box-shadow: 0 0 20px rgba(0,0,0,0.1); 
             border-radius: 0;
+            position: relative; 
         }
         @media (min-width: 801px) {
             .chat-container {
@@ -90,12 +91,14 @@
             overflow-y: auto; 
             display: flex;
             flex-direction: column;
+            position: relative; 
         }
         
         #chat-section {
             display: flex;
             flex-direction: column;
             height: 100%;
+            position: relative; 
         }
 
         #messages-box { 
@@ -105,6 +108,14 @@
             background-image: url('https://images.unsplash.com/photo-1500964757637-c85e8a162699?q=80&w=2103&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message-content {
+            user-select: text; 
+            -webkit-user-select: text;
         }
 
         #articles-section { 
@@ -121,15 +132,13 @@
             background-color: rgba(255, 255, 255, 0.9);
         }
         
-        /* === گۆڕانکاری داواکراو === */
         #articleModal .modal-content {
-            background-color: #32362e; /* ڕەنگی داواکراو */
-            color: white; /* ڕەنگی نووسین بۆ سپی */
+            background-color: #32362e;
+            color: white;
         }
         #articleModal .modal-header {
-            border-bottom-color: #4a4e47; /* ڕەنگی هێڵی جیاکەرەوە */
+            border-bottom-color: #4a4e47;
         }
-        /* === کۆتایی گۆڕانکاری === */
 
         .article-modal-body img { max-width: 100%; border-radius: 10px; margin-bottom: 1rem; }
         
@@ -138,18 +147,21 @@
             display: flex; 
             align-items: flex-end;
             position: relative; 
+            padding-bottom: 35px;
+            max-width: 95%;
+            transition: transform 0.3s ease;
         }
         .message.own { 
-            justify-content: flex-end;
+            align-self: flex-end;
         }
         .message.other { 
-            justify-content: flex-start;
+            align-self: flex-start;
         }
         
         .message-content { 
             padding: 8px 12px; 
             border-radius: 18px; 
-            max-width: 80%;
+            max-width: 100%; 
             position: relative; 
             box-shadow: 0 1px 1px rgba(0,0,0,0.1);
             word-wrap: break-word;
@@ -173,20 +185,38 @@
         .edited-badge { font-size: 0.7rem; color: #a0a0a0; margin-right: 5px; }
         
         .message-actions { 
+            position: absolute;
+            bottom: 0;
+            z-index: 10;
+            background-color: #2a3942;
+            padding: 5px 10px;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             font-size: 1rem; 
             display: none;
             align-items: center;
-            gap: 8px;
-            margin: 0 10px;
-            position: relative; 
+            gap: 12px;
+            white-space: nowrap;
+        }
+        .message.own .message-actions {
+            right: 0;
+        }
+        .message.other .message-actions {
+            left: 0;
         }
         .message:hover .message-actions { 
             display: flex;
         }
-        .message-actions a { cursor: pointer; color: #a0a0a0; text-decoration: none; }
-        .message-actions a:hover { color: white; }
+        
+        .message-actions a { cursor: pointer; color: white; text-decoration: none; position: relative; }
+        .message-actions a:hover { color: #f0f0f0; }
 
         .reply-preview { background-color: #2a3942; padding: 8px 12px; border-bottom: 1px solid #3a4a55; font-size: 0.9rem; display: none; position: relative; flex-shrink: 0; }
+        #reply-preview-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         .replied-to-box { background-color: rgba(0,0,0,0.2); padding: 8px; margin-bottom: 8px; border-radius: 10px; border-left: 3px solid #53bdeb; font-size: 0.9rem; }
         
         .reactions-container { 
@@ -235,6 +265,7 @@
             background-color: #004a3c;
         }
         
+        /* --- START: ADDED CODE --- */
         .mute-dropdown { 
             display: none; 
             position: absolute; 
@@ -244,12 +275,13 @@
             z-index: 1; 
             border-radius: 5px; 
             padding: 5px 0;
-            bottom: 100%;
-            left: 0;
+            bottom: 100%; /* This positions the dropdown above the button */
         }
-        .message.other .message-actions .mute-dropdown {
-            left: auto;
+        .message.own .mute-dropdown {
             right: 0;
+        }
+        .message.other .mute-dropdown {
+            left: 0;
         }
         .mute-dropdown a { 
             color: white; 
@@ -264,10 +296,92 @@
         .show-dropdown {
             display: block;
         }
+        /* --- END: ADDED CODE --- */
         
         #chat-footer {
             flex-shrink: 0;
         }
+        
+        #mention-notification {
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background-color: #53bdeb;
+            color: white;
+            border-radius: 50%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .edit-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+        .edit-modal-content {
+            background-color: #3e4a54;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            color: white;
+        }
+        .edit-modal-content h6 {
+            margin-top: 0;
+        }
+        .edit-modal-content textarea {
+            width: 100%;
+            min-height: 100px;
+            background-color: #2a3942;
+            color: white;
+            border: 1px solid #53bdeb;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            resize: vertical;
+        }
+        .edit-modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .edit-modal-buttons button {
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .edit-modal-buttons .btn-ok {
+            background-color: #53bdeb;
+            color: white;
+        }
+        .edit-modal-buttons .btn-cancel {
+            background-color: transparent;
+            color: #53bdeb;
+        }
+        
+        #message-input {
+            resize: none;
+            overflow-y: auto;
+            max-height: 120px;
+        }
+
     </style>
 </head>
 <body>
@@ -287,7 +401,7 @@
                         <a class="nav-link active" id="chat-tab" href="#">الدردشة</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="articles-tab" href="#">قسم مقالات</a>
+                        <a class="nav-link" id="articles-tab" href="#">القائمة</a>
                     </li>
                 </ul>
             </div>
@@ -306,6 +420,7 @@
                 <!-- Chat Section -->
                 <div id="chat-section">
                     <div id="messages-box"></div>
+                    <div id="mention-notification" title="لديك رد جديد">@</div>
                 </div>
                 <!-- Articles Section -->
                 <div id="articles-section" style="display: none;">
@@ -337,11 +452,11 @@
                 <div id="reply-preview" class="reply-preview">
                     <div id="cancel-reply" class="cancel-reply">&times;</div>
                     <div class="reply-preview-sender" id="reply-preview-sender"></div>
-                    <div class="reply-preview-text" id="reply-preview-text"></div>
+                    <div id="reply-preview-text" class="reply-preview-text"></div>
                 </div>
                 <div class="card-footer p-3 bg-light border-top">
                     <div class="input-group">
-                        <input type="text" id="message-input" class="form-control" placeholder="اكتب رسالتك...">
+                        <textarea id="message-input" class="form-control" placeholder="اكتب رسالتك..." rows="1"></textarea>
                         <button id="send-button" class="btn btn-primary"><i class="bi bi-send-fill"></i></button>
                     </div>
                 </div>
@@ -417,6 +532,7 @@
         const pinnedMessageText = document.getElementById('pinned-message-text');
         const unpinButton = document.getElementById('unpin-button');
         const pinnedMessageClickableArea = document.getElementById('pinned-message-clickable-area');
+        const mentionNotification = document.getElementById('mention-notification');
 
 
         // Tab Switching Logic
@@ -609,10 +725,22 @@
             const messageData = { text, senderName: auth.currentUser.displayName || auth.currentUser.email, senderId: auth.currentUser.uid, senderRole: currentUserRole, createdAt: serverTimestamp() };
             if (replyToMessage) { messageData.replyTo = replyToMessage; }
             await addDoc(collection(db, "messages"), messageData);
-            messageInput.value = ""; cancelReply();
+            messageInput.value = ""; 
+            cancelReply();
+            messageInput.style.height = 'auto';
         }
         sendButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+        
+        messageInput.addEventListener('keypress', (e) => { 
+            if (e.key === 'Enter' && !e.shiftKey) { 
+                e.preventDefault(); 
+                sendMessage();
+            }
+        });
+        messageInput.addEventListener('input', () => {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = (messageInput.scrollHeight) + 'px';
+        });
         
         function cancelReply() { replyToMessage = null; replyPreview.style.display = 'none'; }
         cancelReplyButton.addEventListener('click', cancelReply);
@@ -620,7 +748,7 @@
         function loadMessages() {
             const q = query(collection(db, "messages"), orderBy("createdAt"));
             onSnapshot(q, (snapshot) => {
-                const wasScrolledToBottom = messagesBox.scrollHeight - messagesBox.clientHeight <= messagesBox.scrollTop + 1;
+                const wasScrolledToBottom = messagesBox.scrollHeight - messagesBox.clientHeight <= messagesBox.scrollTop + 150;
                 
                 messagesBox.innerHTML = "";
                 snapshot.forEach(messageDoc => {
@@ -628,15 +756,20 @@
                     const msgDiv = document.createElement('div'); 
                     msgDiv.className = `message ${isOwn ? 'own' : 'other'}`;
                     msgDiv.id = `message-${msgId}`;
+                    msgDiv.dataset.senderName = msg.senderName;
+                    msgDiv.dataset.senderId = msg.senderId;
+                    msgDiv.dataset.text = msg.text;
+
                     const time = msg.createdAt ? new Date(msg.createdAt.toDate()).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '';
                     const canModerate = currentUserRole === 'developer' || currentUserRole === 'admin';
                     
                     let controls = '';
                     const pinButton = canModerate ? `<a onclick="window.pinMessage('${msgId}')" title="تثبيت"><i class="bi bi-pin-angle-fill"></i></a>` : '';
-                    const replyButton = `<a onclick="window.setReply('${msgId}', '${msg.senderName}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="رد"><i class="bi bi-reply-fill"></i></a>`;
+                    const replyButton = `<a onclick="window.setReplyWrapper('${msgId}')" title="رد"><i class="bi bi-reply-fill"></i></a>`;
+                    const copyButton = `<a onclick="window.copyMessageText('${msgId}')" title="نسخ"><i class="bi bi-clipboard"></i></a>`;
                     
                     if (isOwn) {
-                        controls = `<div class="message-actions">${replyButton}<a onclick="window.editMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a><a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`;
+                        controls = `<div class="message-actions">${copyButton}${replyButton}<a onclick="window.editMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a><a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`;
                     } else if (canModerate) {
                         const isTargetAdmin = msg.senderRole === 'admin' || msg.senderRole === 'developer';
                         const muteDropdownId = `mute-dropdown-${msgId}`;
@@ -647,10 +780,10 @@
                             <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 1440)">يوم واحد</a>
                             <a href="#" onclick="window.unmuteUser('${msg.senderId}', '${msg.senderName}')" style="color: #00a884;">إلغاء الكتم</a>
                         </div>`;
-                        const muteButton = `<a onclick="window.toggleMuteDropdown('${muteDropdownId}')" title="كتم"><i class="bi bi-bell-slash-fill"></i></a>`;
-                        controls = `<div class="message-actions">${replyButton}<a onclick="window.deleteOtherMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${!isTargetAdmin ? `${muteButton}<a onclick="window.banUser('${msg.senderId}', '${msg.senderName}')" title="حظر"><i class="bi bi-slash-circle-fill"></i></a>${pinButton}${muteOptions}` : pinButton}</div>`;
+                        const muteButton = `<a onclick="event.stopPropagation(); window.toggleMuteDropdown('${muteDropdownId}')" title="كتم"><i class="bi bi-bell-slash-fill"></i></a>`;
+                        controls = `<div class="message-actions">${copyButton}${replyButton}<a onclick="window.deleteOtherMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${!isTargetAdmin ? `${muteButton}<a onclick="window.banUser('${msg.senderId}', '${msg.senderName}')" title="حظر"><i class="bi bi-slash-circle-fill"></i></a>${pinButton}${muteOptions}` : pinButton}</div>`;
                     } else {
-                        controls = `<div class="message-actions">${replyButton}</div>`;
+                        controls = `<div class="message-actions">${copyButton}${replyButton}</div>`;
                     }
 
                     const editedBadge = msg.isEdited ? `<span class="edited-badge">(تم التعديل)</span>` : '';
@@ -681,7 +814,7 @@
                             ${reactionsContainerHtml}
                             ${!isOwn ? `<div class="sender">${senderNameDisplay}</div>` : ''}
                             ${repliedToHtml}
-                            <div>${msg.text}</div>
+                            <div class="message-text">${msg.text}</div>
                             <div class="timestamp-wrapper">
                                 <span class="timestamp">${time}</span>
                                 ${editedBadge}
@@ -689,13 +822,20 @@
                             ${displayedReactionsHtml}
                         </div>`;
                     
-                    if (isOwn) {
-                        msgDiv.innerHTML = controls + messageContentHtml;
-                    } else {
-                        msgDiv.innerHTML = messageContentHtml + controls;
-                    }
-
+                    msgDiv.innerHTML = messageContentHtml + controls;
                     messagesBox.appendChild(msgDiv);
+                });
+                
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        const msg = change.doc.data();
+                        if (auth.currentUser && msg.replyTo && msg.replyTo.senderId === auth.currentUser.uid && msg.senderId !== auth.currentUser.uid) {
+                            if (!document.hasFocus() || !wasScrolledToBottom) {
+                                mentionNotification.style.display = 'flex';
+                                mentionNotification.dataset.messageId = change.doc.id;
+                            }
+                        }
+                    }
                 });
                 
                 if (wasScrolledToBottom) {
@@ -754,6 +894,31 @@
             }
         });
 
+        mentionNotification.addEventListener('click', () => {
+            const messageId = mentionNotification.dataset.messageId;
+            if (!messageId) return;
+
+            const messageElement = document.getElementById(`message-${messageId}`);
+            if (messageElement) {
+                messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                messageElement.style.transition = 'background-color 0.5s';
+                messageElement.style.backgroundColor = 'rgba(83, 189, 235, 0.3)';
+                setTimeout(() => {
+                    messageElement.style.backgroundColor = '';
+                }, 2500);
+            }
+            mentionNotification.style.display = 'none';
+        });
+
+        messagesBox.addEventListener('scroll', () => {
+            if (mentionNotification.style.display !== 'none') {
+                const isNearBottom = messagesBox.scrollHeight - messagesBox.clientHeight <= messagesBox.scrollTop + 150;
+                if (isNearBottom) {
+                    mentionNotification.style.display = 'none';
+                }
+            }
+        });
+
         window.toggleMuteDropdown = (id) => {
             event.stopPropagation();
             document.querySelectorAll(".mute-dropdown").forEach(d => {
@@ -769,11 +934,161 @@
         
         window.muteUser = async (uid, name, min) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; await setDoc(doc(db, "users", uid), { mutedUntil: new Date(Date.now() + min * 60000) }, { merge: true }); alert(`تم كتم ${name} لمدة ${min} دقيقة.`); };
         window.unmuteUser = async (uid, name) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; await setDoc(doc(db, "users", uid), { mutedUntil: null }, { merge: true }); alert(`تم إلغاء كتم ${name}.`); };
-        window.setReply = (id, name, text) => { replyToMessage = { messageId: id, senderName: name, text }; document.getElementById('reply-preview-sender').textContent = `الرد على ${name}`; document.getElementById('reply-preview-text').textContent = text; replyPreview.style.display = 'block'; messageInput.focus(); };
+        
+        function setReplyFromElement(el) {
+            const msgId = el.id.replace('message-', '');
+            const senderName = el.dataset.senderName;
+            const senderId = el.dataset.senderId;
+            const text = el.dataset.text;
+
+            if(senderName && senderId && text){
+                replyToMessage = { messageId: msgId, senderName, senderId, text }; 
+                document.getElementById('reply-preview-sender').textContent = `الرد على ${senderName}`; 
+                document.getElementById('reply-preview-text').textContent = text; 
+                replyPreview.style.display = 'block'; 
+                messageInput.focus(); 
+            }
+        }
+        window.setReplyWrapper = (msgId) => {
+            event.stopPropagation();
+            const el = document.getElementById(`message-${msgId}`);
+            if (el) setReplyFromElement(el);
+        };
+        
+        window.copyMessageText = async (msgId) => {
+            const messageElement = document.getElementById(`message-${msgId}`);
+            if (messageElement) {
+                const textElement = messageElement.querySelector('.message-text');
+                if (textElement) {
+                    try {
+                        await navigator.clipboard.writeText(textElement.innerText);
+                        alert("تم نسخ النص!"); 
+                    } catch (err) {
+                        console.error('Failed to copy text: ', err);
+                        alert("فشل نسخ النص.");
+                    }
+                }
+            }
+        };
+        
+        function showEditModal(id, currentText) {
+            const backdrop = document.createElement('div');
+            backdrop.className = 'edit-modal-backdrop';
+            
+            const modal = document.createElement('div');
+            modal.className = 'edit-modal-content';
+            
+            modal.innerHTML = `
+                <h6>قم بتعديل رسالتك:</h6>
+                <textarea id="edit-textarea">${currentText}</textarea>
+                <div class="edit-modal-buttons">
+                    <button class="btn-cancel">CANCEL</button>
+                    <button class="btn-ok">OK</button>
+                </div>
+            `;
+            
+            backdrop.appendChild(modal);
+            document.body.appendChild(backdrop);
+            
+            const textarea = document.getElementById('edit-textarea');
+            textarea.focus();
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+
+            backdrop.querySelector('.btn-ok').onclick = () => {
+                const newText = textarea.value;
+                if (newText && newText.trim() !== "" && newText !== currentText) {
+                    updateDoc(doc(db, "messages", id), { text: newText, isEdited: true, lastEditedAt: serverTimestamp() });
+                }
+                document.body.removeChild(backdrop);
+            };
+            
+            backdrop.querySelector('.btn-cancel').onclick = () => {
+                document.body.removeChild(backdrop);
+            };
+            
+            backdrop.onclick = (e) => {
+                if (e.target === backdrop) {
+                    document.body.removeChild(backdrop);
+                }
+            };
+        }
+
+        window.editMessage = (id, text) => { 
+            showEditModal(id, text);
+        };
+        
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchCurrentX = 0;
+        let isSwiping = false;
+        let isSwipeLocked = false;
+        let swipedElement = null;
+        const swipeThreshold = 60;
+        const swipeLockThreshold = 10;
+
+        messagesBox.addEventListener('touchstart', (e) => {
+            const targetMessage = e.target.closest('.message');
+            if (!targetMessage) return;
+
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            swipedElement = targetMessage;
+        }, { passive: true });
+
+        // --- START: MODIFIED CODE ---
+        messagesBox.addEventListener('touchmove', (e) => {
+            if (!swipedElement) return;
+
+            touchCurrentX = e.touches[0].clientX;
+            const touchCurrentY = e.touches[0].clientY;
+            const diffX = touchCurrentX - touchStartX;
+            const diffY = touchCurrentY - touchStartY;
+
+            if (!isSwipeLocked) {
+                if (Math.abs(diffX) > swipeLockThreshold) {
+                    isSwiping = true;
+                    isSwipeLocked = true;
+                    swipedElement.style.transition = 'none';
+                } else if (Math.abs(diffY) > swipeLockThreshold) {
+                    swipedElement = null;
+                    isSwipeLocked = true;
+                }
+            }
+
+            if (isSwiping) {
+                // Allow swiping to the right for any message
+                if (diffX > 0) {
+                    const constrainedDiff = Math.min(diffX, 100);
+                    swipedElement.style.transform = `translateX(${constrainedDiff}px)`;
+                }
+            }
+        }, { passive: true });
+
+        messagesBox.addEventListener('touchend', (e) => {
+            if (!swipedElement) return;
+
+            if(isSwiping) {
+                const diffX = touchCurrentX - touchStartX;
+                swipedElement.style.transition = 'transform 0.3s ease';
+
+                // Check for a right swipe on any message
+                if (diffX > swipeThreshold) {
+                    setReplyFromElement(swipedElement);
+                }
+
+                // Always reset the position
+                swipedElement.style.transform = 'translateX(0)';
+            }
+
+            isSwiping = false;
+            isSwipeLocked = false;
+            swipedElement = null;
+        });
+        // --- END: MODIFIED CODE ---
+        
         window.toggleReaction = async (msgId, emoji) => { if (!auth.currentUser) return; const msgRef = doc(db, "messages", msgId); const msgDoc = await getDoc(msgRef); const msgData = msgDoc.data(); const uid = auth.currentUser.uid; const existing = msgData.reactions?.find(r => r.userId === uid); if (existing) { await updateDoc(msgRef, { reactions: arrayRemove(existing) }); if (existing.emoji !== emoji) { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } } else { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } };
         window.deleteOwnMessage = async (id) => { if (confirm("هل أنت متأكد من حذف رسالتك؟")) { await deleteDoc(doc(db, "messages", id)); } };
         window.deleteOtherMessage = async (id) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; if (confirm("هل أنت متأكد من حذف هذه الرسالة؟")) { await deleteDoc(doc(db, "messages", id)); } };
-        window.editMessage = async (id, text) => { const newText = prompt("قم بتعديل رسالتك:", text); if (newText && newText.trim() !== "" && newText !== text) { await updateDoc(doc(db, "messages", id), { text: newText, isEdited: true, lastEditedAt: serverTimestamp() }); } };
         window.banUser = async (uid, name) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; const userToBan = await getDoc(doc(db, "users", uid)); if (userToBan.exists() && (userToBan.data().role === 'admin' || userToBan.data().role === 'developer')) { alert("لا يمكنك حظر مشرف آخر."); return; } if (confirm(`هل أنت متأكد من حظر ${name}؟`)) { await setDoc(doc(db, "users", uid), { isBanned: true }, { merge: true }); alert(`تم حظر ${name}.`); } };
     </script>
 </body>
