@@ -49,13 +49,40 @@
         }
         
         #pinned-message-container {
-            padding: 10px 15px;
+            padding: 8px 15px;
             background-color: #fffbe6;
             border-bottom: 1px solid #ffe58f;
-            display: none; 
+            display: none;
             font-size: 0.9rem;
             flex-shrink: 0;
+            position: relative;
+        }
+        #pinned-message-clickable-area {
             cursor: pointer;
+            padding-right: 25px; 
+        }
+        #pinned-by-text {
+            font-weight: bold;
+            color: #664d03;
+            display: block;
+            font-size: 0.8rem;
+        }
+        #pinned-message-text {
+            color: #856404;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+        #unpin-button {
+            position: absolute;
+            top: 50%;
+            right: 10px; 
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 1.2rem; 
+            color: #856404;
+            z-index: 2;
         }
 
         .main-content { 
@@ -80,7 +107,6 @@
             background-position: center;
         }
 
-        /* === گۆڕانکاری یەکەم === */
         #articles-section { 
             padding: 20px;
             background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop');
@@ -95,10 +121,15 @@
             background-color: rgba(255, 255, 255, 0.9);
         }
         
-        /* === گۆڕانکاری دووەم === */
+        /* === گۆڕانکاری داواکراو === */
         #articleModal .modal-content {
-            background-color: #f5f5dc; /* ڕەنگی بێجی وەک پێشوو */
+            background-color: #32362e; /* ڕەنگی داواکراو */
+            color: white; /* ڕەنگی نووسین بۆ سپی */
         }
+        #articleModal .modal-header {
+            border-bottom-color: #4a4e47; /* ڕەنگی هێڵی جیاکەرەوە */
+        }
+        /* === کۆتایی گۆڕانکاری === */
 
         .article-modal-body img { max-width: 100%; border-radius: 10px; margin-bottom: 1rem; }
         
@@ -147,6 +178,7 @@
             align-items: center;
             gap: 8px;
             margin: 0 10px;
+            position: relative; 
         }
         .message:hover .message-actions { 
             display: flex;
@@ -157,14 +189,81 @@
         .reply-preview { background-color: #2a3942; padding: 8px 12px; border-bottom: 1px solid #3a4a55; font-size: 0.9rem; display: none; position: relative; flex-shrink: 0; }
         .replied-to-box { background-color: rgba(0,0,0,0.2); padding: 8px; margin-bottom: 8px; border-radius: 10px; border-left: 3px solid #53bdeb; font-size: 0.9rem; }
         
-        .reactions-container { position: absolute; top: -35px; background-color: #202c33; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; padding: 5px; opacity: 0; visibility: hidden; transition: all 0.2s; z-index: 10; }
-        .message-content:hover .reactions-container { opacity: 1; visibility: visible; }
+        .reactions-container { 
+            position: absolute; 
+            top: -35px; 
+            background-color: #202c33; 
+            border-radius: 20px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
+            display: flex; 
+            padding: 5px; 
+            opacity: 0; 
+            visibility: hidden; 
+            transition: all 0.2s; 
+            z-index: 10; 
+        }
+        .message.own .reactions-container { left: 0; }
+        .message.other .reactions-container { right: 0; }
+        .message-content:hover .reactions-container { 
+            opacity: 1; 
+            visibility: visible; 
+        }
+        .reaction-emoji { 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            margin: 0 4px; 
+            transition: transform 0.1s; 
+        }
+        .reaction-emoji:hover { 
+            transform: scale(1.3); 
+        }
+        .message-reactions { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 5px; 
+            margin-top: 5px; 
+        }
+        .reaction-chip { 
+            background-color: #2a3942; 
+            border-radius: 10px; 
+            padding: 2px 8px; 
+            font-size: 0.8rem; 
+            display: flex; 
+            align-items: center; 
+        }
+        .message.own .reaction-chip { 
+            background-color: #004a3c;
+        }
         
-        .message-reactions { display: flex; flex-wrap: wrap; gap: 5px; position: absolute; bottom: -5px; right: 5px; }
-        .message.own .message-reactions { left: 5px; right: auto; }
-        .reaction-chip { background-color: #2a3942; border-radius: 10px; padding: 1px 6px; font-size: 0.8rem; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
-        
-        .mute-dropdown { display: none; position: absolute; background-color: #202c33; min-width: 160px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 5px; padding: 5px 0; }
+        .mute-dropdown { 
+            display: none; 
+            position: absolute; 
+            background-color: #202c33; 
+            min-width: 160px; 
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); 
+            z-index: 1; 
+            border-radius: 5px; 
+            padding: 5px 0;
+            bottom: 100%;
+            left: 0;
+        }
+        .message.other .message-actions .mute-dropdown {
+            left: auto;
+            right: 0;
+        }
+        .mute-dropdown a { 
+            color: white; 
+            padding: 8px 12px; 
+            text-decoration: none; 
+            display: block; 
+            font-size: 0.9rem; 
+        }
+        .mute-dropdown a:hover { 
+            background-color: #2a3942; 
+        }
+        .show-dropdown {
+            display: block;
+        }
         
         #chat-footer {
             flex-shrink: 0;
@@ -195,12 +294,11 @@
 
             <!-- Pinned Message -->
             <div id="pinned-message-container">
-                <div>
-                    <i class="bi bi-pin-angle-fill"></i>
+                <i id="unpin-button" class="bi bi-x-circle-fill"></i>
+                <div id="pinned-message-clickable-area">
                     <span id="pinned-by-text" class="pinned-by"></span>
-                    <i id="unpin-button" class="bi bi-x-circle-fill"></i>
+                    <span id="pinned-message-text" class="pinned-text"></span>
                 </div>
-                <div id="pinned-message-text" class="pinned-text"></div>
             </div>
 
             <!-- Main Content -->
@@ -256,7 +354,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="articleModalTitle"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body article-modal-body" id="articleModalBody"></div>
             </div>
@@ -318,6 +416,8 @@
         const pinnedByText = document.getElementById('pinned-by-text');
         const pinnedMessageText = document.getElementById('pinned-message-text');
         const unpinButton = document.getElementById('unpin-button');
+        const pinnedMessageClickableArea = document.getElementById('pinned-message-clickable-area');
+
 
         // Tab Switching Logic
         chatTab.addEventListener('click', (e) => {
@@ -539,8 +639,16 @@
                         controls = `<div class="message-actions">${replyButton}<a onclick="window.editMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a><a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`;
                     } else if (canModerate) {
                         const isTargetAdmin = msg.senderRole === 'admin' || msg.senderRole === 'developer';
-                        const muteButton = `<a onclick="window.toggleMuteDropdown('mute-dropdown-${msgId}')" title="كتم"><i class="bi bi-bell-slash-fill"></i></a>`;
-                        controls = `<div class="message-actions">${replyButton}<a onclick="window.deleteOtherMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${!isTargetAdmin ? `${muteButton}<a onclick="window.banUser('${msg.senderId}', '${msg.senderName}')" title="حظر"><i class="bi bi-slash-circle-fill"></i></a>${pinButton}` : pinButton}</div>`;
+                        const muteDropdownId = `mute-dropdown-${msgId}`;
+                        const muteOptions = `<div id="${muteDropdownId}" class="mute-dropdown">
+                            <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 1)">دقيقة واحدة</a>
+                            <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 5)">5 دقائق</a>
+                            <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 15)">ربع ساعة</a>
+                            <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 1440)">يوم واحد</a>
+                            <a href="#" onclick="window.unmuteUser('${msg.senderId}', '${msg.senderName}')" style="color: #00a884;">إلغاء الكتم</a>
+                        </div>`;
+                        const muteButton = `<a onclick="window.toggleMuteDropdown('${muteDropdownId}')" title="كتم"><i class="bi bi-bell-slash-fill"></i></a>`;
+                        controls = `<div class="message-actions">${replyButton}<a onclick="window.deleteOtherMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${!isTargetAdmin ? `${muteButton}<a onclick="window.banUser('${msg.senderId}', '${msg.senderName}')" title="حظر"><i class="bi bi-slash-circle-fill"></i></a>${pinButton}${muteOptions}` : pinButton}</div>`;
                     } else {
                         controls = `<div class="message-actions">${replyButton}</div>`;
                     }
@@ -554,12 +662,23 @@
                     let repliedToHtml = '';
                     if (msg.replyTo) { repliedToHtml = `<div class="replied-to-box"><div class="replied-to-sender">${msg.replyTo.senderName}</div><div class="replied-to-text">${msg.replyTo.text}</div></div>`; }
                     
+                    const availableReactions = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+                    let reactionsContainerHtml = '<div class="reactions-container">';
+                    availableReactions.forEach(emoji => { reactionsContainerHtml += `<span class="reaction-emoji" onclick="window.toggleReaction('${msgId}', '${emoji}')">${emoji}</span>`; });
+                    reactionsContainerHtml += '</div>';
+
                     let displayedReactionsHtml = '<div class="message-reactions">';
-                    if (msg.reactions) { const reactionGroups = msg.reactions.reduce((acc, r) => { acc[r.emoji] = (acc[r.emoji] || 0) + 1; return acc; }, {}); for (const e in reactionGroups) { displayedReactionsHtml += `<div class="reaction-chip">${e} ${reactionGroups[e]}</div>`; } }
+                    if (msg.reactions && msg.reactions.length > 0) { 
+                        const reactionGroups = msg.reactions.reduce((acc, r) => { acc[r.emoji] = (acc[r.emoji] || 0) + 1; return acc; }, {}); 
+                        for (const e in reactionGroups) { 
+                            displayedReactionsHtml += `<div class="reaction-chip">${e} ${reactionGroups[e]}</div>`; 
+                        } 
+                    }
                     displayedReactionsHtml += '</div>';
 
                     const messageContentHtml = `
                         <div class="message-content">
+                            ${reactionsContainerHtml}
                             ${!isOwn ? `<div class="sender">${senderNameDisplay}</div>` : ''}
                             ${repliedToHtml}
                             <div>${msg.text}</div>
@@ -621,7 +740,7 @@
             });
         }
 
-        pinnedMessageContainer.addEventListener('click', () => {
+        pinnedMessageClickableArea.addEventListener('click', () => {
             const messageId = pinnedMessageContainer.dataset.messageId;
             if (!messageId) return;
             const messageElement = document.getElementById(`message-${messageId}`);
@@ -635,8 +754,19 @@
             }
         });
 
-        window.toggleMuteDropdown = (id) => document.getElementById(id).classList.toggle("show-dropdown");
-        window.onclick = (e) => { if (!e.target.matches('.bi-bell-slash-fill')) { document.querySelectorAll(".mute-dropdown.show-dropdown").forEach(d => d.classList.remove('show-dropdown')); } }
+        window.toggleMuteDropdown = (id) => {
+            event.stopPropagation();
+            document.querySelectorAll(".mute-dropdown").forEach(d => {
+                if(d.id !== id) d.classList.remove('show-dropdown');
+            });
+            document.getElementById(id).classList.toggle("show-dropdown");
+        }
+        window.onclick = (e) => { 
+            if (!e.target.matches('.bi-bell-slash-fill')) { 
+                document.querySelectorAll(".mute-dropdown.show-dropdown").forEach(d => d.classList.remove('show-dropdown')); 
+            } 
+        }
+        
         window.muteUser = async (uid, name, min) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; await setDoc(doc(db, "users", uid), { mutedUntil: new Date(Date.now() + min * 60000) }, { merge: true }); alert(`تم كتم ${name} لمدة ${min} دقيقة.`); };
         window.unmuteUser = async (uid, name) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; await setDoc(doc(db, "users", uid), { mutedUntil: null }, { merge: true }); alert(`تم إلغاء كتم ${name}.`); };
         window.setReply = (id, name, text) => { replyToMessage = { messageId: id, senderName: name, text }; document.getElementById('reply-preview-sender').textContent = `الرد على ${name}`; document.getElementById('reply-preview-text').textContent = text; replyPreview.style.display = 'block'; messageInput.focus(); };
