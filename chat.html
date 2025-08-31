@@ -41,13 +41,38 @@
                 border-radius: 15px;
             }
         }
-
-        .chat-header { 
-            padding: 0.5rem 1rem; 
-            background-color: #f8f9fa; 
-            border-bottom: 1px solid #dee2e6; 
+        
+        /* --- START: MODIFIED CODE --- */
+        .chat-header {
+            padding: 1rem;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e9ecef;
             flex-shrink: 0;
         }
+        #logout-button {
+            border-color: #adb5bd;
+            color: #495057;
+        }
+        #logout-button:hover {
+            background-color: #f1f1f1;
+            color: #212529;
+        }
+        .nav-pills {
+            background-color: #f1f1f1;
+            border-radius: 25px;
+            padding: 4px;
+        }
+        .nav-pills .nav-link {
+            color: #495057;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #008069;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        /* --- END: MODIFIED CODE --- */
         
         #pinned-message-container {
             padding: 8px 15px;
@@ -184,16 +209,15 @@
         .timestamp { font-size: 0.75rem; color: #a0a0a0; }
         .edited-badge { font-size: 0.7rem; color: #a0a0a0; margin-right: 5px; }
         
-        /* --- START: MODIFIED CODE --- */
-        .message-actions { 
+        .message-actions {
             position: absolute;
             bottom: 0;
             z-index: 10;
-            background-color: white; /* Changed */
+            background-color: white;
             padding: 5px 10px;
             border-radius: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            font-size: 1rem; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-size: 1rem;
             display: none;
             align-items: center;
             gap: 12px;
@@ -209,9 +233,15 @@
             display: flex;
         }
         
-        .message-actions a { cursor: pointer; color: #2a3942; text-decoration: none; position: relative; } /* Changed */
-        .message-actions a:hover { color: #000; } /* Changed */
-        /* --- END: MODIFIED CODE --- */
+        .message-actions a {
+            cursor: pointer;
+            color: #2a3942;
+            text-decoration: none;
+            position: relative;
+        }
+        .message-actions a:hover {
+            color: #000;
+        }
 
         .reply-preview { background-color: #2a3942; padding: 8px 12px; border-bottom: 1px solid #3a4a55; font-size: 0.9rem; display: none; position: relative; flex-shrink: 0; }
         #reply-preview-text {
@@ -302,6 +332,44 @@
             flex-shrink: 0;
         }
         
+        /* --- START: MODIFIED CODE --- */
+        #chat-footer .card-footer {
+            background-color: #f0f2f5;
+            border-top: none;
+            padding: 10px 15px;
+        }
+        #chat-footer .input-group {
+            background-color: #ffffff;
+            border-radius: 25px;
+            padding: 5px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        #message-input {
+            resize: none;
+            overflow-y: auto;
+            max-height: 120px;
+            border: none;
+            box-shadow: none;
+            background-color: transparent;
+        }
+        #message-input::placeholder {
+            color: #8696a0;
+        }
+        #send-button {
+            background-color: #00a884;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #send-button:hover {
+            background-color: #008268;
+        }
+        /* --- END: MODIFIED CODE --- */
+
         #mention-notification {
             position: absolute;
             bottom: 15px;
@@ -374,12 +442,6 @@
         .edit-modal-buttons .btn-cancel {
             background-color: transparent;
             color: #53bdeb;
-        }
-        
-        #message-input {
-            resize: none;
-            overflow-y: auto;
-            max-height: 120px;
         }
 
     </style>
@@ -1035,7 +1097,6 @@
             swipedElement = targetMessage;
         }, { passive: true });
 
-        // --- START: MODIFIED CODE ---
         messagesBox.addEventListener('touchmove', (e) => {
             if (!swipedElement) return;
 
@@ -1056,7 +1117,6 @@
             }
 
             if (isSwiping) {
-                // Allow swiping to the right for any message
                 if (diffX > 0) {
                     const constrainedDiff = Math.min(diffX, 100);
                     swipedElement.style.transform = `translateX(${constrainedDiff}px)`;
@@ -1071,12 +1131,10 @@
                 const diffX = touchCurrentX - touchStartX;
                 swipedElement.style.transition = 'transform 0.3s ease';
 
-                // Check for a right swipe on any message
                 if (diffX > swipeThreshold) {
                     setReplyFromElement(swipedElement);
                 }
 
-                // Always reset the position
                 swipedElement.style.transform = 'translateX(0)';
             }
 
@@ -1084,7 +1142,6 @@
             isSwipeLocked = false;
             swipedElement = null;
         });
-        // --- END: MODIFIED CODE ---
         
         window.toggleReaction = async (msgId, emoji) => { if (!auth.currentUser) return; const msgRef = doc(db, "messages", msgId); const msgDoc = await getDoc(msgRef); const msgData = msgDoc.data(); const uid = auth.currentUser.uid; const existing = msgData.reactions?.find(r => r.userId === uid); if (existing) { await updateDoc(msgRef, { reactions: arrayRemove(existing) }); if (existing.emoji !== emoji) { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } } else { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } };
         window.deleteOwnMessage = async (id) => { if (confirm("هل أنت متأكد من حذف رسالتك؟")) { await deleteDoc(doc(db, "messages", id)); } };
