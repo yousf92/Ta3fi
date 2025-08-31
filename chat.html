@@ -265,7 +265,6 @@
             background-color: #004a3c;
         }
         
-        /* --- START: ADDED CODE --- */
         .mute-dropdown { 
             display: none; 
             position: absolute; 
@@ -275,7 +274,7 @@
             z-index: 1; 
             border-radius: 5px; 
             padding: 5px 0;
-            bottom: 100%; /* This positions the dropdown above the button */
+            bottom: 100%;
         }
         .message.own .mute-dropdown {
             right: 0;
@@ -296,7 +295,6 @@
         .show-dropdown {
             display: block;
         }
-        /* --- END: ADDED CODE --- */
         
         #chat-footer {
             flex-shrink: 0;
@@ -1035,7 +1033,6 @@
             swipedElement = targetMessage;
         }, { passive: true });
 
-        // --- START: MODIFIED CODE ---
         messagesBox.addEventListener('touchmove', (e) => {
             if (!swipedElement) return;
 
@@ -1056,9 +1053,11 @@
             }
 
             if (isSwiping) {
-                // Allow swiping to the right for any message
-                if (diffX > 0) {
+                if (swipedElement.classList.contains('other') && diffX > 0) {
                     const constrainedDiff = Math.min(diffX, 100);
+                    swipedElement.style.transform = `translateX(${constrainedDiff}px)`;
+                } else if (swipedElement.classList.contains('own') && diffX < 0) {
+                    const constrainedDiff = Math.max(diffX, -100);
                     swipedElement.style.transform = `translateX(${constrainedDiff}px)`;
                 }
             }
@@ -1071,12 +1070,13 @@
                 const diffX = touchCurrentX - touchStartX;
                 swipedElement.style.transition = 'transform 0.3s ease';
 
-                // Check for a right swipe on any message
-                if (diffX > swipeThreshold) {
+                const isOtherSwipedRight = swipedElement.classList.contains('other') && diffX > swipeThreshold;
+                const isOwnSwipedLeft = swipedElement.classList.contains('own') && diffX < -swipeThreshold;
+
+                if (isOtherSwipedRight || isOwnSwipedLeft) {
                     setReplyFromElement(swipedElement);
                 }
 
-                // Always reset the position
                 swipedElement.style.transform = 'translateX(0)';
             }
 
@@ -1084,7 +1084,6 @@
             isSwipeLocked = false;
             swipedElement = null;
         });
-        // --- END: MODIFIED CODE ---
         
         window.toggleReaction = async (msgId, emoji) => { if (!auth.currentUser) return; const msgRef = doc(db, "messages", msgId); const msgDoc = await getDoc(msgRef); const msgData = msgDoc.data(); const uid = auth.currentUser.uid; const existing = msgData.reactions?.find(r => r.userId === uid); if (existing) { await updateDoc(msgRef, { reactions: arrayRemove(existing) }); if (existing.emoji !== emoji) { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } } else { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } };
         window.deleteOwnMessage = async (id) => { if (confirm("هل أنت متأكد من حذف رسالتك؟")) { await deleteDoc(doc(db, "messages", id)); } };
