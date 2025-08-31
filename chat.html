@@ -42,7 +42,6 @@
             }
         }
         
-        /* --- START: MODIFIED CODE --- */
         .chat-header {
             padding: 1rem;
             background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url('https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=1974&auto=format&fit=crop');
@@ -79,7 +78,6 @@
             color: white;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        /* --- END: MODIFIED CODE --- */
         
         #pinned-message-container {
             padding: 8px 15px;
@@ -339,14 +337,13 @@
             flex-shrink: 0;
         }
         
-        /* --- START: MODIFIED CODE --- */
         #chat-footer .card-footer {
             background-color: #ffffff;
             border-top: 1px solid #e9ecef;
             padding: 10px 15px;
         }
         #chat-footer .input-group {
-            background-color: #f1f8f6; /* Changed from white to a soft green-tint */
+            background-color: #f1f8f6;
             border-radius: 25px;
             padding: 5px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
@@ -363,7 +360,7 @@
             color: #8696a0;
         }
         #send-button {
-            background-color: #009688; /* Changed to a nice teal color */
+            background-color: #009688;
             border-radius: 50%;
             width: 45px;
             height: 45px;
@@ -375,7 +372,6 @@
         #send-button:hover {
             background-color: #00796b;
         }
-        /* --- END: MODIFIED CODE --- */
 
         #mention-notification {
             position: absolute;
@@ -470,7 +466,7 @@
                         <a class="nav-link active" id="chat-tab" href="#">الدردشة</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="articles-tab" href="#">مقالات عن التعافي</a>
+                        <a class="nav-link" id="articles-tab" href="#">القائمة</a>
                     </li>
                 </ul>
             </div>
@@ -850,7 +846,15 @@
                             <a href="#" onclick="window.unmuteUser('${msg.senderId}', '${msg.senderName}')" style="color: #00a884;">إلغاء الكتم</a>
                         </div>`;
                         const muteButton = `<a onclick="event.stopPropagation(); window.toggleMuteDropdown('${muteDropdownId}')" title="كتم"><i class="bi bi-bell-slash-fill"></i></a>`;
-                        controls = `<div class="message-actions">${copyButton}${replyButton}<a onclick="window.deleteOtherMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${!isTargetAdmin ? `${muteButton}<a onclick="window.banUser('${msg.senderId}', '${msg.senderName}')" title="حظر"><i class="bi bi-slash-circle-fill"></i></a>${pinButton}${muteOptions}` : pinButton}</div>`;
+                        
+                        // --- START: MODIFIED CODE ---
+                        let makeAdminButton = '';
+                        if (currentUserRole === 'developer' && !isTargetAdmin) {
+                            makeAdminButton = `<a onclick="window.makeUserAdmin('${msg.senderId}', '${msg.senderName}')" title="جعله مشرفًا"><i class="bi bi-shield-check"></i></a>`;
+                        }
+                        controls = `<div class="message-actions">${copyButton}${replyButton}<a onclick="window.deleteOtherMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${!isTargetAdmin ? `${muteButton}<a onclick="window.banUser('${msg.senderId}', '${msg.senderName}')" title="حظر"><i class="bi bi-slash-circle-fill"></i></a>${makeAdminButton}${pinButton}${muteOptions}` : pinButton}</div>`;
+                        // --- END: MODIFIED CODE ---
+
                     } else {
                         controls = `<div class="message-actions">${copyButton}${replyButton}</div>`;
                     }
@@ -1154,6 +1158,25 @@
         window.deleteOwnMessage = async (id) => { if (confirm("هل أنت متأكد من حذف رسالتك؟")) { await deleteDoc(doc(db, "messages", id)); } };
         window.deleteOtherMessage = async (id) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; if (confirm("هل أنت متأكد من حذف هذه الرسالة؟")) { await deleteDoc(doc(db, "messages", id)); } };
         window.banUser = async (uid, name) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; const userToBan = await getDoc(doc(db, "users", uid)); if (userToBan.exists() && (userToBan.data().role === 'admin' || userToBan.data().role === 'developer')) { alert("لا يمكنك حظر مشرف آخر."); return; } if (confirm(`هل أنت متأكد من حظر ${name}؟`)) { await setDoc(doc(db, "users", uid), { isBanned: true }, { merge: true }); alert(`تم حظر ${name}.`); } };
+        
+        // --- START: ADDED CODE ---
+        window.makeUserAdmin = async (uid, name) => {
+            if (currentUserRole !== 'developer') {
+                alert("ليس لديك الصلاحية للقيام بهذا الإجراء.");
+                return;
+            }
+            if (confirm(`هل أنت متأكد من ترقية ${name} إلى مشرف؟`)) {
+                try {
+                    await setDoc(doc(db, "users", uid), { role: 'admin' }, { merge: true });
+                    alert(`تمت ترقية ${name} إلى مشرف بنجاح.`);
+                } catch (error) {
+                    console.error("Error making user admin: ", error);
+                    alert("حدث خطأ أثناء ترقية المستخدم.");
+                }
+            }
+        };
+        // --- END: ADDED CODE ---
+
     </script>
 </body>
 </html>
