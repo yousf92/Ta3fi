@@ -636,6 +636,7 @@
                 }
                 currentUserRole = userData.role || 'user';
             } else {
+                await setDoc(userDocRef, { role: 'user' }, { merge: true });
                 currentUserRole = 'user';
             }
             adminArticleForm.style.display = (currentUserRole === 'developer' || currentUserRole === 'admin') ? 'block' : 'none';
@@ -836,24 +837,34 @@
                     if (isOwn) {
                         controls = `<div class="message-actions">${copyButton}${replyButton}<a onclick="window.editMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a><a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`;
                     } else if (canModerate) {
-                        const isTargetAdmin = msg.senderRole === 'admin' || msg.senderRole === 'developer';
-                        const muteDropdownId = `mute-dropdown-${msgId}`;
-                        const muteOptions = `<div id="${muteDropdownId}" class="mute-dropdown">
-                            <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 1)">دقيقة واحدة</a>
-                            <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 5)">5 دقائق</a>
-                            <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 15)">ربع ساعة</a>
-                            <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 1440)">يوم واحد</a>
-                            <a href="#" onclick="window.unmuteUser('${msg.senderId}', '${msg.senderName}')" style="color: #00a884;">إلغاء الكتم</a>
-                        </div>`;
-                        const muteButton = `<a onclick="event.stopPropagation(); window.toggleMuteDropdown('${muteDropdownId}')" title="كتم"><i class="bi bi-bell-slash-fill"></i></a>`;
-                        
+                        const isTargetAdmin = msg.senderRole === 'admin';
+                        const isTargetDeveloper = msg.senderRole === 'developer';
+
+                        let actionButtons = `${copyButton}${replyButton}<a onclick="window.deleteOtherMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>`;
+
                         // --- START: MODIFIED CODE ---
-                        let makeAdminButton = '';
-                        if (currentUserRole === 'developer' && !isTargetAdmin) {
-                            makeAdminButton = `<a onclick="window.makeUserAdmin('${msg.senderId}', '${msg.senderName}')" title="جعله مشرفًا"><i class="bi bi-shield-check"></i></a>`;
+                        if (currentUserRole === 'developer' && !isTargetDeveloper) {
+                            actionButtons += `<a onclick="window.toggleAdminRole('${msg.senderId}', '${msg.senderName}')" title="تغيير دور المشرف"><i class="bi bi-shield-fill"></i></a>`;
                         }
-                        controls = `<div class="message-actions">${copyButton}${replyButton}<a onclick="window.deleteOtherMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${!isTargetAdmin ? `${muteButton}<a onclick="window.banUser('${msg.senderId}', '${msg.senderName}')" title="حظر"><i class="bi bi-slash-circle-fill"></i></a>${makeAdminButton}${pinButton}${muteOptions}` : pinButton}</div>`;
                         // --- END: MODIFIED CODE ---
+                        
+                        actionButtons += pinButton;
+
+                        if (!isTargetAdmin && !isTargetDeveloper) {
+                            const muteDropdownId = `mute-dropdown-${msgId}`;
+                            const muteOptions = `<div id="${muteDropdownId}" class="mute-dropdown">
+                                <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 1)">دقيقة واحدة</a>
+                                <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 5)">5 دقائق</a>
+                                <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 15)">ربع ساعة</a>
+                                <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 1440)">يوم واحد</a>
+                                <a href="#" onclick="window.unmuteUser('${msg.senderId}', '${msg.senderName}')" style="color: #00a884;">إلغاء الكتم</a>
+                            </div>`;
+                            const muteButton = `<a onclick="event.stopPropagation(); window.toggleMuteDropdown('${muteDropdownId}')" title="كتم"><i class="bi bi-bell-slash-fill"></i></a>`;
+                            const banButton = `<a onclick="window.banUser('${msg.senderId}', '${msg.senderName}')" title="حظر"><i class="bi bi-slash-circle-fill"></i></a>`;
+                            actionButtons += `${muteButton}${banButton}${muteOptions}`;
+                        }
+                        
+                        controls = `<div class="message-actions">${actionButtons}</div>`;
 
                     } else {
                         controls = `<div class="message-actions">${copyButton}${replyButton}</div>`;
@@ -861,8 +872,8 @@
 
                     const editedBadge = msg.isEdited ? `<span class="edited-badge">(تم التعديل)</span>` : '';
                     let roleBadge = '';
-                    if (msg.senderRole === 'developer') roleBadge = '<span class="role-badge developer">⭐ (مطور)</span>';
-                    else if (msg.senderRole === 'admin') roleBadge = '<span class="role-badge admin">🛡️ (مشرف)</span>';
+                    if (msg.senderRole === 'developer') roleBadge = '⭐ (مطور)';
+                    else if (msg.senderRole === 'admin') roleBadge = '🛡️ (مشرف)';
                     const senderNameDisplay = `${msg.senderName} ${roleBadge}`;
                     
                     let repliedToHtml = '';
@@ -1159,23 +1170,43 @@
         window.deleteOtherMessage = async (id) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; if (confirm("هل أنت متأكد من حذف هذه الرسالة؟")) { await deleteDoc(doc(db, "messages", id)); } };
         window.banUser = async (uid, name) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; const userToBan = await getDoc(doc(db, "users", uid)); if (userToBan.exists() && (userToBan.data().role === 'admin' || userToBan.data().role === 'developer')) { alert("لا يمكنك حظر مشرف آخر."); return; } if (confirm(`هل أنت متأكد من حظر ${name}؟`)) { await setDoc(doc(db, "users", uid), { isBanned: true }, { merge: true }); alert(`تم حظر ${name}.`); } };
         
-        // --- START: ADDED CODE ---
-        window.makeUserAdmin = async (uid, name) => {
+        // --- START: MODIFIED CODE ---
+        window.toggleAdminRole = async (uid, name) => {
             if (currentUserRole !== 'developer') {
                 alert("ليس لديك الصلاحية للقيام بهذا الإجراء.");
                 return;
             }
-            if (confirm(`هل أنت متأكد من ترقية ${name} إلى مشرف؟`)) {
-                try {
-                    await setDoc(doc(db, "users", uid), { role: 'admin' }, { merge: true });
-                    alert(`تمت ترقية ${name} إلى مشرف بنجاح.`);
-                } catch (error) {
-                    console.error("Error making user admin: ", error);
-                    alert("حدث خطأ أثناء ترقية المستخدم.");
+
+            try {
+                const userDocRef = doc(db, "users", uid);
+                const userDoc = await getDoc(userDocRef);
+                const currentRole = userDoc.exists() ? userDoc.data().role || 'user' : 'user';
+
+                const isCurrentlyAdmin = currentRole === 'admin';
+                const newRole = isCurrentlyAdmin ? 'user' : 'admin';
+                
+                const confirmationMessage = isCurrentlyAdmin 
+                    ? `ئەتەوێت ${name} لایبەی لەئەدمین؟` 
+                    : `ئەتەوێت ${name} بکەیتە ئەدمین؟`;
+
+                const successMessage = isCurrentlyAdmin
+                    ? `تمت إزالة ${name} من الإشراف بنجاح.`
+                    : `تمت ترقية ${name} إلى مشرف بنجاح.`;
+
+                const errorMessage = isCurrentlyAdmin
+                    ? "حدث خطأ أثناء إزالة المستخدم من الإشراف."
+                    : "حدث خطأ أثناء ترقية المستخدم.";
+
+                if (confirm(confirmationMessage)) {
+                    await setDoc(userDocRef, { role: newRole }, { merge: true });
+                    alert(successMessage);
                 }
+            } catch (error) {
+                console.error("Error toggling admin role: ", error);
+                alert("حدث خطأ أثناء تغيير دور المستخدم.");
             }
         };
-        // --- END: ADDED CODE ---
+        // --- END: MODIFIED CODE ---
 
     </script>
 </body>
