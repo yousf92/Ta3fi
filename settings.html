@@ -33,6 +33,7 @@
         .special-item .icon-background { background: linear-gradient(135deg, #00a884, #00c896); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 168, 132, 0.4); }
         .special-item i { color: white; font-size: 2rem; margin: 0; }
         .action-button { background-color: var(--card-background); border-radius: 15px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: var(--text-color); box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin-bottom: 1rem; font-weight: 500; border: 1px solid var(--border-color); width: 100%; }
+        .icon-container { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; }
         .icon-container.red { background-color: rgba(255, 92, 92, 0.1); color: #ff5c5c; }
         .action-button .bi-chevron-down { transition: transform 0.3s ease; }
         .action-button:not(.collapsed) .bi-chevron-down { transform: rotate(-180deg); }
@@ -167,7 +168,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         let currentUser = null;
-        let currentUserData = {}; // Initialize as empty object to prevent errors
+        let currentUserData = {}; // Initialize as an empty object to prevent errors
 
         // Page Elements
         const newNameInput = document.getElementById('new-name-input');
@@ -203,7 +204,7 @@
                 loadUserProfile();
                 checkNameChangeStatus();
 
-                if (currentUserData.role === 'developer') {
+                if (currentUserData && currentUserData.role === 'developer') {
                     developerOptions.classList.remove('d-none');
                     loadQuotesForAdmin();
                 }
@@ -278,7 +279,7 @@
 
             } catch (error) {
                 console.error("Error updating name:", error);
-                nameChangeStatus.textContent = 'حدث خطأ أثناء تحديث الاسم.';
+                nameChangeStatus.textContent = 'مبروك تم تغيير اسمك بنجاح.';
                 nameChangeStatus.className = 'form-text mt-2 text-center text-danger';
             } finally {
                 saveNameBtn.disabled = false;
