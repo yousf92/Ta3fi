@@ -11,10 +11,11 @@
         :root {
             --primary-color: #00a884;
             --danger-color: #ff5c5c;
-            --background-color: #f0f2f5;
-            --card-background: #ffffff;
-            --text-color: #111b21;
-            --secondary-text-color: #667781;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #FAFAFA;
+            --secondary-text-color: #CCCCCC;
+            --border-color: #383838;
         }
         body, html {
             margin: 0; padding: 0; font-family: 'Tajawal', sans-serif;
@@ -23,23 +24,55 @@
         }
         .page { display: flex; flex-direction: column; height: 100%; width: 100%; }
         .content-area { flex-grow: 1; overflow-y: auto; padding: 1rem; padding-bottom: 80px; }
-        .top-header { display: flex; justify-content: flex-end; align-items: center; padding: 1rem; background-color: var(--background-color); border-bottom: 1px solid #e0e0e0; }
-        .bottom-nav { display: flex; justify-content: space-around; padding: 0.5rem 0; background-color: var(--card-background); box-shadow: 0 -2px 5px rgba(0,0,0,0.05); position: fixed; bottom: 0; width: 100%; z-index: 100; }
+        .top-header { display: flex; justify-content: flex-end; align-items: center; padding: 1rem; background-color: var(--background-color); border-bottom: 1px solid var(--border-color); }
+        .bottom-nav { display: flex; justify-content: space-around; padding: 0.5rem 0; background-color: var(--card-background); box-shadow: 0 -2px 5px rgba(0,0,0,0.2); position: fixed; bottom: 0; width: 100%; z-index: 100; border-top: 1px solid var(--border-color); }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--secondary-text-color); text-decoration: none; font-size: 0.75rem; cursor: pointer; }
         .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary-color); }
         .nav-item.special-item { transform: translateY(-20px); }
         .special-item .icon-background { background: linear-gradient(135deg, #00a884, #00c896); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 168, 132, 0.4); }
         .special-item i { color: white; font-size: 2rem; margin: 0; }
-        .action-button { background-color: var(--card-background); border-radius: 15px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: var(--text-color); box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 1rem; font-weight: 500; border: none; width: 100%; }
-        .icon-container { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; }
-        .icon-container.red { background-color: #ffe6e6; color: #ff5c5c; }
+        .action-button { background-color: var(--card-background); border-radius: 15px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: var(--text-color); box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin-bottom: 1rem; font-weight: 500; border: 1px solid var(--border-color); width: 100%; }
+        .icon-container.red { background-color: rgba(255, 92, 92, 0.1); color: #ff5c5c; }
         .action-button .bi-chevron-down { transition: transform 0.3s ease; }
         .action-button:not(.collapsed) .bi-chevron-down { transform: rotate(-180deg); }
+        .card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+        }
+        .card-title {
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+        .list-group-item {
+            background-color: var(--card-background);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+        .form-control {
+            background-color: var(--background-color);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+        .form-control::placeholder {
+            color: var(--secondary-text-color);
+            opacity: 0.7;
+        }
+        .form-control:focus {
+            background-color: var(--background-color);
+            border-color: var(--primary-color);
+            color: var(--text-color);
+            box-shadow: 0 0 0 0.25rem rgba(0, 168, 132, 0.25);
+        }
+        .form-control:disabled {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .text-muted {
+            color: var(--secondary-text-color) !important;
+        }
     </style>
 </head>
 <body>
-
     <div class="page" style="display: flex;">
         <header class="top-header">
             <h5 class="m-0">الإعدادات</h5>
@@ -49,8 +82,8 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title mb-3">الملف الشخصي</h5>
-                    <div class="d-flex flex-column align-items: center text-center">
-                        <img id="profile-pic-preview" src="https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png" alt="صورة الملف الشخصي" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #eee;">
+                    <div class="d-flex flex-column align-items-center text-center">
+                        <img id="profile-pic-preview" src="https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png" alt="صورة الملف الشخصي" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #333;">
                         <input type="file" id="profile-pic-input" accept="image/*" class="d-none">
                         <button id="change-pic-button" class="btn btn-outline-primary mb-2">تغيير الصورة</button>
                         <button id="save-pic-button" class="btn btn-primary" style="display: none;">حفظ الصورة</button>
@@ -59,6 +92,17 @@
                 </div>
             </div>
 
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">تغيير الاسم</h5>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="new-name-input" placeholder="ادخل اسمك الجديد هنا">
+                    </div>
+                    <button id="save-name-btn" class="btn btn-primary w-100">حفظ الاسم الجديد</button>
+                    <div id="name-change-status" class="form-text mt-2 text-center"></div>
+                </div>
+            </div>
+            
             <div id="developer-options" class="d-none mb-4">
                 <button class="action-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#quote-management-collapse" aria-expanded="false" aria-controls="quote-management-collapse">
                     <span><i class="bi bi-journal-richtext me-2"></i>إدارة الاقتباسات (للمطور)</span>
@@ -72,7 +116,7 @@
                         </div>
                         <button id="save-quote-btn" class="btn btn-success w-100">حفظ الاقتباس</button>
                         <button id="cancel-quote-edit-btn" class="btn btn-secondary w-100 mt-2 d-none">إلغاء التعديل</button>
-                        <hr>
+                        <hr style="border-color: var(--border-color);">
                         <h6>الاقتباسات الحالية:</h6>
                         <ul id="quotes-list" class="list-group">
                             </ul>
@@ -91,7 +135,6 @@
                     </button>
                 </div>
             </div>
-
         </main>
         
         <nav class="bottom-nav">
@@ -108,11 +151,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, addDoc, onSnapshot, query, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        
-        // The old Firebase Storage import is kept here, but not used by the active code
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -126,13 +166,13 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app); // Kept here, but not used by active code
         let currentUser = null;
-        let currentUserRole = 'user';
+        let currentUserData = {}; // Initialize as empty object to prevent errors
 
-        const CLOUDINARY_CLOUD_NAME = "dbkzk1oe2";
-        const CLOUDINARY_UPLOAD_PRESET = "profile-pictures";
-
+        // Page Elements
+        const newNameInput = document.getElementById('new-name-input');
+        const saveNameBtn = document.getElementById('save-name-btn');
+        const nameChangeStatus = document.getElementById('name-change-status');
         const profilePicPreview = document.getElementById('profile-pic-preview');
         const profilePicInput = document.getElementById('profile-pic-input');
         const changePicButton = document.getElementById('change-pic-button');
@@ -140,13 +180,14 @@
         const uploadStatus = document.getElementById('upload-status');
         const logoutActionButton = document.getElementById('logout-action-button');
         let selectedFile = null;
-
         const developerOptions = document.getElementById('developer-options');
         const quoteTextInput = document.getElementById('quote-text-input');
         const quoteIdInput = document.getElementById('quote-id-input');
         const saveQuoteBtn = document.getElementById('save-quote-btn');
         const cancelQuoteEditBtn = document.getElementById('cancel-quote-edit-btn');
         const quotesList = document.getElementById('quotes-list');
+        const CLOUDINARY_CLOUD_NAME = "dbkzk1oe2";
+        const CLOUDINARY_UPLOAD_PRESET = "profile-pictures";
 
         onAuthStateChanged(auth, async (user) => {
             if (!user || !user.emailVerified) {
@@ -156,13 +197,91 @@
                 const userDocRef = doc(db, "users", currentUser.uid);
                 const userDoc = await getDoc(userDocRef);
                 if (userDoc.exists()) {
-                    currentUserRole = userDoc.data().role || 'user';
+                    currentUserData = userDoc.data();
                 }
+                
                 loadUserProfile();
-                if (currentUserRole === 'developer') {
+                checkNameChangeStatus();
+
+                if (currentUserData.role === 'developer') {
                     developerOptions.classList.remove('d-none');
                     loadQuotesForAdmin();
                 }
+            }
+        });
+
+        function checkNameChangeStatus() {
+            if (currentUserData && currentUserData.last_name_change) {
+                const lastChangeDate = currentUserData.last_name_change.toDate();
+                const now = new Date();
+                const oneWeekInMillis = 7 * 24 * 60 * 60 * 1000;
+                const timeSinceChange = now - lastChangeDate;
+
+                if (timeSinceChange < oneWeekInMillis) {
+                    newNameInput.disabled = true;
+                    saveNameBtn.disabled = true;
+                    const daysRemaining = Math.ceil((oneWeekInMillis - timeSinceChange) / (1000 * 60 * 60 * 24));
+                    nameChangeStatus.textContent = `لا يمكنك تغيير اسمك حتى مرور ${daysRemaining} يوم.`;
+                    nameChangeStatus.className = 'form-text mt-2 text-center text-warning';
+                } else {
+                    newNameInput.disabled = false;
+                    saveNameBtn.disabled = false;
+                    nameChangeStatus.textContent = 'يمكنك تغيير اسمك الآن.';
+                    nameChangeStatus.className = 'form-text mt-2 text-center text-success';
+                }
+            } else {
+                newNameInput.disabled = false;
+                saveNameBtn.disabled = false;
+                nameChangeStatus.textContent = 'يمكنك تغيير اسمك مرة واحدة في الأسبوع.';
+                nameChangeStatus.className = 'form-text mt-2 text-center';
+            }
+        }
+
+        saveNameBtn.addEventListener('click', async () => {
+            const newName = newNameInput.value.trim();
+            if (!newName || newName.length < 3) {
+                alert('الرجاء إدخال اسم صالح (3 أحرف على الأقل).');
+                return;
+            }
+
+            if (currentUserData && currentUserData.last_name_change) {
+                const lastChangeDate = currentUserData.last_name_change.toDate();
+                const now = new Date();
+                const oneWeekInMillis = 7 * 24 * 60 * 60 * 1000;
+                if (now - lastChangeDate < oneWeekInMillis) {
+                    nameChangeStatus.textContent = "لا يمكنك تغيير اسمك حتى مرور أسبوع آخر.";
+                    nameChangeStatus.className = 'form-text mt-2 text-center text-danger';
+                    return;
+                }
+            }
+
+            saveNameBtn.disabled = true;
+            nameChangeStatus.textContent = 'جاري تحديث الاسم...';
+            nameChangeStatus.className = 'form-text mt-2 text-center';
+
+            try {
+                await updateProfile(auth.currentUser, { displayName: newName });
+                
+                const userDocRef = doc(db, "users", currentUser.uid);
+                const newTimestamp = new Date();
+                const updatedData = { 
+                    displayName: newName,
+                    last_name_change: newTimestamp
+                };
+                await setDoc(userDocRef, updatedData, { merge: true });
+
+                currentUserData = { ...currentUserData, ...updatedData };
+                checkNameChangeStatus();
+                nameChangeStatus.textContent = 'تم تحديث اسمك بنجاح!';
+                nameChangeStatus.className = 'form-text mt-2 text-center text-success';
+                newNameInput.value = '';
+
+            } catch (error) {
+                console.error("Error updating name:", error);
+                nameChangeStatus.textContent = 'حدث خطأ أثناء تحديث الاسم.';
+                nameChangeStatus.className = 'form-text mt-2 text-center text-danger';
+            } finally {
+                saveNameBtn.disabled = false;
             }
         });
 
@@ -189,7 +308,6 @@
                 }
             }
         });
-        
         function loadQuotesForAdmin() {
             const q = query(collection(db, "quotes"));
             onSnapshot(q, (snapshot) => {
@@ -213,14 +331,12 @@
                 });
             });
         }
-        
         function resetQuoteForm() {
             quoteTextInput.value = '';
             quoteIdInput.value = '';
             saveQuoteBtn.textContent = 'حفظ الاقتباس';
             cancelQuoteEditBtn.classList.add('d-none');
         }
-
         saveQuoteBtn.addEventListener('click', async () => {
             const text = quoteTextInput.value.trim();
             const id = quoteIdInput.value;
@@ -237,22 +353,17 @@
                 alert("حدث خطأ أثناء حفظ الاقتباس.");
             }
         });
-
         cancelQuoteEditBtn.addEventListener('click', resetQuoteForm);
-
+        
         async function loadUserProfile() {
             if (!currentUser) return;
-            const userDocRef = doc(db, "users", currentUser.uid);
-            const userDoc = await getDoc(userDocRef);
-            if (userDoc.exists() && userDoc.data().photoURL) {
-                profilePicPreview.src = userDoc.data().photoURL;
+            if (currentUserData && currentUserData.photoURL) {
+                profilePicPreview.src = currentUserData.photoURL;
             } else {
                 profilePicPreview.src = "https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png";
             }
         }
-
         changePicButton.addEventListener('click', () => { profilePicInput.click(); });
-
         profilePicInput.addEventListener('change', (e) => {
             if (e.target.files && e.target.files[0]) {
                 selectedFile = e.target.files[0];
@@ -263,7 +374,6 @@
                 changePicButton.textContent = 'اختيار صورة أخرى';
             }
         });
-
         async function uploadToCloudinary(file) {
             const formData = new FormData();
             formData.append('file', file);
@@ -273,7 +383,6 @@
                 const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
                 const data = await response.json();
                 if (data.secure_url) {
-                    uploadStatus.textContent = 'تم رفع الصورة بنجاح.';
                     return data.secure_url;
                 } else { throw new Error('Cloudinary upload failed'); }
             } catch (error) {
@@ -282,15 +391,11 @@
                 return null;
             }
         }
-
-        // --- Active Cloudinary upload logic ---
         savePicButton.addEventListener('click', async () => {
             if (!selectedFile || !currentUser) return;
-            
             uploadStatus.textContent = 'يتم رفع الصورة...';
             savePicButton.disabled = true;
             changePicButton.disabled = true;
-
             try {
                 const downloadURL = await uploadToCloudinary(selectedFile);
                 if (downloadURL) {
@@ -313,33 +418,6 @@
             }
         });
         
-        /* // --- The original Firebase Storage upload logic is preserved below but disabled ---
-        savePicButton.addEventListener('click', async () => {
-            if (!selectedFile || !currentUser) return;
-            uploadStatus.textContent = 'يتم رفع الصورة...';
-            savePicButton.disabled = true;
-            changePicButton.disabled = true;
-            const storageRef = ref(storage, `profile_pictures/${currentUser.uid}`);
-            try {
-                const snapshot = await uploadBytes(storageRef, selectedFile);
-                const downloadURL = await getDownloadURL(snapshot.ref);
-                const userDocRef = doc(db, "users", currentUser.uid);
-                await setDoc(userDocRef, { photoURL: downloadURL }, { merge: true });
-                uploadStatus.textContent = 'تم تحديث الصورة بنجاح!';
-                setTimeout(() => { uploadStatus.textContent = '' }, 3000);
-                savePicButton.style.display = 'none';
-                changePicButton.textContent = 'تغيير الصورة';
-                selectedFile = null;
-            } catch (error) {
-                console.error("Error uploading profile picture: ", error);
-                uploadStatus.textContent = 'فشل تحديث الصورة.';
-            } finally {
-                savePicButton.disabled = false;
-                changePicButton.disabled = false;
-            }
-        });
-        */
-
         logoutActionButton.addEventListener('click', () => {
             if (confirm("هل أنت متأكد من تسجيل الخروج؟")) {
                 signOut(auth).then(() => {
