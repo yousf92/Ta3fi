@@ -20,48 +20,103 @@
         body, html {
             margin: 0; padding: 0; font-family: 'Tajawal', sans-serif;
             background-color: var(--background-color); color: var(--text-color);
-            position: fixed; width: 100%; height: 100%; overflow: hidden;
+            height: 100vh;
+            overflow: hidden;
         }
-        .page { display: flex; flex-direction: column; height: 100%; width: 100%; }
-        .content-area { flex-grow: 1; overflow-y: auto; padding: 1rem; padding-bottom: 80px; }
-        .top-header { display: flex; justify-content: flex-end; align-items: center; padding: 1rem; background-color: var(--background-color); border-bottom: 1px solid var(--border-color); }
-        .bottom-nav { display: flex; justify-content: space-around; padding: 0.5rem 0; background-color: var(--card-background); box-shadow: 0 -2px 5px rgba(0,0,0,0.2); position: fixed; bottom: 0; width: 100%; z-index: 100; border-top: 1px solid var(--border-color); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--secondary-text-color); text-decoration: none; font-size: 0.75rem; cursor: pointer; }
+        .page {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+        .top-header {
+            flex-shrink: 0; /* ڕێگری دەکات لە بچووکبوونەوە */
+            display: flex;
+            justify-content: center; /* ناونیشان لە ناوەڕاست */
+            align-items: center;
+            padding: 1rem;
+            background-color: var(--background-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .content-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            padding-bottom: 90px; /* شوێن بۆ ناڤباری خوارەوە */
+        }
+        .bottom-nav {
+            flex-shrink: 0; /* ڕێگری دەکات لە بچووکبوونەوە */
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0;
+            background-color: var(--card-background);
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+            border-top: 1px solid var(--border-color);
+        }
+        .top-header h5 { margin: 0; font-weight: 700; color: var(--text-color);}
+        
+        /* === چارەسەری کێشەی ناڤبار لێرە زیادکرا === */
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--secondary-text-color);
+            text-decoration: none;
+            font-size: 0.75rem;
+            cursor: pointer;
+            width: 14%; /* بۆ دابەشکردنی یەکسانی شوێن */
+            height: 50px; /* بەرزییەکی دیاریکراو بۆ هەموو ئایتمەکان */
+            justify-content: center; /* بۆ ناوەڕاست هێنانی ئایکۆن و نووسین */
+        }
+        /* ======================================= */
+
         .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary-color); }
         .nav-item.special-item { transform: translateY(-20px); }
         .special-item .icon-background { background: linear-gradient(135deg, #00a884, #00c896); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 168, 132, 0.4); }
         .special-item i { color: white; font-size: 2rem; margin: 0; }
-        .card {
-            background-color: var(--card-background);
-            border: 1px solid var(--border-color);
-        }
-        .card-title {
-            font-weight: 700;
-            color: #FFFFFF;
-        }
-        .text-muted {
-            color: var(--secondary-text-color) !important;
-        }
+
+        .note-card { background-color: var(--card-background); border: 1px solid var(--border-color); margin-bottom: 1rem; }
+        .note-card .card-title { font-weight: 700; color: #FFFFFF; }
+        .note-card .card-text { color: var(--text-color); font-size: 0.95rem; line-height: 1.6; }
+        .note-card .mood-emoji { font-size: 1.5rem; margin-left: 0.75rem; }
+        .delete-note-btn { opacity: 0.6; transition: opacity 0.2s ease-in-out; }
+        .delete-note-btn:hover { opacity: 1; color: var(--danger-color) !important; }
+        .read-more-btn { font-weight: 700; color: var(--primary-color); cursor: pointer; text-decoration: none; }
+        
+        .add-note-btn { position: fixed; left: 20px; bottom: 100px; width: 60px; height: 60px; background-color: var(--primary-color); color: white; border-radius: 50%; display: none; /* سەرەتا شاردراوەتەوە */ align-items: center; justify-content: center; font-size: 1.8rem; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 1021; border: none; cursor: pointer; }
+        
+        .modal-content { background-color: var(--background-color); border: 1px solid var(--border-color); }
+        .modal-header { border-bottom: 1px solid var(--border-color); }
+        .modal-header .btn-close { filter: invert(1) grayscale(100%) brightness(200%); margin: 0 -0.5rem 0 auto; }
+        .modal-title { color: #FFFFFF; }
+        .form-control, .form-select { background-color: var(--card-background); border: 1px solid var(--border-color); color: var(--text-color); }
+        .form-control:focus, .form-select:focus { background-color: var(--card-background); border-color: var(--primary-color); box-shadow: 0 0 0 0.25rem rgba(0, 168, 132, 0.25); color: var(--text-color); }
+        #readNoteModal .modal-body { font-size: 1rem; line-height: 1.7; color: var(--text-color); }
+        #readNoteModalHeader { display: flex; justify-content: space-between; width: 100%; align-items: center; }
     </style>
 </head>
 <body>
-
-    <div class="page" style="display: flex;">
+    <div class="page">
         <header class="top-header">
             <h5 class="m-0">اليوميات</h5>
         </header>
         <main class="content-area">
-            
-            <div class="card">
-                <div class="card-body text-center">
-                    <h5 class="card-title">قسم اليوميات</h5>
-                    <p class="card-text text-muted">هذه الميزة قيد التطوير حالياً.</p>
-                    <i class="bi bi-book" style="font-size: 4rem; color: var(--secondary-text-color);"></i>
+            <div id="notes-container">
+                <!-- Spinner for loading -->
+                <div id="loading-spinner" class="text-center p-5">
+                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-muted mt-3">الرجاء الانتظار...</p>
                 </div>
             </div>
-
         </main>
+        
+        <button class="add-note-btn" title="إضافة ملاحظة جديدة" data-bs-toggle="modal" data-bs-target="#addNoteModal">
+            <i class="bi bi-plus-lg"></i>
+        </button>
+
         <nav class="bottom-nav">
             <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
             <a href="diaries.html" class="nav-item active"><i class="bi bi-book"></i><span>اليوميات</span></a>
@@ -73,11 +128,18 @@
         </nav>
     </div>
 
+    <!-- Modals -->
+    <div class="modal fade" id="addNoteModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">إضافة يومية</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="d-flex justify-content-end align-items-center mb-3"><i class="bi bi-calendar3 ms-2 fs-5"></i><input type="date" id="note-date" class="form-control-plaintext p-0 text-white text-end"></div><div class="mood-selector p-3 mb-3 rounded" style="background-color: var(--card-background);"><div class="d-flex align-items-center mb-3"><span id="mood-emoji" class="fs-1 me-3">😊</span><div><p id="mood-text" class="m-0 fw-bold fs-5">سعيد</p><h6 class="text-muted m-0">المزاج</h6></div></div><input type="range" class="form-range" id="mood-slider" min="0" max="4" step="1" value="3"></div><div class="diary-section mt-3"><h5>اليومية</h5><textarea class="form-control" id="note-content" rows="4" placeholder="ما الذي تريد إضافته اليوم؟"></textarea></div></div><div class="modal-footer"><button type="button" class="btn btn-primary w-100 py-2 fw-bold" id="save-note-btn">حفظ</button></div></div></div></div>
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">تأكيد الحذف</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><p>هل أنت متأكد من رغبتك في حذف هذه الملاحظة؟</p></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button><button type="button" class="btn btn-danger" id="confirm-delete-btn">حذف</button></div></div></div></div>
+    <div class="modal fade" id="readNoteModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content"><div class="modal-header"><div id="readNoteModalHeader"></div><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="full-note-content"></div></div></div></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, orderBy, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
             authDomain: "my-chat-app-daaf8.firebaseapp.com",
@@ -86,15 +148,184 @@
             messagingSenderId: "789086064752",
             appId: "1:789086064752:web:d081f1b6832dabca1d64b5"
         };
-        
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        onAuthStateChanged(auth, (user) => {
-            if (!user || !user.emailVerified) {
+        const notesContainer = document.getElementById('notes-container');
+        const addNoteBtn = document.querySelector('.add-note-btn');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        let currentUserId = null;
+
+        onAuthStateChanged(auth, user => {
+            if (user && user.emailVerified) {
+                currentUserId = user.uid;
+                addNoteBtn.style.display = 'flex'; // Show the add button
+                loadNotes(currentUserId);
+            } else {
                 window.location.href = 'index.html';
             }
         });
+
+        function loadNotes(userId) {
+            const notesQuery = query(collection(db, "notes"), where("userId", "==", userId), orderBy("createdAt", "desc"));
+            
+            onSnapshot(notesQuery, (snapshot) => {
+                loadingSpinner.style.display = 'none'; // Hide spinner on first data load
+                notesContainer.innerHTML = ''; // Clear previous notes
+                
+                if (snapshot.empty) {
+                    notesContainer.innerHTML = `<div class="card text-center mt-3"><div class="card-body"><h5 class="card-title">لا توجد ملاحظات</h5><p class="card-text text-muted">أضف أول ملاحظة لك باستخدام الزر الأخضر!</p></div></div>`;
+                } else {
+                    snapshot.forEach(doc => createNoteCard(doc.data(), doc.id));
+                }
+            }, (error) => {
+                console.error("Firestore Error:", error);
+                loadingSpinner.style.display = 'none';
+                notesContainer.innerHTML = `<div class="alert alert-danger text-center"><h5>خطأ في الاتصال</h5><p>حدث خطأ أثناء تحميل ملاحظاتك. الرجاء التأكد من اتصالك بالإنترنت والمحاولة مرة أخرى.</p></div>`;
+            });
+        }
+
+        function createNoteCard(note, noteId) {
+            const content = note.content || '';
+            const displayContent = content.length > 150 ? `${content.substring(0, 150)}... <a href="#" class="read-more-btn">قراءة المزيد...</a>` : content;
+            
+            const noteCardHTML = `
+                <div class="card note-card" data-note-id="${noteId}" data-full-note="${encodeURIComponent(content)}" data-mood-emoji="${note.moodEmoji}" data-mood-text="${note.moodText}" data-date="${note.date}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <div class="d-flex align-items-center">
+                                    <span class="mood-emoji">${note.moodEmoji}</span>
+                                    <h6 class="card-title m-0">${note.moodText}</h6>
+                                </div>
+                                <small class="text-muted d-block mt-1">${note.date}</small>
+                            </div>
+                            <button class="btn btn-link text-danger p-1 delete-note-btn" title="حذف الملاحظة">
+                                <i class="bi bi-trash3" style="font-size: 1.2rem;"></i>
+                            </button>
+                        </div>
+                        <p class="card-text">${displayContent.replace(/\n/g, '<br>')}</p>
+                    </div>
+                </div>`;
+            notesContainer.insertAdjacentHTML('beforeend', noteCardHTML);
+        }
+
+        // Make functions available globally for the other script tag
+        window.saveNote = async (noteData) => {
+            if (!currentUserId) return;
+            try {
+                await addDoc(collection(db, "notes"), {
+                    ...noteData,
+                    userId: currentUserId,
+                    createdAt: serverTimestamp()
+                });
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                alert("حدث خطأ أثناء حفظ الملاحظة.");
+            }
+        };
+
+        window.deleteNote = async (noteId) => {
+            if (!currentUserId) return;
+            try {
+                await deleteDoc(doc(db, "notes", noteId));
+            } catch (e) {
+                console.error("Error deleting document: ", e);
+                alert("حدث خطأ أثناء حذف الملاحظة.");
+            }
+        };
     </script>
+    
+    <script>
+        // This script handles UI interactions (Modals, etc.)
+        document.addEventListener('DOMContentLoaded', () => {
+            const addNoteModal = new bootstrap.Modal(document.getElementById('addNoteModal'));
+            const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+            const readNoteModal = new bootstrap.Modal(document.getElementById('readNoteModal'));
+            
+            let cardToDelete = null;
+
+            const saveNoteBtn = document.getElementById('save-note-btn');
+            const noteDateInput = document.getElementById('note-date');
+            const noteContentInput = document.getElementById('note-content');
+            const moodSlider = document.getElementById('mood-slider');
+            const moodEmoji = document.getElementById('mood-emoji');
+            const moodText = document.getElementById('mood-text');
+            
+            const moods = [
+                { emoji: '😢', text: 'حزين' }, { emoji: '😟', text: 'محبط' },
+                { emoji: '😐', text: 'عادي' }, { emoji: '😊', text: 'سعيد' },
+                { emoji: '😄', text: 'سعيد جداً' },
+            ].reverse();
+
+            const setCurrentDate = () => { noteDateInput.valueAsDate = new Date(); };
+            const updateMood = () => { const mood = moods[parseInt(moodSlider.value)]; moodEmoji.textContent = mood.emoji; moodText.textContent = mood.text; };
+            
+            document.getElementById('addNoteModal').addEventListener('show.bs.modal', setCurrentDate);
+            moodSlider.addEventListener('input', updateMood);
+
+            saveNoteBtn.addEventListener('click', () => {
+                const selectedDate = new Date(noteDateInput.value);
+                const formattedDate = selectedDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+                const selectedMood = moods[parseInt(moodSlider.value)];
+                const noteContent = noteContentInput.value.trim();
+                if (!noteContent) { alert('يرجى كتابة محتوى الملاحظة.'); return; }
+                
+                const noteData = {
+                    date: formattedDate,
+                    moodEmoji: selectedMood.emoji,
+                    moodText: selectedMood.text,
+                    content: noteContent
+                };
+                
+                window.saveNote(noteData); // Use the global function
+                
+                noteContentInput.value = '';
+                moodSlider.value = '3';
+                updateMood();
+                addNoteModal.hide();
+            });
+
+            document.getElementById('notes-container').addEventListener('click', (e) => {
+                const deleteBtn = e.target.closest('.delete-note-btn');
+                if (deleteBtn) {
+                    e.preventDefault();
+                    cardToDelete = deleteBtn.closest('.note-card');
+                    confirmDeleteModal.show();
+                    return;
+                }
+
+                const readMoreBtn = e.target.closest('.read-more-btn');
+                if (readMoreBtn) {
+                    e.preventDefault();
+                    const card = readMoreBtn.closest('.note-card');
+                    document.getElementById('full-note-content').innerHTML = decodeURIComponent(card.dataset.fullNote).replace(/\n/g, '<br>');
+                    document.getElementById('readNoteModalHeader').innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <span class="fs-4 me-3">${card.dataset.moodEmoji}</span>
+                            <div>
+                                <h5 class="m-0">${card.dataset.moodText}</h5>
+                                <small class="text-muted">${card.dataset.date}</small>
+                            </div>
+                        </div>`;
+                    readNoteModal.show();
+                }
+            });
+
+            document.getElementById('confirm-delete-btn').addEventListener('click', () => {
+                if (cardToDelete) {
+                    const noteId = cardToDelete.dataset.noteId;
+                    window.deleteNote(noteId); // Use the global function
+                    cardToDelete = null;
+                }
+                confirmDeleteModal.hide();
+            });
+
+            updateMood();
+        });
+    </script>
+
 </body>
 </html>

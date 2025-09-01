@@ -13,8 +13,8 @@
             --danger-color: #ff5c5c;
             --background-color: #121212;
             --card-background: #1e1e1e;
-            --text-color: #FAFAFA; /* لون أبيض ناصع وواضح */
-            --secondary-text-color: #CCCCCC; /* لون رمادي فاتح وواضح */
+            --text-color: #FAFAFA;
+            --secondary-text-color: #CCCCCC;
             --border-color: #383838;
             --day-color: #86efac;
             --hour-color: #3b82f6;
@@ -35,6 +35,25 @@
         .header-icons { display: flex; gap: 1.5rem; font-size: 1.5rem; color: var(--secondary-text-color); align-items: center;}
         .header-icons i { cursor: pointer; }
         .header-icons a { color: var(--secondary-text-color); text-decoration: none; }
+        
+        /* === START: Notification Badge Styles === */
+        .notification-icon-wrapper {
+            position: relative;
+            cursor: pointer;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -5px;
+            width: 10px;
+            height: 10px;
+            background-color: var(--danger-color);
+            border-radius: 50%;
+            border: 2px solid var(--background-color);
+            display: none; /* Hidden by default */
+        }
+        /* === END: Notification Badge Styles === */
+
         .welcome-message { text-align: right; }
         .welcome-message h5 { margin: 0; font-weight: 700; color: var(--text-color);}
         .welcome-message p { margin: 0; font-size: 0.9rem; color: var(--secondary-text-color); }
@@ -56,7 +75,8 @@
         .action-button.najda-style { background-color: rgba(255, 92, 92, 0.1); color: var(--danger-color); border: 1px solid rgba(255, 92, 92, 0.5); justify-content: center; gap: 10px; font-size: 1.2rem; font-weight: 700; }
         .action-button.najda-style i { font-size: 1.5rem; }
         .bottom-nav { display: flex; justify-content: space-around; padding: 0.5rem 0; background-color: var(--card-background); box-shadow: 0 -2px 5px rgba(0,0,0,0.2); position: fixed; bottom: 0; width: 100%; z-index: 100; border-top: 1px solid var(--border-color); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--secondary-text-color); text-decoration: none; font-size: 0.75rem; cursor: pointer; }
+        
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--secondary-text-color); text-decoration: none; font-size: 0.75rem; cursor: pointer; width: 14%; height: 50px; justify-content: center; }
         .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary-color); }
         .nav-item.special-item { transform: translateY(-20px); }
@@ -85,11 +105,14 @@
         #breathing-circle-container { width: 200px; height: 200px; border: 5px solid rgba(255, 255, 255, 0.7); border-radius: 50%; display: flex; justify-content: center; align-items: center; }
         #breathing-circle { width: 100%; height: 100%; background-color: white; border-radius: 50%; transform: scale(0.2); animation-duration: 19s; animation-iteration-count: infinite; animation-name: breathe; animation-timing-function: ease-in-out; }
         @keyframes breathe { 0% { transform: scale(0.2); } 21% { transform: scale(1); } 58% { transform: scale(1); } 100% { transform: scale(0.2); } }
-        .notification-item { border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px; }
+        
+        .notification-item { position: relative; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px; padding-left: 30px; }
         .notification-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .notification-title { font-weight: 700; color: #FFFFFF; }
         .notification-body { color: var(--secondary-text-color); font-size: 0.9rem; }
         .notification-date { font-size: 0.8rem; color: #aaa; }
+        .delete-notification-btn { position: absolute; left: 5px; top: 50%; transform: translateY(-50%); color: var(--danger-color); cursor: pointer; font-size: 1.2rem; display: none; }
+
         #quote-page { justify-content: center; align-items: center; background: linear-gradient(135deg, #3b82f6, #60a5fa); padding: 2rem; text-align: center; color: white; }
         .quote-box { position: relative; background-color: rgba(0, 0, 0, 0.1); border: 2px solid white; border-radius: 25px; padding: 4rem 2rem; width: 100%; max-width: 500px; }
         .quote-box::before, .quote-box::after { font-family: serif; font-size: 6rem; font-weight: bold; color: white; position: absolute; opacity: 0.8; }
@@ -100,6 +123,10 @@
         #close-quote-btn { position: absolute; top: 20px; left: 20px; font-size: 1.8rem; cursor: pointer; z-index: 10; }
         .card-title { font-weight: 700; color: #FFFFFF; }
         .modal-title { color: #FFFFFF; }
+
+        #notifications-modal .modal-content { background-color: var(--background-color); color: var(--text-color); }
+        #notifications-modal .modal-header { border-bottom: 1px solid var(--border-color); }
+        #notifications-modal .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
     </style>
 </head>
 <body>
@@ -107,7 +134,12 @@
         <div class="home-container">
             <header class="top-header">
                 <div class="header-icons">
-                    <i class="bi bi-bell" data-bs-toggle="modal" data-bs-target="#notifications-modal"></i>
+                    <!-- START: Modified Notification Icon -->
+                    <div class="notification-icon-wrapper" data-bs-toggle="modal" data-bs-target="#notifications-modal">
+                        <i class="bi bi-bell"></i>
+                        <span class="notification-badge"></span>
+                    </div>
+                    <!-- END: Modified Notification Icon -->
                     <a href="settings.html"><i class="bi bi-person-circle"></i></a>
                 </div>
                 <div class="welcome-message">
@@ -242,7 +274,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, arrayUnion, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, arrayUnion, updateDoc, deleteDoc, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -266,6 +298,11 @@
         const openSendModalBtn = document.getElementById('open-send-modal-btn');
         const startTimerBtn = document.getElementById('start-timer-btn');
         const timerSettingsIcon = document.querySelector('.timer-settings-icon');
+        const notificationBadge = document.querySelector('.notification-badge');
+        const notificationsModalEl = document.getElementById('notifications-modal');
+
+        let latestNotificationTimestamp = null;
+
         onAuthStateChanged(auth, async (user) => {
             if (user && user.emailVerified) {
                 welcomeUserEl.textContent = `مرحباً ${user.displayName || 'المستخدم'}`;
@@ -289,16 +326,17 @@
                         updateTimerDisplay(0,0,0,0); 
                     }
                 } else {
-                    await setDoc(userDocRef, { role: 'user' }, { merge: true });
+                    await setDoc(userDocRef, { role: 'user', lastSeenNotificationTimestamp: new Date(0) }, { merge: true });
                     startTimerBtn.classList.remove('d-none');
                     timerSettingsIcon.classList.add('d-none');
                     updateTimerDisplay(0,0,0,0);
                 }
-                loadNotifications();
+                loadNotifications(user.uid);
             } else {
                 window.location.href = 'index.html';
             }
         });
+
         startTimerBtn.addEventListener('click', async () => {
             const user = auth.currentUser;
             if (!user) return;
@@ -311,26 +349,81 @@
             if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(updateTimer, 1000);
         });
+
         const notificationsList = document.getElementById('notifications-list');
         const sendNotificationBtn = document.getElementById('send-notification-btn');
         const sendNotificationModal = new bootstrap.Modal(document.getElementById('send-notification-modal'));
-        function loadNotifications() {
+
+        async function loadNotifications(userId) {
+            const userDocRef = doc(db, "users", userId);
+            const userDoc = await getDoc(userDocRef);
+            const lastSeenTimestamp = userDoc.data()?.lastSeenNotificationTimestamp?.toDate() || new Date(0);
+
             const q = query(collection(db, "notifications"), orderBy("createdAt", "desc"));
             onSnapshot(q, (snapshot) => {
                 notificationsList.innerHTML = "";
                 if (snapshot.empty) {
-                    notificationsList.innerHTML = '<p class="text-center text-muted">لا توجد إشعارات حالياً.</p>'; return;
+                    notificationsList.innerHTML = '<p class="text-center text-muted">لا توجد إشعارات حالياً.</p>';
+                    notificationBadge.style.display = 'none';
+                    return;
                 }
-                snapshot.forEach(doc => {
-                    const notification = doc.data();
+
+                const firstDoc = snapshot.docs[0];
+                latestNotificationTimestamp = firstDoc.data().createdAt?.toDate();
+
+                if (latestNotificationTimestamp && latestNotificationTimestamp > lastSeenTimestamp) {
+                    notificationBadge.style.display = 'block';
+                } else {
+                    notificationBadge.style.display = 'none';
+                }
+
+                snapshot.forEach(docSnapshot => {
+                    const notification = docSnapshot.data();
                     const date = notification.createdAt?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }) || '';
                     const item = document.createElement('div');
                     item.className = 'notification-item';
-                    item.innerHTML = `<div class="d-flex justify-content-between align-items-center"><h6 class="notification-title mb-1">${notification.title}</h6><span class="notification-date">${date}</span></div><p class="notification-body mb-0">${notification.message}</p>`;
+                    let deleteIconHTML = '';
+                    if (currentUserRole === 'developer') {
+                        deleteIconHTML = `<i class="bi bi-trash delete-notification-btn" data-id="${docSnapshot.id}" style="display: inline-block;"></i>`;
+                    }
+                    item.innerHTML = `${deleteIconHTML}<div class="d-flex justify-content-between align-items-center"><h6 class="notification-title mb-1">${notification.title}</h6><span class="notification-date">${date}</span></div><p class="notification-body mb-0">${notification.message}</p>`;
                     notificationsList.appendChild(item);
                 });
+
+                if (currentUserRole === 'developer') {
+                    document.querySelectorAll('.delete-notification-btn').forEach(button => {
+                        button.addEventListener('click', async (e) => {
+                            e.stopPropagation();
+                            const notifId = e.target.getAttribute('data-id');
+                            if (confirm('هل أنت متأكد من حذف هذا الإشعار؟')) {
+                                try {
+                                    await deleteDoc(doc(db, "notifications", notifId));
+                                } catch (error) {
+                                    console.error("Error deleting notification: ", error);
+                                    alert('حدث خطأ أثناء حذف الإشعار.');
+                                }
+                            }
+                        });
+                    });
+                }
             });
         }
+
+        notificationsModalEl.addEventListener('show.bs.modal', async () => {
+            const user = auth.currentUser;
+            if (!user || !latestNotificationTimestamp) return;
+            
+            notificationBadge.style.display = 'none';
+            const userDocRef = doc(db, "users", user.uid);
+            try {
+                await updateDoc(userDocRef, {
+                    lastSeenNotificationTimestamp: latestNotificationTimestamp
+                });
+            } catch (error) {
+                console.error("Error updating last seen timestamp: ", error);
+            }
+        });
+
         sendNotificationBtn.addEventListener('click', async () => {
             const title = document.getElementById('notification-title').value.trim();
             const message = document.getElementById('notification-message').value.trim();
@@ -343,6 +436,7 @@
                 sendNotificationModal.hide();
             } catch (error) { console.error("Error sending notification: ", error); alert('حدث خطأ أثناء إرسال الإشعار.'); }
         });
+
         const dateElement = document.getElementById('current-date');
         const daysValueEl = document.getElementById('days-value');
         const hoursValueEl = document.getElementById('hours-value');
@@ -352,12 +446,14 @@
         const hoursFillEl = document.getElementById('hours-fill');
         const minutesFillEl = document.getElementById('minutes-fill');
         const secondsFillEl = document.getElementById('seconds-fill');
+
         function updateLiveDate() {
             const today = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             dateElement.textContent = today.toLocaleDateString('ar-EG', options);
         }
         updateLiveDate();
+
         function updateTimerDisplay(d, h, m, s) {
             daysValueEl.textContent = d;
             hoursValueEl.textContent = h;
@@ -372,6 +468,7 @@
             minutesFillEl.style.width = `${Math.min(minutesPercent, 100)}%`;
             secondsFillEl.style.width = `${Math.min(secondsPercent, 100)}%`;
         }
+
         function updateTimer() {
             if (!startTime) { updateTimerDisplay(0,0,0,0); return; };
             const now = new Date();
@@ -383,6 +480,7 @@
             const seconds = Math.floor((difference % (1000 * 60)) / 1000);
             updateTimerDisplay(days, hours, minutes, seconds);
         }
+
         const settingsIcon = document.querySelector('.timer-settings-icon');
         const settingsModalOverlay = document.getElementById('settings-modal-overlay');
         const closeSettingsButton = document.getElementById('close-settings-button');
@@ -392,6 +490,7 @@
         const confirmResetModal = document.getElementById('confirm-reset-modal');
         const cancelResetButton = document.getElementById('cancel-reset-button');
         const confirmResetActionButton = document.getElementById('confirm-reset-action-button');
+
         settingsIcon.addEventListener('click', () => settingsModalOverlay.classList.add('show'));
         const closeSettingsModal = () => settingsModalOverlay.classList.remove('show');
         closeSettingsButton.addEventListener('click', closeSettingsModal);
@@ -424,6 +523,7 @@
                 location.reload();
             }
         });
+
         const najdaButton = document.getElementById('najda-button');
         const breathingPage = document.getElementById('breathing-page');
         const closeBreathingBtn = document.getElementById('close-breathing-btn');
@@ -433,6 +533,7 @@
         const quoteText = document.getElementById('quote-text');
         const closeQuoteBtn = document.getElementById('close-quote-btn');
         const skipToQuoteBtn = document.getElementById('skip-to-quote-btn');
+
         function stopBreathingCycle() {
             breathingTimeouts.forEach(clearTimeout); 
             breathingTimeouts = [];
@@ -441,6 +542,7 @@
                 countdownInterval = null;
             }
         }
+
         function startBreathingCycle() {
             breathingTimeouts.forEach(clearTimeout);
             breathingTimeouts = [];
@@ -449,6 +551,7 @@
             breathingTimeouts.push(setTimeout(() => { breathingText.textContent = 'زفير'; }, 11000));
             breathingTimeouts.push(setTimeout(startBreathingCycle, 19000));
         }
+
         async function showQuotePage() {
             const user = auth.currentUser;
             if (!user) return;
@@ -475,6 +578,7 @@
             quotePage.style.display = 'flex';
             quotePage.classList.add('active');
         }
+
         najdaButton.addEventListener('click', () => {
             stopBreathingCycle();
             homePage.classList.remove('active');
@@ -495,17 +599,20 @@
             }, 1000);
             startBreathingCycle();
         });
+
         closeBreathingBtn.addEventListener('click', () => {
             stopBreathingCycle();
             breathingPage.classList.remove('active');
             breathingPage.style.display = 'none';
             homePage.classList.add('active');
         });
+
         closeQuoteBtn.addEventListener('click', () => {
             quotePage.classList.remove('active');
             quotePage.style.display = 'none';
             homePage.classList.add('active');
         });
+
         skipToQuoteBtn.addEventListener('click', () => {
             stopBreathingCycle();
             showQuotePage();
