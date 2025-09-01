@@ -9,534 +9,134 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <style>
         html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden; 
+            height: 100%; margin: 0; padding: 0; overflow: hidden;
         }
-        body { 
-            background-color: #f0f2f5; 
-            font-family: 'Tajawal', sans-serif;
+        body {
+            background-color: #f0f2f5; font-family: 'Tajawal', sans-serif;
         }
-        .chat-wrapper { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100%;
+        .chat-wrapper {
+            display: flex; justify-content: center; align-items: center; height: 100%;
         }
-        .chat-container { 
-            display: flex; 
-            flex-direction: column; 
-            height: 100%;
-            width: 100%; 
-            max-width: 800px; 
-            background: white; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.1); 
-            border-radius: 0;
-            position: relative; 
+        .chat-container {
+            display: flex; flex-direction: column; height: 100%;
+            width: 100%; max-width: 800px; background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1); border-radius: 0; position: relative;
         }
         @media (min-width: 801px) {
-            .chat-container {
-                height: 95vh;
-                border-radius: 15px;
-            }
+            .chat-container { height: 95vh; border-radius: 15px; }
         }
-        
         .chat-header {
             padding: 1rem;
             background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url('https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=1974&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-            border-bottom: none;
-            flex-shrink: 0;
-            color: white;
+            background-size: cover; background-position: center; border-bottom: none;
+            flex-shrink: 0; color: white;
         }
-        .chat-header h5, .chat-header #user-display-name {
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-        }
-        #logout-button {
-            border-color: rgba(255, 255, 255, 0.8);
-            color: white;
-            background-color: rgba(255, 255, 255, 0.15);
-        }
-        #logout-button:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-        }
-        .nav-pills {
-            background-color: rgba(0, 0, 0, 0.25);
-            border-radius: 25px;
-            padding: 4px;
-        }
-        .nav-pills .nav-link {
-            color: #f0f0f0;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-        }
-        .nav-pills .nav-link.active {
-            background-color: #008069;
-            color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        #pinned-message-container {
-            padding: 8px 15px;
-            background-color: #fffbe6;
-            border-bottom: 1px solid #ffe58f;
-            display: none;
-            font-size: 0.9rem;
-            flex-shrink: 0;
-            position: relative;
-        }
-        #pinned-message-clickable-area {
-            cursor: pointer;
-            padding-right: 25px; 
-        }
-        #pinned-by-text {
-            font-weight: bold;
-            color: #664d03;
-            display: block;
-            font-size: 0.8rem;
-        }
-        #pinned-message-text {
-            color: #856404;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: block;
-        }
-        #unpin-button {
-            position: absolute;
-            top: 50%;
-            right: 10px; 
-            transform: translateY(-50%);
-            cursor: pointer;
-            font-size: 1.2rem; 
-            color: #856404;
-            z-index: 2;
-        }
-
-        .main-content { 
-            flex-grow: 1; 
-            overflow-y: auto; 
-            display: flex;
-            flex-direction: column;
-            position: relative; 
-        }
-        
-        #chat-section {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            position: relative; 
-        }
-
-        #messages-box { 
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 20px; 
+        .chat-header h5, .chat-header #user-display-name { color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); }
+        #pinned-message-container { padding: 8px 15px; background-color: #fffbe6; border-bottom: 1px solid #ffe58f; display: none; font-size: 0.9rem; flex-shrink: 0; position: relative; }
+        #pinned-message-clickable-area { cursor: pointer; padding-right: 25px; }
+        #pinned-by-text { font-weight: bold; color: #664d03; display: block; font-size: 0.8rem; }
+        #pinned-message-text { color: #856404; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        #unpin-button { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer; font-size: 1.2rem; color: #856404; z-index: 2; }
+        .main-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; position: relative; }
+        #chat-section { display: flex; flex-direction: column; height: 100%; position: relative; }
+        #messages-box {
+            flex-grow: 1; overflow-y: auto; padding: 20px;
             background-image: url('https://images.unsplash.com/photo-1500964757637-c85e8a162699?q=80&w=2103&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-            user-select: none;
-            display: flex;
-            flex-direction: column;
+            background-size: cover; background-position: center; user-select: none;
+            display: flex; flex-direction: column;
         }
-        
-        .message-content {
-            user-select: text; 
-            -webkit-user-select: text;
-        }
-
-        #articles-section { 
-            padding: 20px;
-            background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-            height: 100%;
-            overflow-y: auto;
-        }
-
-        .article-card { 
-            margin-bottom: 1rem; 
-            background-color: rgba(255, 255, 255, 0.9);
-        }
-        
-        #articleModal .modal-content {
-            background-color: #32362e;
-            color: white;
-        }
-        #articleModal .modal-header {
-            border-bottom-color: #4a4e47;
-        }
-
-        .article-modal-body img { max-width: 100%; border-radius: 10px; margin-bottom: 1rem; }
-        
-        .message { 
-            margin-bottom: 15px; 
-            display: flex; 
-            align-items: flex-end;
-            position: relative; 
-            padding-bottom: 35px;
-            max-width: 95%;
-            transition: transform 0.3s ease;
-        }
-        .message.own { 
-            align-self: flex-end;
-        }
-        .message.other { 
-            align-self: flex-start;
-        }
-        
-        .message-content { 
-            padding: 8px 12px; 
-            border-radius: 18px; 
-            max-width: 100%; 
-            position: relative; 
-            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-            word-wrap: break-word;
-            display: flex;
-            flex-direction: column;
-        }
-
+        .message-content { user-select: text; -webkit-user-select: text; }
+        .message { margin-bottom: 15px; display: flex; align-items: flex-start; position: relative; padding-bottom: 35px; max-width: 95%; transition: transform 0.3s ease; }
+        .message.own { align-self: flex-end; flex-direction: row-reverse; }
+        .message.other { align-self: flex-start; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-left: 10px; flex-shrink: 0; }
+        .message.own .avatar { margin-left: 0; margin-right: 10px; }
+        .message-bubble { display: flex; flex-direction: column; max-width: calc(100% - 50px); }
+        .message-content { padding: 8px 12px; border-radius: 18px; max-width: 100%; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1); word-wrap: break-word; display: flex; flex-direction: column; }
         .message.own .message-content { background-color: #005c4b; color: white; border-bottom-right-radius: 5px; }
         .message.other .message-content { background-color: #202c33; color: white; border-bottom-left-radius: 5px; }
-        
         .sender { font-weight: bold; font-size: 0.9rem; margin-bottom: 4px; color: #53bdeb; }
-        
-        .timestamp-wrapper {
-            align-self: flex-end;
-            display: flex;
-            align-items: center;
-            margin-top: 4px;
-            margin-left: 15px;
-        }
+        .timestamp-wrapper { align-self: flex-end; display: flex; align-items: center; margin-top: 4px; margin-left: 15px; }
         .timestamp { font-size: 0.75rem; color: #a0a0a0; }
         .edited-badge { font-size: 0.7rem; color: #a0a0a0; margin-right: 5px; }
-        
-        .message-actions {
-            position: absolute;
-            bottom: 0;
-            z-index: 10;
-            background-color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            font-size: 1rem;
-            display: none;
-            align-items: center;
-            gap: 12px;
-            white-space: nowrap;
-        }
-        .message.own .message-actions {
-            right: 0;
-        }
-        .message.other .message-actions {
-            left: 0;
-        }
-        .message:hover .message-actions { 
-            display: flex;
-        }
-        
-        .message-actions a {
-            cursor: pointer;
-            color: #2a3942;
-            text-decoration: none;
-            position: relative;
-        }
-        .message-actions a:hover {
-            color: #000;
-        }
-
+        .message-actions { position: absolute; bottom: 0; z-index: 10; background-color: white; padding: 5px 10px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); font-size: 1rem; display: none; align-items: center; gap: 12px; white-space: nowrap; }
+        .message.own .message-actions { right: 50px; }
+        .message.other .message-actions { left: 50px; }
+        .message:hover .message-actions { display: flex; }
+        .message-actions a { cursor: pointer; color: #2a3942; text-decoration: none; position: relative; }
+        .message-actions a:hover { color: #000; }
         .reply-preview { background-color: #2a3942; padding: 8px 12px; border-bottom: 1px solid #3a4a55; font-size: 0.9rem; display: none; position: relative; flex-shrink: 0; }
-        #reply-preview-text {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        #reply-preview-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .replied-to-box { background-color: rgba(0,0,0,0.2); padding: 8px; margin-bottom: 8px; border-radius: 10px; border-left: 3px solid #53bdeb; font-size: 0.9rem; }
-        
-        .reactions-container { 
-            position: absolute; 
-            top: -35px; 
-            background-color: #202c33; 
-            border-radius: 20px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
-            display: flex; 
-            padding: 5px; 
-            opacity: 0; 
-            visibility: hidden; 
-            transition: all 0.2s; 
-            z-index: 10; 
-        }
+        .reactions-container { position: absolute; top: -35px; background-color: #202c33; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; padding: 5px; opacity: 0; visibility: hidden; transition: all 0.2s; z-index: 10; }
         .message.own .reactions-container { left: 0; }
         .message.other .reactions-container { right: 0; }
-        .message-content:hover .reactions-container { 
-            opacity: 1; 
-            visibility: visible; 
-        }
-        .reaction-emoji { 
-            cursor: pointer; 
-            font-size: 1.2rem; 
-            margin: 0 4px; 
-            transition: transform 0.1s; 
-        }
-        .reaction-emoji:hover { 
-            transform: scale(1.3); 
-        }
-        .message-reactions { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 5px; 
-            margin-top: 5px; 
-        }
-        .reaction-chip { 
-            background-color: #2a3942; 
-            border-radius: 10px; 
-            padding: 2px 8px; 
-            font-size: 0.8rem; 
-            display: flex; 
-            align-items: center; 
-        }
-        .message.own .reaction-chip { 
-            background-color: #004a3c;
-        }
-        
-        .mute-dropdown { 
-            display: none; 
-            position: absolute; 
-            background-color: #202c33; 
-            min-width: 160px; 
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); 
-            z-index: 1; 
-            border-radius: 5px; 
-            padding: 5px 0;
-            bottom: 100%;
-        }
-        .message.own .mute-dropdown {
-            right: 0;
-        }
-        .message.other .mute-dropdown {
-            left: 0;
-        }
-        .mute-dropdown a { 
-            color: white; 
-            padding: 8px 12px; 
-            text-decoration: none; 
-            display: block; 
-            font-size: 0.9rem; 
-        }
-        .mute-dropdown a:hover { 
-            background-color: #2a3942; 
-        }
-        .show-dropdown {
-            display: block;
-        }
-        
-        #chat-footer {
-            flex-shrink: 0;
-        }
-        
-        #chat-footer .card-footer {
-            background-color: #ffffff;
-            border-top: 1px solid #e9ecef;
-            padding: 10px 15px;
-        }
-        #chat-footer .input-group {
-            background-color: #f1f8f6;
-            border-radius: 25px;
-            padding: 5px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        #message-input {
-            resize: none;
-            overflow-y: auto;
-            max-height: 120px;
-            border: none;
-            box-shadow: none;
-            background-color: transparent;
-        }
-        #message-input::placeholder {
-            color: #8696a0;
-        }
-        #send-button {
-            background-color: #009688;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #send-button:hover {
-            background-color: #00796b;
-        }
-
-        #mention-notification {
-            position: absolute;
-            bottom: 15px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            background-color: #53bdeb;
-            color: white;
-            border-radius: 50%;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 100;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        
-        .edit-modal-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1050;
-        }
-        .edit-modal-content {
-            background-color: #3e4a54;
-            padding: 20px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            color: white;
-        }
-        .edit-modal-content h6 {
-            margin-top: 0;
-        }
-        .edit-modal-content textarea {
-            width: 100%;
-            min-height: 100px;
-            background-color: #2a3942;
-            color: white;
-            border: 1px solid #53bdeb;
-            border-radius: 5px;
-            padding: 10px;
-            margin-bottom: 15px;
-            resize: vertical;
-        }
-        .edit-modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-        .edit-modal-buttons button {
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .edit-modal-buttons .btn-ok {
-            background-color: #53bdeb;
-            color: white;
-        }
-        .edit-modal-buttons .btn-cancel {
-            background-color: transparent;
-            color: #53bdeb;
-        }
-
+        .message-content:hover .reactions-container { opacity: 1; visibility: visible; }
+        .reaction-emoji { cursor: pointer; font-size: 1.2rem; margin: 0 4px; transition: transform 0.1s; }
+        .reaction-emoji:hover { transform: scale(1.3); }
+        .message-reactions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+        .reaction-chip { background-color: #2a3942; border-radius: 10px; padding: 2px 8px; font-size: 0.8rem; display: flex; align-items: center; }
+        .message.own .reaction-chip { background-color: #004a3c; }
+        .mute-dropdown { display: none; position: absolute; background-color: #202c33; min-width: 160px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 5px; padding: 5px 0; bottom: 100%; }
+        .message.own .mute-dropdown { right: 0; }
+        .message.other .mute-dropdown { left: 0; }
+        .mute-dropdown a { color: white; padding: 8px 12px; text-decoration: none; display: block; font-size: 0.9rem; }
+        .mute-dropdown a:hover { background-color: #2a3942; }
+        .show-dropdown { display: block; }
+        #chat-footer { flex-shrink: 0; }
+        #chat-footer .card-footer { background-color: #ffffff; border-top: 1px solid #e9ecef; padding: 10px 15px; }
+        #chat-footer .input-group { background-color: #f1f8f6; border-radius: 25px; padding: 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        #message-input { resize: none; overflow-y: auto; max-height: 120px; border: none; box-shadow: none; background-color: transparent; }
+        #send-button { background-color: #009688; border-radius: 50%; width: 45px; height: 45px; border: none; display: flex; align-items: center; justify-content: center; }
+        #mention-notification { position: absolute; bottom: 15px; right: 20px; width: 40px; height: 40px; background-color: #53bdeb; color: white; border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: bold; cursor: pointer; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .edit-modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1050; }
+        .edit-modal-content { background-color: #3e4a54; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); color: white; }
+        .edit-modal-content textarea { width: 100%; min-height: 100px; background-color: #2a3942; color: white; border: 1px solid #53bdeb; border-radius: 5px; padding: 10px; margin-bottom: 15px; resize: vertical; }
+        .edit-modal-buttons { display: flex; justify-content: flex-end; gap: 10px; }
     </style>
 </head>
 <body>
     <div class="chat-wrapper">
         <div class="chat-container">
-            <!-- Header -->
             <div class="chat-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h5 class="mb-0" id="header-title">المجموعة لا أبرح حتى أبلغ</h5>
+                        <h5 class="mb-0">المجموعة لا أبرح حتى أبلغ</h5>
                         <small id="user-display-name" class="text-muted"></small>
                     </div>
-                    <button id="logout-button" class="btn btn-sm btn-outline-danger">تسجيل الخروج</button>
-                </div>
-                <ul class="nav nav-pills nav-fill mt-3">
-                    <li class="nav-item">
-                        <a class="nav-link active" id="chat-tab" href="#">الدردشة</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="articles-tab" href="#">القائمة</a>
-                    </li>
+                    <a href="main.html" class="btn" style="color: white; font-size: 1.5rem;" aria-label="العودة للصفحة الرئيسية">
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                    </div>
+                <ul class="nav nav-pills nav-fill mt-3" style="display: none;">
+                    <li class="nav-item"><a class="nav-link active" href="#">الدردشة</a></li>
                 </ul>
             </div>
-
-            <!-- Pinned Message -->
             <div id="pinned-message-container">
                 <i id="unpin-button" class="bi bi-x-circle-fill"></i>
                 <div id="pinned-message-clickable-area">
-                    <span id="pinned-by-text" class="pinned-by"></span>
-                    <span id="pinned-message-text" class="pinned-text"></span>
+                    <span id="pinned-by-text"></span>
+                    <span id="pinned-message-text"></span>
                 </div>
             </div>
-
-            <!-- Main Content -->
             <div class="main-content">
-                <!-- Chat Section -->
                 <div id="chat-section">
                     <div id="messages-box"></div>
                     <div id="mention-notification" title="لديك رد جديد">@</div>
                 </div>
-                <!-- Articles Section -->
-                <div id="articles-section" style="display: none;">
-                    <div id="admin-article-form" class="mb-4 p-3 border rounded" style="display: none; background-color: rgba(255, 255, 255, 0.95);">
-                        <h6>إضافة/تعديل مقال (للمشرفين فقط)</h6>
-                        <input type="hidden" id="article-id-input">
-                        <div class="mb-3">
-                            <label for="article-title-input" class="form-label">عنوان المقال</label>
-                            <input type="text" class="form-control" id="article-title-input">
-                        </div>
-                        <div class="mb-3">
-                            <label for="article-image-input" class="form-label">صورة للمقال</label>
-                            <input type="file" class="form-control" id="article-image-input" accept="image/*">
-                            <small id="upload-status" class="form-text text-muted"></small>
-                        </div>
-                        <div class="mb-3">
-                            <label for="article-content-input" class="form-label">محتوى المقال</label>
-                            <textarea class="form-control" id="article-content-input" rows="5"></textarea>
-                        </div>
-                        <button id="save-article-button" class="btn btn-success w-100">حفظ المقال</button>
-                        <button id="cancel-edit-button" class="btn btn-secondary w-100 mt-2" style="display: none;">إلغاء التعديل</button>
-                    </div>
-                    <div id="articles-list"></div>
-                </div>
             </div>
-
-            <!-- Footer -->
             <div id="chat-footer">
                 <div id="reply-preview" class="reply-preview">
                     <div id="cancel-reply" class="cancel-reply">&times;</div>
                     <div class="reply-preview-sender" id="reply-preview-sender"></div>
                     <div id="reply-preview-text" class="reply-preview-text"></div>
                 </div>
-                <div class="card-footer p-3 bg-light border-top">
+                <div class="card-footer p-3">
                     <div class="input-group">
                         <textarea id="message-input" class="form-control" placeholder="اكتب رسالتك..." rows="1"></textarea>
-                        <button id="send-button" class="btn btn-primary"><i class="bi bi-send-fill"></i></button>
+                        <button id="send-button" class="btn"><i class="bi bi-send-fill"></i></button>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <!-- Article Modal -->
-    <div class="modal fade" id="articleModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="articleModalTitle"></h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body article-modal-body" id="articleModalBody"></div>
             </div>
         </div>
     </div>
@@ -545,10 +145,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, limit, doc, getDoc, deleteDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-        const CLOUDINARY_CLOUD_NAME = "dbkzk1oe2";
-        const CLOUDINARY_UPLOAD_PRESET = "my-articles";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDoc, getDocs, deleteDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -565,61 +162,28 @@
 
         let currentUserRole = 'user';
         let replyToMessage = null;
+        const userProfiles = {};
 
-        // UI Elements
         const userDisplayName = document.getElementById('user-display-name');
-        const logoutButton = document.getElementById('logout-button');
         const messagesBox = document.getElementById('messages-box');
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
         const replyPreview = document.getElementById('reply-preview');
         const cancelReplyButton = document.getElementById('cancel-reply');
-        const adminArticleForm = document.getElementById('admin-article-form');
-        const articlesList = document.getElementById('articles-list');
-        const saveArticleButton = document.getElementById('save-article-button');
-        const articleTitleInput = document.getElementById('article-title-input');
-        const articleContentInput = document.getElementById('article-content-input');
-        const articleImageInput = document.getElementById('article-image-input');
-        const articleIdInput = document.getElementById('article-id-input');
-        const cancelEditButton = document.getElementById('cancel-edit-button');
-        const uploadStatus = document.getElementById('upload-status');
-        const chatTab = document.getElementById('chat-tab');
-        const articlesTab = document.getElementById('articles-tab');
-        const chatSection = document.getElementById('chat-section');
-        const articlesSection = document.getElementById('articles-section');
-        const chatFooter = document.getElementById('chat-footer');
-        const headerTitle = document.getElementById('header-title');
-        const articleModalEl = document.getElementById('articleModal');
-        const articleModal = new bootstrap.Modal(articleModalEl);
-        
+        const mentionNotification = document.getElementById('mention-notification');
         const pinnedMessageContainer = document.getElementById('pinned-message-container');
         const pinnedByText = document.getElementById('pinned-by-text');
         const pinnedMessageText = document.getElementById('pinned-message-text');
         const unpinButton = document.getElementById('unpin-button');
         const pinnedMessageClickableArea = document.getElementById('pinned-message-clickable-area');
-        const mentionNotification = document.getElementById('mention-notification');
 
-
-        // Tab Switching Logic
-        chatTab.addEventListener('click', (e) => {
-            e.preventDefault();
-            chatSection.style.display = 'flex';
-            articlesSection.style.display = 'none';
-            chatFooter.style.display = 'block';
-            chatTab.classList.add('active');
-            articlesTab.classList.remove('active');
-            headerTitle.textContent = 'المجموعة لا أبرح حتى أبلغ';
-        });
-
-        articlesTab.addEventListener('click', (e) => {
-            e.preventDefault();
-            chatSection.style.display = 'none';
-            articlesSection.style.display = 'block';
-            chatFooter.style.display = 'none';
-            articlesTab.classList.add('active');
-            chatTab.classList.remove('active');
-            headerTitle.textContent = 'مقالات عن التعافي';
-        });
+        async function loadUserProfiles() {
+            const usersCol = collection(db, "users");
+            const userSnapshot = await getDocs(usersCol);
+            userSnapshot.forEach((doc) => {
+                userProfiles[doc.id] = doc.data();
+            });
+        }
 
         async function checkUserStatus(userId) {
             const userDocRef = doc(db, "users", userId);
@@ -639,7 +203,6 @@
                 await setDoc(userDocRef, { role: 'user' }, { merge: true });
                 currentUserRole = 'user';
             }
-            adminArticleForm.style.display = (currentUserRole === 'developer' || currentUserRole === 'admin') ? 'block' : 'none';
             return 'active';
         }
 
@@ -653,136 +216,15 @@
                 else if (currentUserRole === 'admin') roleText = '🛡️ (مشرف)';
 
                 userDisplayName.textContent = `مرحبا، ${user.displayName || user.email} ${roleText}`;
+                
+                await loadUserProfiles();
                 loadMessages();
-                loadArticles();
                 loadPinnedMessage();
             } else {
                 window.location.href = 'index.html';
             }
         });
-
-        logoutButton.addEventListener('click', () => {
-            signOut(auth).then(() => { window.location.href = 'index.html'; });
-        });
-
-        async function uploadToCloudinary(file) {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            uploadStatus.textContent = 'جاري رفع الصورة...';
-            try {
-                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-                if (data.secure_url) {
-                    uploadStatus.textContent = 'تم رفع الصورة بنجاح.';
-                    return data.secure_url;
-                } else { throw new Error('Cloudinary upload failed'); }
-            } catch (error) {
-                console.error("Cloudinary Upload Error:", error);
-                uploadStatus.textContent = 'خطأ في رفع الصورة.';
-                return null;
-            }
-        }
-
-        saveArticleButton.addEventListener('click', async () => {
-            const title = articleTitleInput.value.trim();
-            const content = articleContentInput.value.trim();
-            const imageFile = articleImageInput.files[0];
-            const articleId = articleIdInput.value;
-
-            if (!title || !content) { alert("يرجى ملء العنوان والمحتوى."); return; }
-
-            saveArticleButton.disabled = true;
-            let imageUrl = document.querySelector(`#article-card-${articleId} img`)?.src;
-
-            if (imageFile) {
-                imageUrl = await uploadToCloudinary(imageFile);
-            }
-
-            const articleData = {
-                title,
-                content,
-                imageUrl: imageUrl || null,
-                author: auth.currentUser.displayName,
-                authorId: auth.currentUser.uid,
-                lastUpdatedAt: serverTimestamp()
-            };
-
-            if (articleId) {
-                await updateDoc(doc(db, "articles", articleId), articleData);
-                alert("تم تحديث المقال بنجاح!");
-            } else {
-                articleData.createdAt = serverTimestamp();
-                await addDoc(collection(db, "articles"), articleData);
-                alert("تم إضافة المقال بنجاح!");
-            }
-
-            articleIdInput.value = '';
-            articleTitleInput.value = '';
-            articleContentInput.value = '';
-            articleImageInput.value = '';
-            uploadStatus.textContent = '';
-            saveArticleButton.textContent = 'حفظ المقال';
-            cancelEditButton.style.display = 'none';
-            saveArticleButton.disabled = false;
-        });
-
-        cancelEditButton.addEventListener('click', () => {
-            articleIdInput.value = '';
-            articleTitleInput.value = '';
-            articleContentInput.value = '';
-            articleImageInput.value = '';
-            saveArticleButton.textContent = 'حفظ المقال';
-            cancelEditButton.style.display = 'none';
-        });
-        function loadArticles() {
-            const q = query(collection(db, "articles"), orderBy("lastUpdatedAt", "desc"));
-            onSnapshot(q, (snapshot) => {
-                articlesList.innerHTML = "";
-                snapshot.forEach(doc => {
-                    const article = doc.data(); const articleId = doc.id;
-                    const card = document.createElement('div'); card.className = 'card article-card'; card.id = `article-card-${articleId}`;
-                    const contentPreview = article.content.substring(0, 100) + (article.content.length > 100 ? '...' : '');
-                    let adminButtonsHtml = '';
-                    if (currentUserRole === 'developer' || currentUserRole === 'admin') {
-                        adminButtonsHtml = `
-                            <button class="btn btn-sm btn-outline-secondary me-2 btn-edit" data-id="${articleId}" data-title="${article.title.replace(/"/g, '&quot;')}" data-content="${article.content.replace(/"/g, '&quot;')}">تعديل</button>
-                            <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${articleId}">حذف</button>`;
-                    }
-                    card.innerHTML = `
-                        ${article.imageUrl ? `<img src="${article.imageUrl}" class="card-img-top" alt="${article.title}">` : ''}
-                        <div class="card-body">
-                            <h5 class="card-title">${article.title}</h5><p class="card-text">${contentPreview}</p>
-                            <button class="btn btn-primary btn-read-more" data-title="${article.title.replace(/"/g, '&quot;')}" data-content="${article.content.replace(/"/g, '&quot;')}" data-image="${article.imageUrl || ''}">قراءة المزيد</button>
-                            <div class="mt-3">${adminButtonsHtml}</div>
-                        </div>
-                        <div class="card-footer text-muted">آخر تحديث: ${article.lastUpdatedAt ? new Date(article.lastUpdatedAt.toDate()).toLocaleString('ar-EG') : 'غير معروف'}</div>`;
-                    articlesList.appendChild(card);
-                });
-            });
-        }
-
-        articlesList.addEventListener('click', async (e) => {
-            const target = e.target;
-            if (target.classList.contains('btn-read-more')) {
-                document.getElementById('articleModalTitle').textContent = target.dataset.title;
-                document.getElementById('articleModalBody').innerHTML = `${target.dataset.image ? `<img src="${target.dataset.image}" class="img-fluid rounded mb-3" alt="${target.dataset.title}">` : ''}<p>${target.dataset.content.replace(/\n/g, '<br>')}</p>`;
-                articleModal.show();
-            }
-            if (target.classList.contains('btn-edit')) {
-                articlesTab.click();
-                articleIdInput.value = target.dataset.id; articleTitleInput.value = target.dataset.title; articleContentInput.value = target.dataset.content;
-                saveArticleButton.textContent = 'تحديث المقال'; cancelEditButton.style.display = 'block';
-                adminArticleForm.scrollIntoView({ behavior: 'smooth' });
-            }
-            if (target.classList.contains('btn-delete')) {
-                if (confirm("هل أنت متأكد من حذف هذا المقال؟")) { await deleteDoc(doc(db, "articles", target.dataset.id)); alert("تم حذف المقال."); }
-            }
-        });
-
+        
         async function sendMessage() {
             const text = messageInput.value.trim();
             if (!text || !auth.currentUser) return;
@@ -798,10 +240,7 @@
         sendButton.addEventListener('click', sendMessage);
         
         messageInput.addEventListener('keypress', (e) => { 
-            if (e.key === 'Enter' && !e.shiftKey) { 
-                e.preventDefault(); 
-                sendMessage();
-            }
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
         });
         messageInput.addEventListener('input', () => {
             messageInput.style.height = 'auto';
@@ -815,7 +254,6 @@
             const q = query(collection(db, "messages"), orderBy("createdAt"));
             onSnapshot(q, (snapshot) => {
                 const wasScrolledToBottom = messagesBox.scrollHeight - messagesBox.clientHeight <= messagesBox.scrollTop + 150;
-                
                 messagesBox.innerHTML = "";
                 snapshot.forEach(messageDoc => {
                     const msg = messageDoc.data(); const msgId = messageDoc.id; const isOwn = msg.senderId === auth.currentUser.uid;
@@ -826,6 +264,13 @@
                     msgDiv.dataset.senderId = msg.senderId;
                     msgDiv.dataset.text = msg.text;
 
+                    const senderProfile = userProfiles[msg.senderId] || {};
+                    const photoURL = senderProfile.photoURL || 'https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png';
+                    const avatarHtml = `<img src="${photoURL}" alt="${msg.senderName}" class="avatar">`;
+
+                    const messageBubble = document.createElement('div');
+                    messageBubble.className = 'message-bubble';
+                    
                     const time = msg.createdAt ? new Date(msg.createdAt.toDate()).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '';
                     const canModerate = currentUserRole === 'developer' || currentUserRole === 'admin';
                     
@@ -837,19 +282,13 @@
                     if (isOwn) {
                         controls = `<div class="message-actions">${copyButton}${replyButton}<a onclick="window.editMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a><a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`;
                     } else if (canModerate) {
-                        const isTargetAdmin = msg.senderRole === 'admin';
                         const isTargetDeveloper = msg.senderRole === 'developer';
-
+                        const isTargetAdmin = msg.senderRole === 'admin';
                         let actionButtons = `${copyButton}${replyButton}<a onclick="window.deleteOtherMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>`;
-
-                        // --- START: MODIFIED CODE ---
                         if (currentUserRole === 'developer' && !isTargetDeveloper) {
                             actionButtons += `<a onclick="window.toggleAdminRole('${msg.senderId}', '${msg.senderName}')" title="تغيير دور المشرف"><i class="bi bi-shield-fill"></i></a>`;
                         }
-                        // --- END: MODIFIED CODE ---
-                        
                         actionButtons += pinButton;
-
                         if (!isTargetAdmin && !isTargetDeveloper) {
                             const muteDropdownId = `mute-dropdown-${msgId}`;
                             const muteOptions = `<div id="${muteDropdownId}" class="mute-dropdown">
@@ -863,9 +302,7 @@
                             const banButton = `<a onclick="window.banUser('${msg.senderId}', '${msg.senderName}')" title="حظر"><i class="bi bi-slash-circle-fill"></i></a>`;
                             actionButtons += `${muteButton}${banButton}${muteOptions}`;
                         }
-                        
                         controls = `<div class="message-actions">${actionButtons}</div>`;
-
                     } else {
                         controls = `<div class="message-actions">${copyButton}${replyButton}</div>`;
                     }
@@ -906,7 +343,9 @@
                             ${displayedReactionsHtml}
                         </div>`;
                     
-                    msgDiv.innerHTML = messageContentHtml + controls;
+                    messageBubble.innerHTML = messageContentHtml + controls;
+                    msgDiv.innerHTML = avatarHtml;
+                    msgDiv.appendChild(messageBubble);
                     messagesBox.appendChild(msgDiv);
                 });
                 
@@ -934,13 +373,7 @@
             const messageDoc = await getDoc(doc(db, "messages", messageId));
             if (!messageDoc.exists()) return;
             const messageData = messageDoc.data();
-            await setDoc(pinnedDocRef, {
-                messageId: messageId,
-                text: messageData.text,
-                senderName: messageData.senderName,
-                pinnedBy: auth.currentUser.displayName,
-                pinnedAt: serverTimestamp()
-            });
+            await setDoc(pinnedDocRef, { messageId: messageId, text: messageData.text, senderName: messageData.senderName, pinnedBy: auth.currentUser.displayName, pinnedAt: serverTimestamp() });
         };
 
         unpinButton.addEventListener('click', async (e) => {
@@ -972,24 +405,19 @@
                 messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 messageElement.style.transition = 'background-color 0.5s';
                 messageElement.style.backgroundColor = 'rgba(255, 255, 0, 0.3)';
-                setTimeout(() => {
-                    messageElement.style.backgroundColor = '';
-                }, 2000);
+                setTimeout(() => { messageElement.style.backgroundColor = ''; }, 2000);
             }
         });
 
         mentionNotification.addEventListener('click', () => {
             const messageId = mentionNotification.dataset.messageId;
             if (!messageId) return;
-
             const messageElement = document.getElementById(`message-${messageId}`);
             if (messageElement) {
                 messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 messageElement.style.transition = 'background-color 0.5s';
                 messageElement.style.backgroundColor = 'rgba(83, 189, 235, 0.3)';
-                setTimeout(() => {
-                    messageElement.style.backgroundColor = '';
-                }, 2500);
+                setTimeout(() => { messageElement.style.backgroundColor = ''; }, 2500);
             }
             mentionNotification.style.display = 'none';
         });
@@ -1016,8 +444,8 @@
             } 
         }
         
-        window.muteUser = async (uid, name, min) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; await setDoc(doc(db, "users", uid), { mutedUntil: new Date(Date.now() + min * 60000) }, { merge: true }); alert(`تم كتم ${name} لمدة ${min} دقيقة.`); };
-        window.unmuteUser = async (uid, name) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; await setDoc(doc(db, "users", uid), { mutedUntil: null }, { merge: true }); alert(`تم إلغاء كتم ${name}.`); };
+        window.muteUser = async (uid, name, min) => { if (!['developer', 'admin'].includes(currentUserRole)) return; await setDoc(doc(db, "users", uid), { mutedUntil: new Date(Date.now() + min * 60000) }, { merge: true }); alert(`تم كتم ${name} لمدة ${min} دقيقة.`); };
+        window.unmuteUser = async (uid, name) => { if (!['developer', 'admin'].includes(currentUserRole)) return; await setDoc(doc(db, "users", uid), { mutedUntil: null }, { merge: true }); alert(`تم إلغاء كتم ${name}.`); };
         
         function setReplyFromElement(el) {
             const msgId = el.id.replace('message-', '');
@@ -1033,6 +461,7 @@
                 messageInput.focus(); 
             }
         }
+        
         window.setReplyWrapper = (msgId) => {
             event.stopPropagation();
             const el = document.getElementById(`message-${msgId}`);
@@ -1047,8 +476,8 @@
                     try {
                         await navigator.clipboard.writeText(textElement.innerText);
                         alert("تم نسخ النص!"); 
-                    } catch (err) {
-                        console.error('Failed to copy text: ', err);
+                    } catch (err) { 
+                        console.error('Failed to copy text: ', err); 
                         alert("فشل نسخ النص.");
                     }
                 }
@@ -1058,62 +487,37 @@
         function showEditModal(id, currentText) {
             const backdrop = document.createElement('div');
             backdrop.className = 'edit-modal-backdrop';
-            
-            const modal = document.createElement('div');
-            modal.className = 'edit-modal-content';
-            
-            modal.innerHTML = `
-                <h6>قم بتعديل رسالتك:</h6>
-                <textarea id="edit-textarea">${currentText}</textarea>
-                <div class="edit-modal-buttons">
-                    <button class="btn-cancel">CANCEL</button>
-                    <button class="btn-ok">OK</button>
-                </div>
-            `;
-            
-            backdrop.appendChild(modal);
+            backdrop.innerHTML = `
+                <div class="edit-modal-content">
+                    <h6>قم بتعديل رسالتك:</h6>
+                    <textarea id="edit-textarea">${currentText}</textarea>
+                    <div class="edit-modal-buttons">
+                        <button class="btn btn-secondary btn-cancel">إلغاء</button>
+                        <button class="btn btn-primary btn-ok">حفظ</button>
+                    </div>
+                </div>`;
             document.body.appendChild(backdrop);
-            
             const textarea = document.getElementById('edit-textarea');
             textarea.focus();
             textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-
             backdrop.querySelector('.btn-ok').onclick = () => {
                 const newText = textarea.value;
-                if (newText && newText.trim() !== "" && newText !== currentText) {
+                if (newText.trim() && newText !== currentText) {
                     updateDoc(doc(db, "messages", id), { text: newText, isEdited: true, lastEditedAt: serverTimestamp() });
                 }
                 document.body.removeChild(backdrop);
             };
-            
-            backdrop.querySelector('.btn-cancel').onclick = () => {
-                document.body.removeChild(backdrop);
-            };
-            
-            backdrop.onclick = (e) => {
-                if (e.target === backdrop) {
-                    document.body.removeChild(backdrop);
-                }
-            };
+            backdrop.querySelector('.btn-cancel').onclick = () => document.body.removeChild(backdrop);
+            backdrop.onclick = (e) => { if (e.target === backdrop) document.body.removeChild(backdrop); };
         }
-
-        window.editMessage = (id, text) => { 
-            showEditModal(id, text);
-        };
+        window.editMessage = (id, text) => { showEditModal(id, text); };
         
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchCurrentX = 0;
-        let isSwiping = false;
-        let isSwipeLocked = false;
-        let swipedElement = null;
-        const swipeThreshold = 60;
-        const swipeLockThreshold = 10;
+        let touchStartX = 0, touchStartY = 0, touchCurrentX = 0, isSwiping = false, isSwipeLocked = false, swipedElement = null;
+        const swipeThreshold = 60, swipeLockThreshold = 10;
 
         messagesBox.addEventListener('touchstart', (e) => {
             const targetMessage = e.target.closest('.message');
             if (!targetMessage) return;
-
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
             swipedElement = targetMessage;
@@ -1121,93 +525,49 @@
 
         messagesBox.addEventListener('touchmove', (e) => {
             if (!swipedElement) return;
-
             touchCurrentX = e.touches[0].clientX;
-            const touchCurrentY = e.touches[0].clientY;
             const diffX = touchCurrentX - touchStartX;
-            const diffY = touchCurrentY - touchStartY;
-
+            const diffY = e.touches[0].clientY - touchStartY;
             if (!isSwipeLocked) {
-                if (Math.abs(diffX) > swipeLockThreshold) {
-                    isSwiping = true;
-                    isSwipeLocked = true;
-                    swipedElement.style.transition = 'none';
-                } else if (Math.abs(diffY) > swipeLockThreshold) {
-                    swipedElement = null;
-                    isSwipeLocked = true;
-                }
+                if (Math.abs(diffX) > swipeLockThreshold) { isSwiping = true; isSwipeLocked = true; swipedElement.style.transition = 'none'; } 
+                else if (Math.abs(diffY) > swipeLockThreshold) { swipedElement = null; isSwipeLocked = true; }
             }
-
-            if (isSwiping) {
-                if (diffX > 0) {
-                    const constrainedDiff = Math.min(diffX, 100);
-                    swipedElement.style.transform = `translateX(${constrainedDiff}px)`;
-                }
+            if (isSwiping && diffX > 0) {
+                swipedElement.style.transform = `translateX(${Math.min(diffX, 100)}px)`;
             }
         }, { passive: true });
 
         messagesBox.addEventListener('touchend', (e) => {
             if (!swipedElement) return;
-
-            if(isSwiping) {
+            if (isSwiping) {
                 const diffX = touchCurrentX - touchStartX;
                 swipedElement.style.transition = 'transform 0.3s ease';
-
-                if (diffX > swipeThreshold) {
-                    setReplyFromElement(swipedElement);
-                }
-
+                if (diffX > swipeThreshold) { setReplyFromElement(swipedElement); }
                 swipedElement.style.transform = 'translateX(0)';
             }
-
-            isSwiping = false;
-            isSwipeLocked = false;
-            swipedElement = null;
+            isSwiping = false; isSwipeLocked = false; swipedElement = null;
         });
-        
+
         window.toggleReaction = async (msgId, emoji) => { if (!auth.currentUser) return; const msgRef = doc(db, "messages", msgId); const msgDoc = await getDoc(msgRef); const msgData = msgDoc.data(); const uid = auth.currentUser.uid; const existing = msgData.reactions?.find(r => r.userId === uid); if (existing) { await updateDoc(msgRef, { reactions: arrayRemove(existing) }); if (existing.emoji !== emoji) { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } } else { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } };
         window.deleteOwnMessage = async (id) => { if (confirm("هل أنت متأكد من حذف رسالتك؟")) { await deleteDoc(doc(db, "messages", id)); } };
-        window.deleteOtherMessage = async (id) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; if (confirm("هل أنت متأكد من حذف هذه الرسالة؟")) { await deleteDoc(doc(db, "messages", id)); } };
-        window.banUser = async (uid, name) => { if (currentUserRole !== 'developer' && currentUserRole !== 'admin') return; const userToBan = await getDoc(doc(db, "users", uid)); if (userToBan.exists() && (userToBan.data().role === 'admin' || userToBan.data().role === 'developer')) { alert("لا يمكنك حظر مشرف آخر."); return; } if (confirm(`هل أنت متأكد من حظر ${name}؟`)) { await setDoc(doc(db, "users", uid), { isBanned: true }, { merge: true }); alert(`تم حظر ${name}.`); } };
+        window.deleteOtherMessage = async (id) => { if (!['developer', 'admin'].includes(currentUserRole)) return; if (confirm("هل أنت متأكد من حذف هذه الرسالة؟")) { await deleteDoc(doc(db, "messages", id)); } };
+        window.banUser = async (uid, name) => { if (!['developer', 'admin'].includes(currentUserRole)) return; const userToBan = await getDoc(doc(db, "users", uid)); if (userToBan.exists() && (userToBan.data().role === 'admin' || userToBan.data().role === 'developer')) { alert("لا يمكنك حظر مشرف آخر."); return; } if (confirm(`هل أنت متأكد من حظر ${name}؟`)) { await setDoc(doc(db, "users", uid), { isBanned: true }, { merge: true }); alert(`تم حظر ${name}.`); } };
         
-        // --- START: MODIFIED CODE ---
         window.toggleAdminRole = async (uid, name) => {
-            if (currentUserRole !== 'developer') {
-                alert("ليس لديك الصلاحية للقيام بهذا الإجراء.");
-                return;
-            }
-
+            if (currentUserRole !== 'developer') return;
             try {
                 const userDocRef = doc(db, "users", uid);
                 const userDoc = await getDoc(userDocRef);
                 const currentRole = userDoc.exists() ? userDoc.data().role || 'user' : 'user';
-
                 const isCurrentlyAdmin = currentRole === 'admin';
                 const newRole = isCurrentlyAdmin ? 'user' : 'admin';
-                
-                const confirmationMessage = isCurrentlyAdmin 
-                    ? `ئەتەوێت ${name} لایبەی لەئەدمین؟` 
-                    : `ئەتەوێت ${name} بکەیتە ئەدمین؟`;
-
-                const successMessage = isCurrentlyAdmin
-                    ? `تمت إزالة ${name} من الإشراف بنجاح.`
-                    : `تمت ترقية ${name} إلى مشرف بنجاح.`;
-
-                const errorMessage = isCurrentlyAdmin
-                    ? "حدث خطأ أثناء إزالة المستخدم من الإشراف."
-                    : "حدث خطأ أثناء ترقية المستخدم.";
-
+                const confirmationMessage = isCurrentlyAdmin ? `ئەتەوێت ${name} لایبەی لەئەدمین؟` : `ئەتەوێت ${name} بکەیتە ئەدمین؟`;
                 if (confirm(confirmationMessage)) {
                     await setDoc(userDocRef, { role: newRole }, { merge: true });
-                    alert(successMessage);
+                    alert(isCurrentlyAdmin ? `تمت إزالة ${name} من الإشراف.` : `تمت ترقية ${name} إلى مشرف.`);
                 }
-            } catch (error) {
-                console.error("Error toggling admin role: ", error);
-                alert("حدث خطأ أثناء تغيير دور المستخدم.");
-            }
+            } catch (error) { console.error("Error toggling admin role: ", error); }
         };
-        // --- END: MODIFIED CODE ---
-
     </script>
 </body>
 </html>

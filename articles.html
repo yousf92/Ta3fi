@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>المقالات | لا أبرح حتى أبلغ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00a884;
+            --danger-color: #ff5c5c;
+            --background-color: #f0f2f5;
+            --card-background: #ffffff;
+            --text-color: #111b21;
+            --secondary-text-color: #667781;
+        }
+        body, html {
+            margin: 0; padding: 0; font-family: 'Tajawal', sans-serif;
+            background-color: var(--background-color); color: var(--text-color);
+            position: fixed; width: 100%; height: 100%; overflow: hidden;
+        }
+        .page { display: flex; flex-direction: column; height: 100%; width: 100%; }
+        .bottom-nav { display: flex; justify-content: space-around; padding: 0.5rem 0; background-color: var(--card-background); box-shadow: 0 -2px 5px rgba(0,0,0,0.05); position: fixed; bottom: 0; width: 100%; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--secondary-text-color); text-decoration: none; font-size: 0.75rem; cursor: pointer; }
+        .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
+        .nav-item.active { color: var(--primary-color); }
+        .nav-item.special-item { transform: translateY(-20px); }
+        .special-item .icon-background { background: linear-gradient(135deg, #00a884, #00c896); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 168, 132, 0.4); }
+        .special-item i { color: white; font-size: 2rem; margin: 0; }
+        #articles-section-wrapper { background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-position: center; flex-grow: 1; overflow-y: auto; padding: 20px; }
+        .article-card { margin-bottom: 1rem; background-color: rgba(255, 255, 255, 0.92); border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .articles-header { display: flex; justify-content: flex-end; align-items: center; padding: 1rem; background-color: rgba(255, 255, 255, 0.8); backdrop-filter: blur(5px); border-bottom: 1px solid #e0e0e0; flex-shrink: 0; }
+        #articleModal .modal-content { background-color: #3c4043; color: #e8eaed; border: none; box-shadow: none; }
+        #articleModal .modal-header { border-bottom-color: #5f6368; }
+        #articleModal .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+        .article-modal-body { font-size: 1.1rem; line-height: 1.8; }
+        .article-modal-body img { max-width: 100%; border-radius: 10px; margin-bottom: 1.5rem; }
+        @media (max-width: 767px) {
+            #articleModal .modal-dialog { margin: 0; max-width: 100%; height: 100%; }
+            #articleModal .modal-content { height: 100%; border-radius: 0; }
+            #articleModal .modal-body { overflow-y: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="articles-page" class="page">
+        <header class="articles-header"><h5 class="m-0">قائمة المقالات</h5></header>
+        <div id="articles-section-wrapper">
+            <div class="container">
+                <div id="admin-article-form" class="mb-4 p-3 border rounded" style="display: none; background-color: rgba(255, 255, 255, 0.97);">
+                    <h6>إضافة/تعديل مقال</h6>
+                    <input type="hidden" id="article-id-input">
+                    <div class="mb-3"><label for="article-title-input" class="form-label">عنوان المقال</label><input type="text" class="form-control" id="article-title-input"></div>
+                    <div class="mb-3"><label for="article-image-input" class="form-label">صورة للمقال</label><input type="file" class="form-control" id="article-image-input" accept="image/*"><small id="upload-status" class="form-text text-muted"></small></div>
+                    <div class="mb-3"><label for="article-content-input" class="form-label">محتوى المقال</label><textarea class="form-control" id="article-content-input" rows="5"></textarea></div>
+                    <button id="save-article-button" class="btn btn-success w-100">حفظ المقال</button>
+                    <button id="cancel-edit-button" class="btn btn-secondary w-100 mt-2" style="display: none;">إلغاء التعديل</button>
+                </div>
+                <div id="articles-list"></div>
+            </div>
+        </div>
+        <nav class="bottom-nav">
+            <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
+            <a href="diaries.html" class="nav-item"><i class="bi bi-book"></i><span>اليوميات</span></a>
+            <a href="articles.html" class="nav-item active"><i class="bi bi-award"></i><span>المقالات</span></a>
+            <a href="chat.html" class="nav-item special-item"><div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div><span>دردشة</span></a>
+            <a href="follow-up.html" class="nav-item"><i class="bi bi-signpost-split"></i><span>المتابعة</span></a>
+            <a href="library.html" class="nav-item"><i class="bi bi-collection"></i><span>المكتبة</span></a>
+            <a href="settings.html" class="nav-item"><i class="bi bi-gear-fill"></i><span>الاعدادات</span></a>
+        </nav>
+    </div>
+
+    <div class="modal fade" id="articleModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="articleModalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body article-modal-body" id="articleModalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
+            authDomain: "my-chat-app-daaf8.firebaseapp.com",
+            projectId: "my-chat-app-daaf8",
+            storageBucket: "my-chat-app-daaf8.firebasestorage.app",
+            messagingSenderId: "789086064752",
+            appId: "1:789086064752:web:d081f1b6832dabca1d64b5"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserRole = 'user';
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user && user.emailVerified) {
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists() && (userDoc.data().role === 'admin' || userDoc.data().role === 'developer')) {
+                    currentUserRole = userDoc.data().role;
+                    adminArticleForm.style.display = 'block';
+                } else {
+                    currentUserRole = 'user';
+                    adminArticleForm.style.display = 'none';
+                }
+                loadArticles(); 
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        const adminArticleForm = document.getElementById('admin-article-form');
+        const articlesList = document.getElementById('articles-list');
+        const saveArticleButton = document.getElementById('save-article-button');
+        const articleTitleInput = document.getElementById('article-title-input');
+        const articleContentInput = document.getElementById('article-content-input');
+        const articleImageInput = document.getElementById('article-image-input');
+        const articleIdInput = document.getElementById('article-id-input');
+        const cancelEditButton = document.getElementById('cancel-edit-button');
+        const uploadStatus = document.getElementById('upload-status');
+        const articleModalEl = document.getElementById('articleModal');
+        const articleModal = new bootstrap.Modal(articleModalEl);
+        const CLOUDINARY_CLOUD_NAME = "dbkzk1oe2";
+        const CLOUDINARY_UPLOAD_PRESET = "my-articles";
+
+        async function uploadToCloudinary(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            uploadStatus.textContent = 'جاري رفع الصورة...';
+            try {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                const data = await response.json();
+                if (data.secure_url) {
+                    uploadStatus.textContent = 'تم رفع الصورة بنجاح.';
+                    return data.secure_url;
+                } else { throw new Error('Cloudinary upload failed'); }
+            } catch (error) {
+                console.error("Cloudinary Upload Error:", error);
+                uploadStatus.textContent = 'خطأ في رفع الصورة.';
+                return null;
+            }
+        }
+
+        saveArticleButton.addEventListener('click', async () => {
+            if (!auth.currentUser) return;
+            const title = articleTitleInput.value.trim();
+            const content = articleContentInput.value.trim();
+            const imageFile = articleImageInput.files[0];
+            const articleId = articleIdInput.value;
+            if (!title || !content) { alert("يرجى ملء العنوان والمحتوى."); return; }
+            saveArticleButton.disabled = true;
+            let imageUrl = null;
+            if (articleId) { const existingImage = document.querySelector(`#article-card-${articleId} img`); if (existingImage) imageUrl = existingImage.src; }
+            if (imageFile) { imageUrl = await uploadToCloudinary(imageFile); }
+            const articleData = { title, content, imageUrl, author: auth.currentUser.displayName, authorId: auth.currentUser.uid, lastUpdatedAt: serverTimestamp() };
+            if (articleId) { await updateDoc(doc(db, "articles", articleId), articleData); alert("تم تحديث المقال بنجاح!"); } else { articleData.createdAt = serverTimestamp(); await addDoc(collection(db, "articles"), articleData); alert("تم إضافة المقال بنجاح!"); }
+            articleIdInput.value = ''; articleTitleInput.value = ''; articleContentInput.value = ''; articleImageInput.value = '';
+            uploadStatus.textContent = ''; saveArticleButton.textContent = 'حفظ المقال';
+            cancelEditButton.style.display = 'none'; saveArticleButton.disabled = false;
+        });
+
+        cancelEditButton.addEventListener('click', () => {
+            articleIdInput.value = ''; articleTitleInput.value = ''; articleContentInput.value = ''; articleImageInput.value = '';
+            saveArticleButton.textContent = 'حفظ المقال'; cancelEditButton.style.display = 'none';
+        });
+
+        function loadArticles() {
+            const q = query(collection(db, "articles"), orderBy("lastUpdatedAt", "desc"));
+            onSnapshot(q, (snapshot) => {
+                articlesList.innerHTML = "";
+                snapshot.forEach(docSnap => {
+                    const article = docSnap.data();
+                    const articleId = docSnap.id;
+                    const card = document.createElement('div');
+                    card.className = 'card article-card';
+                    card.id = `article-card-${articleId}`;
+                    const contentPreview = article.content.substring(0, 100) + (article.content.length > 100 ? '...' : '');
+                    let adminButtonsHtml = '';
+                    if (currentUserRole === 'developer' || currentUserRole === 'admin') {
+                        adminButtonsHtml = `<button class="btn btn-sm btn-outline-secondary me-2 btn-edit" data-id="${articleId}" data-title="${article.title.replace(/"/g, '&quot;')}" data-content="${article.content.replace(/"/g, '&quot;')}">تعديل</button>
+                                            <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${articleId}">حذف</button>`;
+                    }
+                    card.innerHTML = `${article.imageUrl ? `<img src="${article.imageUrl}" class="card-img-top" alt="${article.title}">` : ''}
+                        <div class="card-body">
+                            <h5 class="card-title">${article.title}</h5>
+                            <p class="card-text">${contentPreview}</p>
+                            <button class="btn btn-primary btn-read-more" data-title="${article.title.replace(/"/g, '&quot;')}" data-content="${article.content.replace(/"/g, '&quot;')}" data-image="${article.imageUrl || ''}">قراءة المزيد</button>
+                            <div class="mt-3">${adminButtonsHtml}</div>
+                        </div>
+                        <div class="card-footer text-muted">آخر تحديث: ${article.lastUpdatedAt ? new Date(article.lastUpdatedAt.toDate()).toLocaleString('ar-EG') : 'غير معروف'}</div>`;
+                    articlesList.appendChild(card);
+                });
+            });
+        }
+
+        articlesList.addEventListener('click', async (e) => {
+            const target = e.target;
+            if (target.classList.contains('btn-read-more')) {
+                document.getElementById('articleModalTitle').textContent = target.dataset.title;
+                document.getElementById('articleModalBody').innerHTML = `${target.dataset.image ? `<img src="${target.dataset.image}" class="img-fluid rounded mb-3" alt="${target.dataset.title}">` : ''}<p>${target.dataset.content.replace(/\n/g, '<br>')}</p>`;
+                articleModal.show();
+            }
+            if (target.classList.contains('btn-edit')) {
+                articleIdInput.value = target.dataset.id;
+                articleTitleInput.value = target.dataset.title;
+                articleContentInput.value = target.dataset.content;
+                saveArticleButton.textContent = 'تحديث المقال';
+                cancelEditButton.style.display = 'block';
+                adminArticleForm.scrollIntoView({ behavior: 'smooth' });
+            }
+            if (target.classList.contains('btn-delete')) {
+                if (confirm("هل أنت متأكد من حذف هذا المقال؟")) {
+                    await deleteDoc(doc(db, "articles", target.dataset.id));
+                    alert("تم حذف المقال.");
+                }
+            }
+        });
+    </script>
+</body>
+</html>

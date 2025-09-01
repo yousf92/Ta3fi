@@ -110,7 +110,7 @@
                     updateProfile(userCredential.user, { displayName: name });
                     sendEmailVerification(userCredential.user)
                         .then(() => {
-                            showAuthMessage("تم إنشاء حسابك بنجاح! الرجاء التحقق من بريدك الإلكتروني لتفعيل الحساب ثم قم بتسجيل الدخول.", false);
+                            showAuthMessage(" تم إنشاء حسابك بنجاح! لتفعيله، يرجى التحقق من بريدك الإلكتروني. ملاحظة هامة: ستجد رسالة التفعيل في مجلد البريد المزعج (Spam)، وليس في البريد الوارد. بعد الضغط على رابط التفعيل، يمكنك تسجيل الدخول.", false);
                         });
                 })
                 .catch(error => showAuthMessage("خطأ: " + error.message));

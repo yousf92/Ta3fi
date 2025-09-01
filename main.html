@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>الرئيسية | لا أبرح حتى أبلغ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00a884;
+            --danger-color: #ff5c5c;
+            --background-color: #f0f2f5;
+            --card-background: #ffffff;
+            --text-color: #111b21;
+            --secondary-text-color: #667781;
+            --day-color: #86efac;
+            --hour-color: #3b82f6;
+            --minute-color: #ec4899;
+            --second-color: #facc15;
+            --progress-bg: rgba(0, 0, 0, 0.2);
+        }
+        body, html {
+            margin: 0; padding: 0; font-family: 'Tajawal', sans-serif;
+            background-color: var(--background-color); color: var(--text-color);
+            position: fixed; width: 100%; height: 100%; overflow: hidden;
+        }
+        .page { display: none; flex-direction: column; height: 100%; width: 100%; }
+        .page.active { display: flex; }
+        .home-container { display: flex; flex-direction: column; height: 100vh; }
+        .content-area { flex-grow: 1; overflow-y: auto; padding: 1rem; padding-bottom: 80px; }
+        .top-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background-color: var(--background-color); }
+        .header-icons { display: flex; gap: 1.5rem; font-size: 1.5rem; color: var(--secondary-text-color); align-items: center;}
+        .header-icons i { cursor: pointer; }
+        .header-icons a { color: var(--secondary-text-color); text-decoration: none; }
+        .welcome-message { text-align: right; }
+        .welcome-message h5 { margin: 0; font-weight: 700; }
+        .welcome-message p { margin: 0; font-size: 0.9rem; color: var(--secondary-text-color); }
+        .progress-timer-card { background: linear-gradient(135deg, #054238, #008069); color: white; border-radius: 20px; padding: 1.5rem; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0, 128, 105, 0.3); margin-bottom: 1.5rem; }
+        .progress-timer-card::before { content: ''; position: absolute; bottom: -40px; left: -50px; width: 200px; height: 200px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' stroke='%23ffffff' stroke-width='4' fill='none'/%3E%3Cpath d='M50 5 L50 20' stroke='%23ffffff' stroke-width='4'/%3E%3Cpath d='M50 95 L50 80' stroke='%23ffffff' stroke-width='4'/%3E%3Cpath d='M5 50 L20 50' stroke='%23ffffff' stroke-width='4'/%3E%3Cpath d='M95 50 L80 50' stroke='%23ffffff' stroke-width='4'/%3E%3C/svg%3E"); background-repeat: no-repeat; opacity: 0.1; transform: rotate(-15deg); }
+        .timer-settings-icon { position: absolute; top: 1rem; left: 1rem; background-color: rgba(255, 255, 255, 0.15); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; z-index: 10; }
+        .progress-rows-container { position: relative; z-index: 5; margin-top: 2rem; }
+        .progress-row { display: flex; align-items: center; background-color: var(--progress-bg); border-radius: 12px; padding: 0.7rem 1rem; margin-bottom: 0.8rem; position: relative; overflow: hidden; }
+        .progress-row:last-child { margin-bottom: 0; }
+        .progress-bar-fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 12px; transition: width 0.5s ease-in-out; }
+        .progress-row .row-content { position: relative; z-index: 2; display: flex; width: 100%; align-items: center; justify-content: space-between; }
+        .progress-row .time-label { font-weight: 700; font-size: 1rem; }
+        .progress-row .time-icon { font-size: 1.2rem; }
+        #days-fill { background-color: var(--day-color); }
+        #hours-fill { background-color: var(--hour-color); }
+        #minutes-fill { background-color: var(--minute-color); }
+        #seconds-fill { background-color: var(--second-color); }
+        .action-button { background-color: var(--card-background); border-radius: 15px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: var(--text-color); box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 1rem; font-weight: 500; border: none; width: 100%; }
+        .action-button.najda-style { background-color: #fdecec; color: var(--danger-color); border: 1px solid var(--danger-color); justify-content: center; gap: 10px; font-size: 1.2rem; font-weight: 700; }
+        .action-button.najda-style i { font-size: 1.5rem; }
+        .bottom-nav { display: flex; justify-content: space-around; padding: 0.5rem 0; background-color: var(--card-background); box-shadow: 0 -2px 5px rgba(0,0,0,0.05); position: fixed; bottom: 0; width: 100%; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--secondary-text-color); text-decoration: none; font-size: 0.75rem; cursor: pointer; }
+        .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
+        .nav-item.active { color: var(--primary-color); }
+        .nav-item.special-item { transform: translateY(-20px); }
+        .special-item .icon-background { background: linear-gradient(135deg, #00a884, #00c896); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 168, 132, 0.4); }
+        .special-item i { color: white; font-size: 2rem; margin: 0; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1050; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-content-custom { background-color: var(--card-background); border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); transform: scale(0.9); transition: transform 0.3s ease; width: 90%; max-width: 400px; }
+        .modal-overlay.show .modal-content-custom { transform: scale(1); }
+        #settings-modal-overlay { align-items: flex-end; }
+        #settings-modal-content { background-color: var(--background-color); width: 100%; max-width: 800px; border-top-left-radius: 20px; border-top-right-radius: 20px; border-bottom-left-radius: 0; border-bottom-right-radius: 0; transform: translateY(100%); }
+        #settings-modal-overlay.show #settings-modal-content { transform: translateY(0); }
+        .modal-header-custom { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid #e0e0e0; }
+        .modal-header-custom h5 { margin: 0; font-weight: 700; }
+        .modal-header-custom i { font-size: 1.2rem; cursor: pointer; color: var(--secondary-text-color); }
+        .modal-body-custom { padding: 1.5rem; }
+        .icon-container.yellow { background-color: #fffbe6; color: #f9c74f; }
+        .icon-container.blue { background-color: #e6f7ff; color: #34b7f1; }
+        .confirm-modal-body { text-align: center; padding: 2rem 1.5rem; }
+        .confirm-modal-body .confirm-icon { font-size: 4rem; color: var(--text-color); margin-bottom: 1rem; }
+        .confirm-modal-body p { font-size: 1.1rem; font-weight: 500; margin-bottom: 2rem; }
+        .confirm-modal-footer { display: flex; gap: 1rem; padding: 0 1.5rem 1.5rem; }
+        .confirm-btn { flex: 1; padding: 0.8rem; border-radius: 12px; border: none; font-weight: 700; font-size: 1rem; cursor: pointer; }
+        .confirm-btn-accept { background-color: var(--primary-color); color: white; }
+        .confirm-btn-cancel { background-color: var(--danger-color); color: white; }
+        #breathing-circle-container { width: 200px; height: 200px; border: 5px solid rgba(255, 255, 255, 0.7); border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+        #breathing-circle { width: 100%; height: 100%; background-color: white; border-radius: 50%; transform: scale(0.2); animation-duration: 19s; animation-iteration-count: infinite; animation-name: breathe; animation-timing-function: ease-in-out; }
+        @keyframes breathe { 0% { transform: scale(0.2); } 21% { transform: scale(1); } 58% { transform: scale(1); } 100% { transform: scale(0.2); } }
+        .notification-item { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
+        .notification-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .notification-title { font-weight: 700; color: var(--text-color); }
+        .notification-body { color: var(--secondary-text-color); font-size: 0.9rem; }
+        .notification-date { font-size: 0.8rem; color: #aaa; }
+        #quote-page { justify-content: center; align-items: center; background: linear-gradient(135deg, #3b82f6, #60a5fa); padding: 2rem; text-align: center; color: white; }
+        .quote-box { position: relative; background-color: rgba(0, 0, 0, 0.1); border: 2px solid white; border-radius: 25px; padding: 4rem 2rem; width: 100%; max-width: 500px; }
+        .quote-box::before, .quote-box::after { font-family: serif; font-size: 6rem; font-weight: bold; color: white; position: absolute; opacity: 0.8; }
+        .quote-box::before { content: '”'; top: -1.5rem; right: 1rem; }
+        .quote-box::after { content: '“'; bottom: -4.5rem; left: 1rem; }
+        .top-indicator-bar { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); width: 35%; max-width: 150px; height: 5px; background-color: white; border-radius: 5px; opacity: 0.7; }
+        #quote-text { font-size: 1.5rem; font-weight: 700; line-height: 1.7; text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2); }
+        #close-quote-btn { position: absolute; top: 20px; left: 20px; font-size: 1.8rem; cursor: pointer; z-index: 10; }
+    </style>
+</head>
+<body>
+
+    <div id="home-page" class="page active">
+        <div class="home-container">
+            <header class="top-header">
+                <div class="header-icons">
+                    <i class="bi bi-bell" data-bs-toggle="modal" data-bs-target="#notifications-modal"></i>
+                    <a href="settings.html"><i class="bi bi-person-circle"></i></a>
+                </div>
+                <div class="welcome-message">
+                    <h5 id="welcome-user"></h5>
+                    <p id="current-date"></p>
+                </div>
+            </header>
+            <main class="content-area">
+                <div class="progress-timer-card">
+                    <div class="timer-settings-icon d-none"><i class="bi bi-gear-fill"></i></div>
+                    <div class="progress-rows-container">
+                        <div class="progress-row">
+                            <div class="progress-bar-fill" id="days-fill"></div>
+                            <div class="row-content">
+                                <span class="time-label"><span id="days-value">0</span> أيام</span>
+                                <i class="bi bi-calendar-check time-icon"></i>
+                            </div>
+                        </div>
+                        <div class="progress-row">
+                            <div class="progress-bar-fill" id="hours-fill"></div>
+                            <div class="row-content">
+                                <span class="time-label"><span id="hours-value">0</span> ساعات</span>
+                                <i class="bi bi-clock time-icon"></i>
+                            </div>
+                        </div>
+                        <div class="progress-row">
+                            <div class="progress-bar-fill" id="minutes-fill"></div>
+                            <div class="row-content">
+                                <span class="time-label"><span id="minutes-value">0</span> دقائق</span>
+                                <i class="bi bi-clock-history time-icon"></i>
+                            </div>
+                        </div>
+                        <div class="progress-row">
+                            <div class="progress-bar-fill" id="seconds-fill"></div>
+                            <div class="row-content">
+                                <span class="time-label"><span id="seconds-value">0</span> ثواني</span>
+                                <i class="bi bi-hourglass-split time-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button id="start-timer-btn" class="btn btn-success btn-lg w-100 mb-3 d-none">بدء العداد</button>
+                <button id="najda-button" class="action-button najda-style"><i class="bi bi-fire"></i><span>النجدة!</span><i class="bi bi-siren-fill"></i></button>
+            </main>
+            <nav class="bottom-nav">
+                <a href="main.html" class="nav-item active"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
+                <a href="diaries.html" class="nav-item"><i class="bi bi-book"></i><span>اليوميات</span></a>
+                <a href="articles.html" class="nav-item"><i class="bi bi-award"></i><span>المقالات</span></a>
+                <a href="chat.html" class="nav-item special-item"><div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div><span>دردشة</span></a>
+                <a href="follow-up.html" class="nav-item"><i class="bi bi-signpost-split"></i><span>المتابعة</span></a>
+                <a href="library.html" class="nav-item"><i class="bi bi-collection"></i><span>المكتبة</span></a>
+                <a href="settings.html" class="nav-item"><i class="bi bi-gear-fill"></i><span>الاعدادات</span></a>
+            </nav>
+        </div>
+    </div>
+    
+    <div id="breathing-page" class="page" style="background: linear-gradient(to top, #28b485, #7ed56f); justify-content: center; align-items: center; text-align: center; color: white; padding: 1rem;">
+        <i class="bi bi-x-lg" id="close-breathing-btn" style="position: absolute; top: 20px; right: 20px; font-size: 1.8rem; cursor: pointer; z-index: 10;"></i>
+        <div id="breathing-circle-container"><div id="breathing-circle"></div></div>
+        <h1 id="breathing-text" style="font-size: 4rem; margin-top: 2rem; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">شهيق</h1>
+        <div id="breathing-timer" style="font-size: 1.5rem; color: white; margin-top: 1rem; font-weight: bold;"></div>
+        <button id="skip-to-quote-btn" class="btn btn-outline-light mt-4">الانتقال إلى الاقتباس <i class="bi bi-arrow-left-short"></i></button>
+        <p style="font-size: 1.1rem; max-width: 300px; margin-top: 1.5rem;">خذ دقيقة من وقتك للتنفس حيث يساعدك على تهدئة عقلك</p>
+    </div>
+
+    <div id="quote-page" class="page">
+        <div class="top-indicator-bar"></div>
+        <i class="bi bi-x-lg" id="close-quote-btn"></i>
+        <div class="quote-box">
+            <p id="quote-text"></p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="settings-modal-overlay">
+        <div class="modal-content-custom" id="settings-modal-content">
+            <header class="modal-header-custom"><h5>اعدادات العداد</h5><i class="bi bi-x-lg" id="close-settings-button"></i></header>
+            <div class="modal-body-custom">
+                <button class="action-button" id="reset-timer-button"><span>تصفير العداد</span><div class="icon-container yellow"><i class="bi bi-arrow-counterclockwise"></i></div></button>
+                <button class="action-button" id="set-date-button"><span>تعيين تاريخ بداية جديد</span><div class="icon-container blue"><i class="bi bi-calendar-plus"></i></div></button>
+                <input type="datetime-local" id="date-time-picker" style="opacity: 0; position: absolute; left: -9999px; width: 1px; height: 1px;">
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="confirm-reset-modal">
+        <div class="modal-content-custom">
+            <div class="confirm-modal-body"><div class="confirm-icon"><i class="bi bi-arrow-counterclockwise"></i></div><p>هل أنت متأكد من تصفير العداد؟</p></div>
+            <div class="confirm-modal-footer"><button class="confirm-btn confirm-btn-cancel" id="cancel-reset-button">رجوع</button><button class="confirm-btn confirm-btn-accept" id="confirm-reset-action-button">تصفير</button></div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="notifications-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">الإشعارات</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="notifications-list"></div>
+                <div class="modal-footer">
+                    <button id="open-send-modal-btn" type="button" class="btn btn-success d-none" data-bs-toggle="modal" data-bs-target="#send-notification-modal">إرسال إشعار جديد</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="send-notification-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إرسال إشعار جديد</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="notification-title" class="form-label">العنوان</label>
+                        <input type="text" class="form-control" id="notification-title" placeholder="عنوان الإشعار">
+                    </div>
+                    <div class="mb-3">
+                        <label for="notification-message" class="form-label">الرسالة</label>
+                        <textarea class="form-control" id="notification-message" rows="4" placeholder="محتوى الإشعار"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" id="send-notification-btn">إرسال</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, arrayUnion, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
+            authDomain: "my-chat-app-daaf8.firebaseapp.com",
+            projectId: "my-chat-app-daaf8",
+            storageBucket: "my-chat-app-daaf8.firebasestorage.app",
+            messagingSenderId: "789086064752",
+            appId: "1:789086064752:web:d081f1b6832dabca1d64b5"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let startTime = null;
+        let timerInterval = null;
+        let currentUserRole = 'user';
+        let breathingTimeouts = [];
+        let countdownInterval = null;
+        let remainingTime = 0;
+
+        const welcomeUserEl = document.getElementById('welcome-user');
+        const openSendModalBtn = document.getElementById('open-send-modal-btn');
+        const startTimerBtn = document.getElementById('start-timer-btn');
+        const timerSettingsIcon = document.querySelector('.timer-settings-icon');
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user && user.emailVerified) {
+                welcomeUserEl.textContent = `مرحباً ${user.displayName || 'المستخدم'}`;
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists()) {
+                    currentUserRole = userDoc.data().role || 'user';
+                    if (currentUserRole === 'developer') {
+                        openSendModalBtn.classList.remove('d-none');
+                    }
+                    if (userDoc.data().timerStartDate) {
+                        startTime = userDoc.data().timerStartDate.toDate();
+                        startTimerBtn.classList.add('d-none'); 
+                        timerSettingsIcon.classList.remove('d-none'); 
+                        updateTimer();
+                        if (timerInterval) clearInterval(timerInterval);
+                        timerInterval = setInterval(updateTimer, 1000);
+                    } else {
+                        startTimerBtn.classList.remove('d-none'); 
+                        timerSettingsIcon.classList.add('d-none'); 
+                        updateTimerDisplay(0,0,0,0); 
+                    }
+                } else {
+                    await setDoc(userDocRef, { role: 'user' }, { merge: true });
+                    startTimerBtn.classList.remove('d-none');
+                    timerSettingsIcon.classList.add('d-none');
+                    updateTimerDisplay(0,0,0,0);
+                }
+                loadNotifications();
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        startTimerBtn.addEventListener('click', async () => {
+            const user = auth.currentUser;
+            if (!user) return;
+            startTime = new Date();
+            const userDocRef = doc(db, "users", user.uid);
+            await setDoc(userDocRef, { timerStartDate: startTime }, { merge: true });
+            startTimerBtn.classList.add('d-none');
+            timerSettingsIcon.classList.remove('d-none');
+            updateTimer();
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 1000);
+        });
+
+        const notificationsList = document.getElementById('notifications-list');
+        const sendNotificationBtn = document.getElementById('send-notification-btn');
+        const sendNotificationModal = new bootstrap.Modal(document.getElementById('send-notification-modal'));
+
+        function loadNotifications() {
+            const q = query(collection(db, "notifications"), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snapshot) => {
+                notificationsList.innerHTML = "";
+                if (snapshot.empty) {
+                    notificationsList.innerHTML = '<p class="text-center text-muted">لا توجد إشعارات حالياً.</p>'; return;
+                }
+                snapshot.forEach(doc => {
+                    const notification = doc.data();
+                    const date = notification.createdAt?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }) || '';
+                    const item = document.createElement('div');
+                    item.className = 'notification-item';
+                    item.innerHTML = `<div class="d-flex justify-content-between align-items-center"><h6 class="notification-title mb-1">${notification.title}</h6><span class="notification-date">${date}</span></div><p class="notification-body mb-0">${notification.message}</p>`;
+                    notificationsList.appendChild(item);
+                });
+            });
+        }
+
+        sendNotificationBtn.addEventListener('click', async () => {
+            const title = document.getElementById('notification-title').value.trim();
+            const message = document.getElementById('notification-message').value.trim();
+            if (!title || !message) { alert('الرجاء ملء جميع الحقول.'); return; }
+            try {
+                await addDoc(collection(db, "notifications"), { title: title, message: message, createdAt: serverTimestamp() });
+                alert('تم إرسال الإشعار بنجاح.');
+                document.getElementById('notification-title').value = '';
+                document.getElementById('notification-message').value = '';
+                sendNotificationModal.hide();
+            } catch (error) { console.error("Error sending notification: ", error); alert('حدث خطأ أثناء إرسال الإشعار.'); }
+        });
+
+        const dateElement = document.getElementById('current-date');
+        const daysValueEl = document.getElementById('days-value');
+        const hoursValueEl = document.getElementById('hours-value');
+        const minutesValueEl = document.getElementById('minutes-value');
+        const secondsValueEl = document.getElementById('seconds-value');
+        const daysFillEl = document.getElementById('days-fill');
+        const hoursFillEl = document.getElementById('hours-fill');
+        const minutesFillEl = document.getElementById('minutes-fill');
+        const secondsFillEl = document.getElementById('seconds-fill');
+        
+        function updateLiveDate() {
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            dateElement.textContent = today.toLocaleDateString('ar-EG', options);
+        }
+        updateLiveDate();
+
+        function updateTimerDisplay(d, h, m, s) {
+            daysValueEl.textContent = d;
+            hoursValueEl.textContent = h;
+            minutesValueEl.textContent = m;
+            secondsValueEl.textContent = s;
+            const daysPercent = d > 0 ? ((d % 30) / 29) * 100 : 0;
+            const hoursPercent = h > 0 ? (h / 23) * 100 : 0;
+            const minutesPercent = m > 0 ? (m / 59) * 100 : 0;
+            const secondsPercent = s > 0 ? (s / 59) * 100 : 0;
+            daysFillEl.style.width = `${Math.min(daysPercent, 100)}%`;
+            hoursFillEl.style.width = `${Math.min(hoursPercent, 100)}%`;
+            minutesFillEl.style.width = `${Math.min(minutesPercent, 100)}%`;
+            secondsFillEl.style.width = `${Math.min(secondsPercent, 100)}%`;
+        }
+        
+        function updateTimer() {
+            if (!startTime) { updateTimerDisplay(0,0,0,0); return; };
+            const now = new Date();
+            const difference = now - startTime;
+            if (difference < 0) { updateTimerDisplay(0,0,0,0); return; }
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+            updateTimerDisplay(days, hours, minutes, seconds);
+        }
+        
+        const settingsIcon = document.querySelector('.timer-settings-icon');
+        const settingsModalOverlay = document.getElementById('settings-modal-overlay');
+        const closeSettingsButton = document.getElementById('close-settings-button');
+        const resetTimerButton = document.getElementById('reset-timer-button');
+        const setDateButton = document.getElementById('set-date-button');
+        const dateTimePicker = document.getElementById('date-time-picker');
+        const confirmResetModal = document.getElementById('confirm-reset-modal');
+        const cancelResetButton = document.getElementById('cancel-reset-button');
+        const confirmResetActionButton = document.getElementById('confirm-reset-action-button');
+        
+        settingsIcon.addEventListener('click', () => settingsModalOverlay.classList.add('show'));
+        const closeSettingsModal = () => settingsModalOverlay.classList.remove('show');
+        closeSettingsButton.addEventListener('click', closeSettingsModal);
+        settingsModalOverlay.addEventListener('click', (e) => { if (e.target === settingsModalOverlay) closeSettingsModal(); });
+        
+        setDateButton.addEventListener('click', () => dateTimePicker.showPicker());
+        dateTimePicker.addEventListener('change', async (e) => {
+            const user = auth.currentUser;
+            if (user && e.target.value) {
+                const newStartTime = new Date(e.target.value);
+                if (!isNaN(newStartTime.getTime())) {
+                    const userDocRef = doc(db, "users", user.uid);
+                    await setDoc(userDocRef, { timerStartDate: newStartTime }, { merge: true });
+                    location.reload();
+                }
+            }
+        });
+
+        resetTimerButton.addEventListener('click', () => { 
+            closeSettingsModal(); 
+            setTimeout(() => confirmResetModal.classList.add('show'), 300); 
+        });
+
+        const closeConfirmModal = () => confirmResetModal.classList.remove('show');
+        cancelResetButton.addEventListener('click', closeConfirmModal);
+        confirmResetModal.addEventListener('click', (e) => { if (e.target === confirmResetModal) closeConfirmModal(); });
+        
+        confirmResetActionButton.addEventListener('click', async () => {
+            const user = auth.currentUser;
+            if (user) {
+                const newStartTime = new Date();
+                const userDocRef = doc(db, "users", user.uid);
+                await setDoc(userDocRef, { timerStartDate: newStartTime }, { merge: true });
+                location.reload();
+            }
+        });
+
+        const najdaButton = document.getElementById('najda-button');
+        const breathingPage = document.getElementById('breathing-page');
+        const closeBreathingBtn = document.getElementById('close-breathing-btn');
+        const breathingText = document.getElementById('breathing-text');
+        const homePage = document.getElementById('home-page');
+        const quotePage = document.getElementById('quote-page');
+        const quoteText = document.getElementById('quote-text');
+        const closeQuoteBtn = document.getElementById('close-quote-btn');
+        const skipToQuoteBtn = document.getElementById('skip-to-quote-btn');
+
+        function stopBreathingCycle() {
+            breathingTimeouts.forEach(clearTimeout); 
+            breathingTimeouts = [];
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+        }
+
+        function startBreathingCycle() {
+            // This function now ONLY handles the animation loop and text changes
+            breathingTimeouts.forEach(clearTimeout);
+            breathingTimeouts = [];
+
+            breathingText.textContent = 'شهيق';
+            breathingTimeouts.push(setTimeout(() => { breathingText.textContent = 'حبس النفس'; }, 4000));
+            breathingTimeouts.push(setTimeout(() => { breathingText.textContent = 'زفير'; }, 11000));
+            breathingTimeouts.push(setTimeout(startBreathingCycle, 19000));
+        }
+        
+        async function showQuotePage() {
+            const user = auth.currentUser;
+            if (!user) return;
+            const userDocRef = doc(db, "users", user.uid);
+            const userDoc = await getDoc(userDocRef);
+            let seenQuoteIds = userDoc.exists() && userDoc.data().seenQuoteIds ? userDoc.data().seenQuoteIds : [];
+            const quotesSnapshot = await getDocs(collection(db, "quotes"));
+            const allQuotes = [];
+            quotesSnapshot.forEach(doc => allQuotes.push({ id: doc.id, ...doc.data() }));
+            let unseenQuotes = allQuotes.filter(q => !seenQuoteIds.includes(q.id));
+            if (unseenQuotes.length === 0 && allQuotes.length > 0) {
+                await updateDoc(userDocRef, { seenQuoteIds: [] });
+                unseenQuotes = allQuotes;
+            }
+            if (unseenQuotes.length > 0) {
+                const randomQuote = unseenQuotes[Math.floor(Math.random() * unseenQuotes.length)];
+                quoteText.textContent = randomQuote.text;
+                await updateDoc(userDocRef, { seenQuoteIds: arrayUnion(randomQuote.id) });
+            } else {
+                quoteText.textContent = "استمر في التقدم، كل خطوة مهمه.";
+            }
+            breathingPage.classList.remove('active');
+            breathingPage.style.display = 'none';
+            quotePage.style.display = 'flex';
+            quotePage.classList.add('active');
+        }
+
+        najdaButton.addEventListener('click', () => {
+            stopBreathingCycle(); // Stop any previous cycles completely before starting
+            homePage.classList.remove('active');
+            breathingPage.style.display = 'flex';
+            breathingPage.classList.add('active');
+            
+            const breathingTimerEl = document.getElementById('breathing-timer');
+            remainingTime = 57;
+            breathingTimerEl.textContent = `الوقت المتبقي: ${remainingTime} ثانية`;
+            
+            countdownInterval = setInterval(() => {
+                remainingTime--;
+                if (remainingTime >= 0) {
+                    breathingTimerEl.textContent = `الوقت المتبقي: ${remainingTime} ثانية`;
+                }
+                
+                if (remainingTime < 0) {
+                    stopBreathingCycle();
+                    showQuotePage();
+                }
+            }, 1000);
+            
+            startBreathingCycle();
+        });
+
+        closeBreathingBtn.addEventListener('click', () => {
+            stopBreathingCycle();
+            breathingPage.classList.remove('active');
+            breathingPage.style.display = 'none';
+            homePage.classList.add('active');
+        });
+
+        closeQuoteBtn.addEventListener('click', () => {
+            quotePage.classList.remove('active');
+            quotePage.style.display = 'none';
+            homePage.classList.add('active');
+        });
+
+        skipToQuoteBtn.addEventListener('click', () => {
+            stopBreathingCycle();
+            showQuotePage();
+        });
+    </script>
+</body>
+</html>
