@@ -16,6 +16,11 @@
             --text-color: #FAFAFA;
             --secondary-text-color: #CCCCCC;
             --border-color: #383838;
+            /* ڕەنگەکان */
+            --orange-color: #fd9843; /* غياب */
+            --red-color: #e55454;   /* زلة */
+            --green-color: #27ae60; /* انتصار */
+            --grey-color: #6c757d;   /* انتكاسة */
         }
         body, html {
             margin: 0; padding: 0; font-family: 'Tajawal', sans-serif;
@@ -26,22 +31,7 @@
         .content-area { flex-grow: 1; overflow-y: auto; padding: 1rem; padding-bottom: 80px; }
         .top-header { display: flex; justify-content: flex-end; align-items: center; padding: 1rem; background-color: var(--background-color); border-bottom: 1px solid var(--border-color); }
         .bottom-nav { display: flex; justify-content: space-around; padding: 0.5rem 0; background-color: var(--card-background); box-shadow: 0 -2px 5px rgba(0,0,0,0.2); position: fixed; bottom: 0; width: 100%; z-index: 100; border-top: 1px solid var(--border-color); }
-        
-        /* === چارەسەری کێشەی ناڤبار لێرە زیادکرا === */
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--secondary-text-color);
-            text-decoration: none;
-            font-size: 0.75rem;
-            cursor: pointer;
-            width: 14%; /* بۆ دابەشکردنی یەکسانی شوێن */
-            height: 50px; /* بەرزییەکی دیاریکراو بۆ هەموو ئایتمەکان */
-            justify-content: center; /* بۆ ناوەڕاست هێنانی ئایکۆن و نووسین */
-        }
-        /* ======================================= */
-
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--secondary-text-color); text-decoration: none; font-size: 0.75rem; cursor: pointer; width: 14%; height: 50px; justify-content: center; }
         .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary-color); }
         .nav-item.special-item { transform: translateY(-20px); }
@@ -51,12 +41,106 @@
             background-color: var(--card-background);
             border: 1px solid var(--border-color);
         }
-        .card-title {
-            font-weight: 700;
-            color: #FFFFFF;
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
         }
-        .text-muted {
-            color: var(--secondary-text-color) !important;
+        .stat-card {
+            padding: 1rem 0.5rem;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+        }
+        .stat-card .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .stat-card .stat-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+        /* گۆڕانکاری لێرە کراوە */
+        .stat-card.orange { background-color: var(--orange-color); } /* غياب */
+        .stat-card.red { background-color: var(--red-color); }
+        .stat-card.green { background-color: var(--green-color); }
+        .stat-card.grey { background-color: var(--grey-color); } /* انتكاسة */
+
+        .calendar-card {
+            background-color: var(--card-background);
+            border-radius: 15px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .calendar-header button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+        }
+        #month-year {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+        .calendar-day, .weekday {
+            text-align: center;
+            font-size: 0.9rem;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .weekday {
+            color: var(--secondary-text-color);
+            font-weight: 700;
+        }
+        .calendar-day {
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+        .calendar-day.today {
+            border: 2px solid var(--primary-color);
+        }
+        /* گۆڕانکاری لێرە کراوە */
+        .calendar-day.orange { background-color: var(--orange-color); color: white; } /* غياب */
+        .calendar-day.red { background-color: var(--red-color); color: white; }
+        .calendar-day.green { background-color: var(--green-color); color: white; }
+        .calendar-day.grey { background-color: var(--grey-color); color: white; } /* انتكاسة */
+
+        .add-status-button {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            box-shadow: 0 5px 15px rgba(0, 168, 132, 0.3);
+            z-index: 105;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -68,15 +152,42 @@
         </header>
         <main class="content-area">
             
-            <div class="card">
-                <div class="card-body text-center">
-                    <h5 class="card-title">قسم المتابعة</h5>
-                    <p class="card-text text-muted">هذه الميزة قيد التطوير حالياً.</p>
-                    <i class="bi bi-signpost-split" style="font-size: 4rem; color: var(--secondary-text-color);"></i>
+            <div class="stats-grid">
+                <div class="stat-card orange"> <!-- گۆڕدرا بۆ پرتەقاڵی -->
+                    <div id="absence-count" class="stat-number">0</div>
+                    <div class="stat-label">غياب</div>
+                </div>
+                <div class="stat-card grey"> <!-- گۆڕدرا بۆ ڕەساسی -->
+                    <div id="relapse-count" class="stat-number">0</div>
+                    <div class="stat-label">انتكاسة</div>
+                </div>
+                <div class="stat-card red">
+                    <div id="slip-count" class="stat-number">0</div>
+                    <div class="stat-label">زلة</div>
+                </div>
+                <div class="stat-card green">
+                    <div id="victory-count" class="stat-number">0</div>
+                    <div class="stat-label">انتصار</div>
                 </div>
             </div>
 
+            <div class="calendar-card">
+                <div class="calendar-header">
+                    <button id="prev-month"><i class="bi bi-chevron-right"></i></button>
+                    <div id="month-year"></div>
+                    <button id="next-month"><i class="bi bi-chevron-left"></i></button>
+                </div>
+                <div class="calendar-grid" id="weekdays"></div>
+                <div class="calendar-grid" id="calendar-days"></div>
+            </div>
+
         </main>
+
+        <button class="add-status-button" data-bs-toggle="modal" data-bs-target="#addStatusModal">
+            <i class="bi bi-plus-circle-fill me-2"></i>
+            <span>إضافة حالة اليوم</span>
+        </button>
+
         <nav class="bottom-nav">
             <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
             <a href="diaries.html" class="nav-item"><i class="bi bi-book"></i><span>اليوميات</span></a>
@@ -87,6 +198,26 @@
             <a href="settings.html" class="nav-item"><i class="bi bi-gear-fill"></i><span>الاعدادات</span></a>
         </nav>
     </div>
+
+    <div class="modal fade" id="addStatusModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: var(--card-background);">
+                <div class="modal-header" style="border-bottom-color: var(--border-color);">
+                    <h5 class="modal-title">كيف كان يومك؟</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: invert(1)"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">اختر الحالة التي تريد تسجيلها لتاريخ اليوم.</p>
+                    <div class="d-grid gap-3">
+                        <button class="btn btn-lg" style="background-color: var(--grey-color); color: white;" data-status="relapse">انتكاسة</button> <!-- گۆڕدرا بۆ ڕەساسی -->
+                        <button class="btn btn-lg" style="background-color: var(--red-color); color: white;" data-status="slip">زلة</button>
+                        <button class="btn btn-lg" style="background-color: var(--green-color); color: white;" data-status="victory">انتصار</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
@@ -105,11 +236,141 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
+        let currentUserId = null;
+
         onAuthStateChanged(auth, (user) => {
-            if (!user || !user.emailVerified) {
+            if (user && user.emailVerified) {
+                currentUserId = user.uid;
+                initializeCalendar();
+            } else {
                 window.location.href = 'index.html';
             }
         });
+
+        const monthYearEl = document.getElementById('month-year');
+        const weekdaysEl = document.getElementById('weekdays');
+        const daysEl = document.getElementById('calendar-days');
+        const prevMonthBtn = document.getElementById('prev-month');
+        const nextMonthBtn = document.getElementById('next-month');
+        const addStatusModal = new bootstrap.Modal(document.getElementById('addStatusModal'));
+
+        let currentDate = new Date();
+
+        function getHabitData() {
+            if (!currentUserId) return {};
+            const data = localStorage.getItem(`habitData_${currentUserId}`);
+            return data ? JSON.parse(data) : {};
+        }
+
+        function saveHabitData(data) {
+            if (!currentUserId) return;
+            localStorage.setItem(`habitData_${currentUserId}`, JSON.stringify(data));
+        }
+
+        function toDateString(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        function autoFillAbsence() {
+            const habitData = getHabitData();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const firstEntryDateStr = Object.keys(habitData).sort()[0];
+            if (!firstEntryDateStr) return;
+
+            let loopDate = new Date(firstEntryDateStr);
+
+            while (loopDate < today) {
+                const dateStr = toDateString(loopDate);
+                if (!habitData[dateStr]) {
+                    habitData[dateStr] = 'absence';
+                }
+                loopDate.setDate(loopDate.getDate() + 1);
+            }
+            saveHabitData(habitData);
+        }
+
+        function renderCalendar() {
+            autoFillAbsence();
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+            monthYearEl.textContent = `${monthNames[month]} ${year}`;
+
+            weekdaysEl.innerHTML = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'].map(day => `<div class="weekday">${day}</div>`).join('');
+            
+            daysEl.innerHTML = '';
+            
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                daysEl.innerHTML += `<div></div>`;
+            }
+
+            const habitData = getHabitData();
+            let counts = { absence: 0, relapse: 0, slip: 0, victory: 0 };
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+                dayEl.textContent = day;
+                
+                const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                if (habitData[dateString]) {
+                    const status = habitData[dateString];
+                    // گۆڕانکاری لێرە کراوە
+                    const colorMap = { absence: 'orange', relapse: 'grey', slip: 'red', victory: 'green' };
+                    dayEl.classList.add(colorMap[status]);
+                    if (counts[status] !== undefined) {
+                        counts[status]++;
+                    }
+                }
+
+                if (day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
+                    dayEl.classList.add('today');
+                }
+                
+                daysEl.appendChild(dayEl);
+            }
+
+            document.getElementById('absence-count').textContent = counts.absence;
+            document.getElementById('relapse-count').textContent = counts.relapse;
+            document.getElementById('slip-count').textContent = counts.slip;
+            document.getElementById('victory-count').textContent = counts.victory;
+        }
+
+        function initializeCalendar() {
+            renderCalendar();
+
+            prevMonthBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar();
+            });
+
+            nextMonthBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar();
+            });
+
+            document.querySelectorAll('#addStatusModal button[data-status]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const status = button.dataset.status;
+                    const dateString = toDateString(new Date());
+                    
+                    const habitData = getHabitData();
+                    habitData[dateString] = status;
+                    saveHabitData(habitData);
+                    
+                    addStatusModal.hide();
+                    renderCalendar();
+                });
+            });
+        }
     </script>
 </body>
 </html>
