@@ -96,41 +96,20 @@
         #quote-page { 
             justify-content: center; 
             align-items: center; 
-            background-size: cover;
-            background-position: center;
-            transition: background-image 1s ease-in-out;
             padding: 2rem; 
             text-align: center; 
             color: white; 
-            position: relative;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 1s ease-in-out;
         }
-        #quote-page::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1;
-        }
-        .quote-box { 
-            position: relative; 
-            background-color: rgba(0, 0, 0, 0.2); 
-            border: 2px solid rgba(255, 255, 255, 0.8); 
-            border-radius: 25px; 
-            padding: 4rem 2rem; 
-            width: 100%; 
-            max-width: 500px; 
-            backdrop-filter: blur(5px);
-            z-index: 2;
-        }
+        .quote-box { position: relative; background-color: rgba(0, 0, 0, 0.4); border: 2px solid rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 25px; padding: 4rem 2rem; width: 100%; max-width: 500px; }
         .quote-box::before, .quote-box::after { font-family: serif; font-size: 6rem; font-weight: bold; color: white; position: absolute; opacity: 0.8; }
         .quote-box::before { content: '”'; top: -1.5rem; right: 1rem; }
         .quote-box::after { content: '“'; bottom: -4.5rem; left: 1rem; }
-        .top-indicator-bar { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); width: 35%; max-width: 150px; height: 5px; background-color: white; border-radius: 5px; opacity: 0.7; z-index: 2; }
-        #quote-text { font-size: 1.5rem; font-weight: 700; line-height: 1.7; text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2); }
-        #close-quote-btn { position: absolute; top: 20px; left: 20px; font-size: 1.8rem; cursor: pointer; z-index: 10; }
+        .top-indicator-bar { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); width: 35%; max-width: 150px; height: 5px; background-color: white; border-radius: 5px; opacity: 0.7; }
+        #quote-text { font-size: 1.5rem; font-weight: 700; line-height: 1.7; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); }
+        #close-quote-btn { position: absolute; top: 20px; left: 20px; font-size: 1.8rem; cursor: pointer; z-index: 10; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
         .card-title { font-weight: 700; color: #FFFFFF; }
         .modal-title { color: #FFFFFF; }
         #notifications-modal .modal-content { background-color: var(--background-color); color: var(--text-color); }
@@ -155,172 +134,44 @@
             width: 100%;
             height: 100%;
             background: 
-                /* Layer 3: Farthest mountain */
                 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M-10 100 L20 70 L50 100 Z" fill="rgba(0,0,0,0.1)" /></svg>') -10% 0/40% 40% no-repeat,
-                /* Layer 2: Middle mountain */
                 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M0 100 L50 40 L100 100 Z" fill="rgba(0,0,0,0.2)" /></svg>') 50% 100%/80% 80% no-repeat,
-                /* Layer 1: Closest mountain */
                 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M0 100 L40 20 L80 100 Z" fill="rgba(0,0,0,0.3)" /></svg>') 10% 100%/60% 60% no-repeat;
         }
-        .climber {
-            position: absolute;
-            width: 45px;
-            height: 45px;
-            animation: climb-path 20s linear infinite;
-        }
-        .climber-body {
-            position: absolute;
-            width: 35%; height: 50%;
-            background-color: #fff;
-            border-radius: 40% 40% 20% 20%;
-            top: 25%; left: 32.5%;
-        }
-        .climber-head {
-            position: absolute;
-            width: 30%; height: 30%;
-            background-color: #fff;
-            border-radius: 50%;
-            top: 5%; left: 35%;
-        }
-        .climber-backpack {
-            position: absolute;
-            width: 40%; height: 45%;
-            background-color: #ff6b6b;
-            border-radius: 20% 20% 30% 30%;
-            top: 30%; left: 10%;
-        }
-        .climber-leg, .climber-arm {
-            position: absolute;
-            background-color: #fff;
-            border-radius: 5px;
-        }
+        .climber { position: absolute; width: 45px; height: 45px; animation: climb-path 20s linear infinite; }
+        .climber-body { position: absolute; width: 35%; height: 50%; background-color: #fff; border-radius: 40% 40% 20% 20%; top: 25%; left: 32.5%; }
+        .climber-head { position: absolute; width: 30%; height: 30%; background-color: #fff; border-radius: 50%; top: 5%; left: 35%; }
+        .climber-backpack { position: absolute; width: 40%; height: 45%; background-color: #ff6b6b; border-radius: 20% 20% 30% 30%; top: 30%; left: 10%; }
+        .climber-leg, .climber-arm { position: absolute; background-color: #fff; border-radius: 5px; }
         .climber-leg { width: 15%; height: 40%; bottom: -15%; }
         .climber-arm { width: 15%; height: 35%; top: 30%; }
         .leg-right { left: 35%; animation: walk-leg-right 1s infinite; }
         .leg-left { left: 55%; animation: walk-leg-left 1s infinite; }
         .arm-right { left: 35%; animation: walk-arm-right 1s infinite; }
         .arm-left { left: 55%; animation: walk-arm-left 1s infinite; }
-
         @keyframes walk-leg-right { 0%, 100% { transform: rotate(-20deg); } 50% { transform: rotate(20deg); } }
         @keyframes walk-leg-left { 0%, 100% { transform: rotate(20deg); } 50% { transform: rotate(-20deg); } }
         @keyframes walk-arm-right { 0%, 100% { transform: rotate(20deg); } 50% { transform: rotate(-20deg); } }
         @keyframes walk-arm-left { 0%, 100% { transform: rotate(-20deg); } 50% { transform: rotate(20deg); } }
-
-        @keyframes climb-path {
-            0% { bottom: 5%; left: -10%; }
-            20% { bottom: 40%; left: 30%; }
-            25% { bottom: 30%; left: 28%; transform: rotate(90deg); } /* Fall 1 */
-            30% { bottom: 5%; left: 25%; transform: rotate(0deg); } /* Reset 1 */
-            50% { bottom: 70%; left: 60%; }
-            55% { bottom: 60%; left: 58%; transform: rotate(-90deg); } /* Fall 2 */
-            60% { bottom: 5%; left: 55%; transform: rotate(0deg); } /* Reset 2 */
-            95% { bottom: 110%; left: 85%; } /* Success */
-            100% { bottom: 120%; left: 90%; }
-        }
+        @keyframes climb-path { 0% { bottom: 5%; left: -10%; } 20% { bottom: 40%; left: 30%; } 25% { bottom: 30%; left: 28%; transform: rotate(90deg); } 30% { bottom: 5%; left: 25%; transform: rotate(0deg); } 50% { bottom: 70%; left: 60%; } 55% { bottom: 60%; left: 58%; transform: rotate(-90deg); } 60% { bottom: 5%; left: 55%; transform: rotate(0deg); } 95% { bottom: 110%; left: 85%; } 100% { bottom: 120%; left: 90%; } }
         /* === END: Animation Styles (Updated) === */
 
         /* === START: Fire Animation === */
         .action-button.najda-style .bi-fire {
             animation: fire-flicker 1.5s ease-in-out infinite alternate;
+            position: relative;
+            top: 3px;
         }
-
-        @keyframes fire-flicker {
-            0% {
-                transform: scale(1.0) translateY(0) rotate(0);
-                color: #ffad00; /* Orange-yellow */
-                text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00;
-            }
-            25% {
-                transform: scale(1.1) translateY(-2px) rotate(3deg);
-                color: #facc15; /* Yellow --second-color */
-                text-shadow: 0 0 6px #ff5c5c, 0 0 10px #ff5c5c, 0 0 16px #facc15;
-            }
-            50% {
-                transform: scale(0.95) translateY(1px) rotate(-2deg);
-                color: var(--danger-color); /* Red #ff5c5c */
-                text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00;
-            }
-            75% {
-                transform: scale(1.05) translateY(-1px) rotate(2deg);
-                color: #facc15; /* Yellow */
-                text-shadow: 0 0 6px #ff5c5c, 0 0 12px #ff5c5c, 0 0 18px #facc15;
-            }
-            100% {
-                transform: scale(1.0) translateY(0) rotate(0);
-                color: #ffad00;
-                text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00;
-            }
-        }
+        @keyframes fire-flicker { 0% { transform: scale(1.0) translateY(0) rotate(0); color: #ffad00; text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00; } 25% { transform: scale(1.1) translateY(-2px) rotate(3deg); color: #facc15; text-shadow: 0 0 6px #ff5c5c, 0 0 10px #ff5c5c, 0 0 16px #facc15; } 50% { transform: scale(0.95) translateY(1px) rotate(-2deg); color: var(--danger-color); text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00; } 75% { transform: scale(1.05) translateY(-1px) rotate(2deg); color: #facc15; text-shadow: 0 0 6px #ff5c5c, 0 0 12px #ff5c5c, 0 0 18px #facc15; } 100% { transform: scale(1.0) translateY(0) rotate(0); color: #ffad00; text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00; } }
         /* === END: Fire Animation === */
 
         /* === START: Fire Alarm Animation (Beacon Style) === */
-        .fire-alarm {
-            width: 28px;
-            height: 24px;
-            position: relative;
-        }
-
-        .fire-alarm-dome {
-            width: 100%;
-            height: 20px;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: radial-gradient(circle at 50% 0%, #ff8a8a, #d10000 90%);
-            border-radius: 14px 14px 3px 3px;
-            overflow: hidden;
-            z-index: 2;
-            border: 1px solid #ff5c5c;
-        }
-
-        .fire-alarm-dome::before { /* Concentric rings effect */
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-image: repeating-linear-gradient(to bottom, 
-                rgba(255, 255, 255, 0.15) 0px, 
-                rgba(255, 255, 255, 0.15) 1px, 
-                transparent 1px, 
-                transparent 3px);
-            z-index: 3;
-        }
-
-        .fire-alarm-dome::after { /* Inner light bulb flash */
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,220,150,0.9) 0%, rgba(255,100,100,0) 35%);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            animation: beacon-flash 1.2s infinite ease-in-out;
-            z-index: 4;
-        }
-
-        .fire-alarm-base {
-            width: 28px;
-            height: 5px;
-            background: linear-gradient(to top, #c00000, #e02020);
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            border-radius: 0 0 4px 4px;
-            z-index: 1;
-            box-shadow: 0 2px 3px rgba(0,0,0,0.5);
-        }
-
-        @keyframes beacon-flash {
-            0%, 100% {
-                opacity: 0.4;
-                transform: translate(-50%, -50%) scale(0.5);
-            }
-            50% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
-            }
-        }
+        .fire-alarm { width: 28px; height: 24px; position: relative; }
+        .fire-alarm-dome { width: 100%; height: 20px; position: absolute; top: 0; left: 0; background: radial-gradient(circle at 50% 0%, #ff8a8a, #d10000 90%); border-radius: 14px 14px 3px 3px; overflow: hidden; z-index: 2; border: 1px solid #ff5c5c; }
+        .fire-alarm-dome::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0px, rgba(255, 255, 255, 0.15) 1px, transparent 1px, transparent 3px); z-index: 3; }
+        .fire-alarm-dome::after { content: ''; position: absolute; top: 50%; left: 50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,220,150,0.9) 0%, rgba(255,100,100,0) 35%); border-radius: 50%; transform: translate(-50%, -50%); animation: beacon-flash 1.2s infinite ease-in-out; z-index: 4; }
+        .fire-alarm-base { width: 28px; height: 5px; background: linear-gradient(to top, #c00000, #e02020); position: absolute; bottom: 0; left: 0; border-radius: 0 0 4px 4px; z-index: 1; box-shadow: 0 2px 3px rgba(0,0,0,0.5); }
+        @keyframes beacon-flash { 0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.5); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
         /* === END: Fire Alarm Animation (Beacon Style) === */
 
     </style>
@@ -343,7 +194,6 @@
             </header>
             <main class="content-area">
                 <div class="progress-timer-card">
-                    <!-- === START: Animation Container Updated === -->
                     <div class="climbing-animation-container">
                         <div class="mountain-bg"></div>
                         <div class="climber">
@@ -356,7 +206,6 @@
                             <div class="climber-arm arm-right"></div>
                         </div>
                     </div>
-                    <!-- === END: Animation Container Updated === -->
                     <div class="timer-settings-icon d-none"><i class="bi bi-gear-fill"></i></div>
                     <div class="progress-rows-container">
                         <div class="progress-row">
@@ -389,6 +238,16 @@
                         </div>
                     </div>
                 </div>
+                 <!-- START: Gemini Feature - Daily Inspiration -->
+                 <div id="inspiration-container" class="mb-3">
+                    <button id="inspiration-btn" class="action-button" style="justify-content: center; text-align: center; gap: 10px; font-weight: 700; width: 100%;">
+                        <span>🔥 عندي رغبة شديدة لمشاهدة الإباحية، أعطني حلا جذريا</span>
+                    </button>
+                    <div id="inspiration-display" class="p-3 mt-2 d-none" style="background-color: var(--card-background); border-radius: 15px; border: 1px solid var(--border-color);">
+                        <p id="inspiration-text" class="mb-0" style="text-align: right; color: var(--text-color); line-height: 1.8;"></p>
+                    </div>
+                </div>
+                <!-- END: Gemini Feature - Daily Inspiration -->
                 <button id="start-timer-btn" class="btn btn-success btn-lg w-100 mb-3 d-none">بدء العداد</button>
                 <button id="najda-button" class="action-button najda-style">
                     <i class="bi bi-fire"></i>
@@ -411,7 +270,7 @@
         </div>
     </div>
     
-    <!-- هەموو مۆداڵ و پەیجەکانی تر وەک خۆیانن -->
+    <!-- Modals and other pages -->
     <div id="breathing-page" class="page" style="background: linear-gradient(to top, #28b485, #7ed56f); justify-content: center; align-items: center; text-align: center; color: white; padding: 1rem;">
         <i class="bi bi-x-lg" id="close-breathing-btn" style="position: absolute; top: 20px; right: 20px; font-size: 1.8rem; cursor: pointer; z-index: 10;"></i>
         <div id="breathing-circle-container"><div id="breathing-circle"></div></div>
@@ -445,6 +304,7 @@
             <div class="confirm-modal-footer"><button class="confirm-btn confirm-btn-cancel" id="cancel-reset-button">رجوع</button><button class="confirm-btn confirm-btn-accept" id="confirm-reset-action-button">تصفير</button></div>
         </div>
     </div>
+
     <div class="modal fade" id="notifications-modal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
@@ -487,9 +347,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, arrayUnion, updateDoc, deleteDoc, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, arrayUnion, updateDoc, deleteDoc, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -503,461 +363,373 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        let startTime = null;
-        let timerInterval = null;
-        let currentUserRole = 'user';
-        let breathingTimeouts = [];
-        let countdownInterval = null;
-        let remainingTime = 0;
-        const welcomeUserEl = document.getElementById('welcome-user');
-        const openSendModalBtn = document.getElementById('open-send-modal-btn');
-        const startTimerBtn = document.getElementById('start-timer-btn');
-        const timerSettingsIcon = document.querySelector('.timer-settings-icon');
-        const notificationBadge = document.querySelector('.notification-badge');
-        const notificationsModalEl = document.getElementById('notifications-modal');
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            let startTime = null;
+            let timerInterval = null;
+            let currentUserRole = 'user';
+            let breathingTimeouts = [];
+            let countdownInterval = null;
+            let remainingTime = 0;
+            let previousSolutions = [];
+            const welcomeUserEl = document.getElementById('welcome-user');
+            const openSendModalBtn = document.getElementById('open-send-modal-btn');
+            const startTimerBtn = document.getElementById('start-timer-btn');
+            const timerSettingsIcon = document.querySelector('.timer-settings-icon');
+            const notificationBadge = document.querySelector('.notification-badge');
+            const notificationsModalEl = document.getElementById('notifications-modal');
+            let latestNotificationTimestamp = null;
+            const natureImages = [ 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80', 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&q=80', 'https://images.unsplash.com/photo-1433086966358-548G-54859d0ed716?w=800&q=80', 'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=800&q=80', 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800&q=80', 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&q=80', 'https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=800&q=80', 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800&q=80', 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&q=80', 'https://images.unsplash.com/photo-1505144808419-1957a94ca61e?w=800&q=80', 'https://images.unsplash.com/photo-1497449493050-aba1e7e4b29f?w=800&q=80', 'https://images.unsplash.com/photo-1586348943529-beaae6c28db9?w=800&q=80', 'https://images.unsplash.com/photo-1511497584788-876760111969?w=800&q=80', 'https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=800&q=80', 'https://images.unsplash.com/photo-1444703686981-a3abbc4d42e2?w=800&q=80', 'https://images.unsplash.com/photo-1473773508845-188df298d2d1?w=800&q=80', 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=800&q=80', 'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?w=800&q=80', 'https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=800&q=80', 'https://images.unsplash.com/photo-1455218873523-0115b2402d53?w=800&q=80' ];
+            let lastImageIndex = -1;
 
-        let latestNotificationTimestamp = null;
+            const apiKey = "AIzaSyDB_0f4D2ugw-r6jajigBmhZepR0ZXU_c0";
 
-        const natureImages = [
-            'https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=2100&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1426604966848-d7adac402bff?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=1974&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1586348943529-beaae6c28db9?q=80&w=1915&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1505144808419-1957a94ca61e?q=80&w=1974&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?q=80&w=1974&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1431794062232-2a99a5431c6c?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2071&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1475113548554-5a36f1f523d6?q=80&w=1974&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1500964757637-c85e8a162699?q=80&w=2103&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1473773508845-188df298d2d1?q=80&w=1974&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1476610182240-2483a02fb024?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=2074&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1505765055802-62de69dd1110?q=80&w=1974&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1439853949127-fa647821eba0?q=80&w=1974&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1444464666168-49d633b86797?q=80&w=2069&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?q=80&w=2076&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1504567961542-e24d9439a724?q=80&w=1974&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1511884642898-4c92249e20b6?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1490730141103-6cac27aaab94?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1454372182658-c712e4c5a1db?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1465189684280-6a8fa9b19a7a?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1459213599464-863769234249?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1446329813274-7c9036bd9a1f?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1475724017904-b712072c452a?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1434725039720-aaad6dd32dfe?q=80&w=1942&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1474524955719-b9f87c50ce47?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1510798831971-661eb04b3739?q=80&w=1974&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1463288889813-ae23b3821045?q=80&w=1932&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1445363692815-ebcd599f7621?q=80&w=1974&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?q=80&w=1925&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1491466424936-e304919aada7?q=80&w=2069&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1523731175654-a952d717538a?q=80&w=1974&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1504218320019-3225b6a32336?q=80&w=1974&auto=format&fit=crop'
-        ];
-
-        let lastRandomIndex = -1;
-
-        function getRandomNatureImage() {
-            let randomIndex;
-            do {
-                randomIndex = Math.floor(Math.random() * natureImages.length);
-            } while (randomIndex === lastRandomIndex);
-            lastRandomIndex = randomIndex;
-            return natureImages[randomIndex];
-        }
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user && user.emailVerified) {
-                welcomeUserEl.textContent = `مرحباً ${user.displayName || 'المستخدم'}`;
-                const userDocRef = doc(db, "users", user.uid);
-                const userDoc = await getDoc(userDocRef);
-                if (userDoc.exists()) {
-                    currentUserRole = userDoc.data().role || 'user';
-                    if (currentUserRole === 'developer') {
-                        openSendModalBtn.classList.remove('d-none');
+            async function callGeminiAPI(prompt) {
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                const payload = { contents: [{ parts: [{ text: prompt }] }], };
+                try {
+                    const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!response.ok) {
+                        console.error("Gemini API response not ok:", response.status, response.statusText);
+                        const errorBody = await response.text();
+                        console.error("Error body:", errorBody);
+                        return "صار خطأ وحنا نتصل بالسيرفر جرب مرة ثانية";
                     }
-                    if (userDoc.data().timerStartDate) {
-                        startTime = userDoc.data().timerStartDate.toDate();
-                        startTimerBtn.classList.add('d-none'); 
-                        timerSettingsIcon.classList.remove('d-none'); 
-                        updateTimer();
-                        if (timerInterval) clearInterval(timerInterval);
-                        timerInterval = setInterval(updateTimer, 1000);
+                    const result = await response.json();
+                    const candidate = result.candidates?.[0];
+                    if (candidate && candidate.content?.parts?.[0]?.text) {
+                        return candidate.content.parts[0].text.trim();
                     } else {
-                        startTimerBtn.classList.remove('d-none'); 
-                        timerSettingsIcon.classList.add('d-none'); 
-                        updateTimerDisplay(0,0,0,0); 
+                        console.error("Invalid response structure from Gemini API:", result);
+                        return "ما قدرت أطلع لك رد حاول مرة ثانية";
                     }
-                } else {
-                    await setDoc(userDocRef, { role: 'user', lastSeenNotificationTimestamp: new Date(0) }, { merge: true });
-                    startTimerBtn.classList.remove('d-none');
-                    timerSettingsIcon.classList.add('d-none');
-                    updateTimerDisplay(0,0,0,0);
-                }
-                loadNotifications(user.uid);
-            } else {
-                // Logic for visitors
-                welcomeUserEl.textContent = `مرحباً أيها الزائر`;
-                document.querySelector('.notification-icon-wrapper').style.display = 'none';
-                const profileIconLink = document.querySelector('.header-icons a[href="settings.html"]');
-                if(profileIconLink) profileIconLink.style.display = 'none';
-
-                const visitorStartTime = localStorage.getItem('visitorTimerStartDate');
-                if (visitorStartTime) {
-                    startTime = new Date(visitorStartTime);
-                    startTimerBtn.classList.add('d-none'); 
-                    timerSettingsIcon.classList.remove('d-none'); 
-                    updateTimer();
-                    if (timerInterval) clearInterval(timerInterval);
-                    timerInterval = setInterval(updateTimer, 1000);
-                } else {
-                    startTimerBtn.classList.remove('d-none'); 
-                    timerSettingsIcon.classList.add('d-none'); 
-                    updateTimerDisplay(0,0,0,0); 
+                } catch (error) {
+                    console.error("Error calling Gemini API:", error);
+                    return "فيه مشكلة بالشبكة تأكد من اتصالك بالنت";
                 }
             }
-        });
 
-        startTimerBtn.addEventListener('click', async () => {
-            const user = auth.currentUser;
-            startTime = new Date();
-            if (user && user.emailVerified) {
-                const userDocRef = doc(db, "users", user.uid);
-                await setDoc(userDocRef, { timerStartDate: startTime }, { merge: true });
-            } else {
-                localStorage.setItem('visitorTimerStartDate', startTime.toISOString());
-            }
-            startTimerBtn.classList.add('d-none');
-            timerSettingsIcon.classList.remove('d-none');
-            updateTimer();
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(updateTimer, 1000);
-        });
-
-        const notificationsList = document.getElementById('notifications-list');
-        const sendNotificationBtn = document.getElementById('send-notification-btn');
-        const sendNotificationModal = new bootstrap.Modal(document.getElementById('send-notification-modal'));
-
-        async function loadNotifications(userId) {
-            const userDocRef = doc(db, "users", userId);
-            const userDoc = await getDoc(userDocRef);
-            const lastSeenTimestamp = userDoc.data()?.lastSeenNotificationTimestamp?.toDate() || new Date(0);
-
-            const q = query(collection(db, "notifications"), orderBy("createdAt", "desc"));
-            onSnapshot(q, (snapshot) => {
-                notificationsList.innerHTML = "";
-                if (snapshot.empty) {
-                    notificationsList.innerHTML = '<p class="text-center text-muted">لا توجد إشعارات حالياً.</p>';
-                    notificationBadge.style.display = 'none';
+            function setupGeminiFeatures() {
+                const inspirationBtn = document.getElementById('inspiration-btn');
+                
+                if (!apiKey) {
+                    console.warn("مفتاح Gemini API فارغ. الميزات التي تعتمد على الذكاء الاصطناعي معطلة.");
+                    inspirationBtn.disabled = true;
+                    inspirationBtn.style.cursor = 'not-allowed';
+                    inspirationBtn.innerHTML = `<span>تحتاج لإضافة مفتاح API</span>`;
                     return;
                 }
 
-                const firstDoc = snapshot.docs[0];
-                latestNotificationTimestamp = firstDoc.data().createdAt?.toDate();
-
-                if (latestNotificationTimestamp && latestNotificationTimestamp > lastSeenTimestamp) {
-                    notificationBadge.style.display = 'block';
-                } else {
-                    notificationBadge.style.display = 'none';
-                }
-
-                snapshot.forEach(docSnapshot => {
-                    const notification = docSnapshot.data();
-                    const date = notification.createdAt?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }) || '';
-                    const item = document.createElement('div');
-                    item.className = 'notification-item';
-                    let deleteIconHTML = '';
-                    if (currentUserRole === 'developer') {
-                        deleteIconHTML = `<i class="bi bi-trash delete-notification-btn" data-id="${docSnapshot.id}" style="display: inline-block;"></i>`;
+                inspirationBtn.addEventListener('click', async () => {
+                    const inspirationDisplay = document.getElementById('inspiration-display');
+                    const inspirationText = document.getElementById('inspiration-text');
+                    inspirationBtn.disabled = true;
+                    inspirationBtn.innerHTML = `<span>لحظة أفكر لك بحل... <i class="bi bi-hourglass-split"></i></span>`;
+                    
+                    let basePrompt = "أنا عندي رغبة قوية مرة إني أشوف مقاطع إباحية وأبغى حل جذري وفوري بصفتك ناصح أمين على منهج السلف الصالح عطني نصيحة عملية ومباشرة أقدر أسويها الحين عشان أتجاوز هذي الرغبة تكلم باللهجة السعودية العامية وردك لازم يكون بدون تشكيل وبدون أي علامات ترقيم نهائيا وخليه قصير ومختصر وطبيعي كأنك تكلم خويك";
+                    
+                    if (previousSolutions.length > 0) {
+                        const previousSolutionsText = previousSolutions.join(' و ');
+                        basePrompt += ` الحلول اللي عطيتني هي ${previousSolutionsText} لا تكررها وعطني حل جديد ومختلف`;
                     }
-                    item.innerHTML = `${deleteIconHTML}<div class="d-flex justify-content-between align-items: center"><h6 class="notification-title mb-1">${notification.title}</h6><span class="notification-date">${date}</span></div><p class="notification-body mb-0">${notification.message}</p>`;
-                    notificationsList.appendChild(item);
-                });
 
-                if (currentUserRole === 'developer') {
-                    document.querySelectorAll('.delete-notification-btn').forEach(button => {
-                        button.addEventListener('click', async (e) => {
-                            e.stopPropagation();
-                            const notifId = e.target.getAttribute('data-id');
-                            if (confirm('هل أنت متأكد من حذف هذا الإشعار؟')) {
-                                try {
-                                    await deleteDoc(doc(db, "notifications", notifId));
-                                } catch (error) {
-                                    console.error("Error deleting notification: ", error);
-                                    alert('حدث خطأ أثناء حذف الإشعار.');
-                                }
-                            }
-                        });
-                    });
+                    const generatedText = await callGeminiAPI(basePrompt);
+                    
+                    if (generatedText) {
+                         previousSolutions.push(generatedText);
+                    }
+
+                    inspirationText.innerHTML = generatedText.replace(/\n/g, '<br>'); // Preserve line breaks
+                    inspirationDisplay.classList.remove('d-none');
+                    inspirationBtn.disabled = false;
+                    inspirationBtn.innerHTML = `<span>🔥 أبغى حل ثاني</span>`;
+                });
+            }
+
+            onAuthStateChanged(auth, async (user) => {
+                if (user && user.emailVerified) {
+                    welcomeUserEl.textContent = `مرحباً ${user.displayName || 'المستخدم'}`;
+                    const userDocRef = doc(db, "users", user.uid);
+                    const userDoc = await getDoc(userDocRef);
+                    if (userDoc.exists()) {
+                        currentUserRole = userDoc.data().role || 'user';
+                        if (currentUserRole === 'developer') { openSendModalBtn.classList.remove('d-none'); }
+                        if (userDoc.data().timerStartDate) {
+                            startTime = userDoc.data().timerStartDate.toDate();
+                            startTimerBtn.classList.add('d-none'); 
+                            timerSettingsIcon.classList.remove('d-none'); 
+                            updateTimer();
+                            if (timerInterval) clearInterval(timerInterval);
+                            timerInterval = setInterval(updateTimer, 1000);
+                        } else {
+                            startTimerBtn.classList.remove('d-none'); 
+                            timerSettingsIcon.classList.add('d-none'); 
+                            updateTimerDisplay(0,0,0,0); 
+                        }
+                    } else {
+                        await setDoc(userDocRef, { role: 'user', lastSeenNotificationTimestamp: new Date(0) }, { merge: true });
+                        startTimerBtn.classList.remove('d-none');
+                        timerSettingsIcon.classList.add('d-none');
+                        updateTimerDisplay(0,0,0,0);
+                    }
+                    loadNotifications(user.uid);
+                } else {
+                    window.location.href = 'index.html';
                 }
             });
-        }
-        notificationsModalEl.addEventListener('show.bs.modal', async () => {
-            const user = auth.currentUser;
-            if (!user || !latestNotificationTimestamp) return;
-            
-            notificationBadge.style.display = 'none';
-            const userDocRef = doc(db, "users", user.uid);
-            try {
-                await updateDoc(userDocRef, {
-                    lastSeenNotificationTimestamp: latestNotificationTimestamp
+
+            startTimerBtn.addEventListener('click', async () => {
+                const user = auth.currentUser;
+                if (!user) return;
+                startTime = new Date();
+                const userDocRef = doc(db, "users", user.uid);
+                await setDoc(userDocRef, { timerStartDate: startTime }, { merge: true });
+                startTimerBtn.classList.add('d-none');
+                timerSettingsIcon.classList.remove('d-none');
+                updateTimer();
+                if (timerInterval) clearInterval(timerInterval);
+                timerInterval = setInterval(updateTimer, 1000);
+            });
+
+            async function loadNotifications(userId) {
+                const notificationsList = document.getElementById('notifications-list');
+                const userDocRef = doc(db, "users", userId);
+                const userDoc = await getDoc(userDocRef);
+                const lastSeenTimestamp = userDoc.data()?.lastSeenNotificationTimestamp?.toDate() || new Date(0);
+                const q = query(collection(db, "notifications"), orderBy("createdAt", "desc"));
+                onSnapshot(q, (snapshot) => {
+                    notificationsList.innerHTML = "";
+                    if (snapshot.empty) {
+                        notificationsList.innerHTML = '<p class="text-center text-muted">لا توجد إشعارات حالياً.</p>';
+                        notificationBadge.style.display = 'none';
+                        return;
+                    }
+                    const firstDoc = snapshot.docs[0];
+                    latestNotificationTimestamp = firstDoc.data().createdAt?.toDate();
+                    if (latestNotificationTimestamp && latestNotificationTimestamp > lastSeenTimestamp) {
+                        notificationBadge.style.display = 'block';
+                    } else {
+                        notificationBadge.style.display = 'none';
+                    }
+                    snapshot.forEach(docSnapshot => {
+                        const notification = docSnapshot.data();
+                        const date = notification.createdAt?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }) || '';
+                        const item = document.createElement('div');
+                        item.className = 'notification-item';
+                        let deleteIconHTML = '';
+                        if (currentUserRole === 'developer') {
+                            deleteIconHTML = `<i class="bi bi-trash delete-notification-btn" data-id="${docSnapshot.id}" style="display: inline-block;"></i>`;
+                        }
+                        item.innerHTML = `${deleteIconHTML}<div class="d-flex justify-content-between align-items: center"><h6 class="notification-title mb-1">${notification.title}</h6><span class="notification-date">${date}</span></div><p class="notification-body mb-0">${notification.message}</p>`;
+                        notificationsList.appendChild(item);
+                    });
+                    if (currentUserRole === 'developer') {
+                        document.querySelectorAll('.delete-notification-btn').forEach(button => {
+                            button.addEventListener('click', async (e) => {
+                                e.stopPropagation();
+                                const notifId = e.target.getAttribute('data-id');
+                                if (confirm('هل أنت متأكد من حذف هذا الإشعار؟')) {
+                                    try { await deleteDoc(doc(db, "notifications", notifId)); } catch (error) { console.error("Error deleting notification: ", error); alert('حدث خطأ أثناء حذف الإشعار.'); }
+                                }
+                            });
+                        });
+                    }
                 });
-            } catch (error) {
-                console.error("Error updating last seen timestamp: ", error);
             }
-        });
+            notificationsModalEl.addEventListener('show.bs.modal', async () => {
+                const user = auth.currentUser;
+                if (!user || !latestNotificationTimestamp) return;
+                notificationBadge.style.display = 'none';
+                const userDocRef = doc(db, "users", user.uid);
+                try { await updateDoc(userDocRef, { lastSeenNotificationTimestamp: latestNotificationTimestamp }); } catch (error) { console.error("Error updating last seen timestamp: ", error); }
+            });
+            
+            const sendNotificationBtn = document.getElementById('send-notification-btn');
+            const sendNotificationModal = new bootstrap.Modal(document.getElementById('send-notification-modal'));
+            sendNotificationBtn.addEventListener('click', async () => {
+                const title = document.getElementById('notification-title').value.trim();
+                const message = document.getElementById('notification-message').value.trim();
+                if (!title || !message) { alert('الرجاء ملء جميع الحقول.'); return; }
+                try {
+                    await addDoc(collection(db, "notifications"), { title: title, message: message, createdAt: serverTimestamp() });
+                    alert('تم إرسال الإشعار بنجاح.');
+                    document.getElementById('notification-title').value = '';
+                    document.getElementById('notification-message').value = '';
+                    sendNotificationModal.hide();
+                } catch (error) { console.error("Error sending notification: ", error); alert('حدث خطأ أثناء إرسال الإشعار.'); }
+            });
 
-        sendNotificationBtn.addEventListener('click', async () => {
-            const title = document.getElementById('notification-title').value.trim();
-            const message = document.getElementById('notification-message').value.trim();
-            if (!title || !message) { alert('الرجاء ملء جميع الحقول.'); return; }
-            try {
-                await addDoc(collection(db, "notifications"), { title: title, message: message, createdAt: serverTimestamp() });
-                alert('تم إرسال الإشعار بنجاح.');
-                document.getElementById('notification-title').value = '';
-                document.getElementById('notification-message').value = '';
-                sendNotificationModal.hide();
-            } catch (error) { console.error("Error sending notification: ", error); alert('حدث خطأ أثناء إرسال الإشعار.'); }
-        });
+            const dateElement = document.getElementById('current-date');
+            const daysValueEl = document.getElementById('days-value');
+            const hoursValueEl = document.getElementById('hours-value');
+            const minutesValueEl = document.getElementById('minutes-value');
+            const secondsValueEl = document.getElementById('seconds-value');
+            const daysFillEl = document.getElementById('days-fill');
+            const hoursFillEl = document.getElementById('hours-fill');
+            const minutesFillEl = document.getElementById('minutes-fill');
+            const secondsFillEl = document.getElementById('seconds-fill');
 
-        const dateElement = document.getElementById('current-date');
-        const daysValueEl = document.getElementById('days-value');
-        const hoursValueEl = document.getElementById('hours-value');
-        const minutesValueEl = document.getElementById('minutes-value');
-        const secondsValueEl = document.getElementById('seconds-value');
-        const daysFillEl = document.getElementById('days-fill');
-        const hoursFillEl = document.getElementById('hours-fill');
-        const minutesFillEl = document.getElementById('minutes-fill');
-        const secondsFillEl = document.getElementById('seconds-fill');
+            function updateLiveDate() {
+                const today = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                dateElement.textContent = today.toLocaleDateString('ar-EG', options);
+            }
+            updateLiveDate();
 
-        function updateLiveDate() {
-            const today = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            dateElement.textContent = today.toLocaleDateString('ar-EG', options);
-        }
-        updateLiveDate();
+            function updateTimerDisplay(d, h, m, s) {
+                daysValueEl.textContent = d; hoursValueEl.textContent = h; minutesValueEl.textContent = m; secondsValueEl.textContent = s;
+                const daysPercent = d > 0 ? ((d % 30) / 29) * 100 : 0;
+                const hoursPercent = h > 0 ? (h / 23) * 100 : 0;
+                const minutesPercent = m > 0 ? (m / 59) * 100 : 0;
+                const secondsPercent = s > 0 ? (s / 59) * 100 : 0;
+                daysFillEl.style.width = `${Math.min(daysPercent, 100)}%`;
+                hoursFillEl.style.width = `${Math.min(hoursPercent, 100)}%`;
+                minutesFillEl.style.width = `${Math.min(minutesPercent, 100)}%`;
+                secondsFillEl.style.width = `${Math.min(secondsPercent, 100)}%`;
+            }
 
-        function updateTimerDisplay(d, h, m, s) {
-            daysValueEl.textContent = d;
-            hoursValueEl.textContent = h;
-            minutesValueEl.textContent = m;
-            secondsValueEl.textContent = s;
-            const daysPercent = d > 0 ? ((d % 30) / 29) * 100 : 0;
-            const hoursPercent = h > 0 ? (h / 23) * 100 : 0;
-            const minutesPercent = m > 0 ? (m / 59) * 100 : 0;
-            const secondsPercent = s > 0 ? (s / 59) * 100 : 0;
-            daysFillEl.style.width = `${Math.min(daysPercent, 100)}%`;
-            hoursFillEl.style.width = `${Math.min(hoursPercent, 100)}%`;
-            minutesFillEl.style.width = `${Math.min(minutesPercent, 100)}%`;
-            secondsFillEl.style.width = `${Math.min(secondsPercent, 100)}%`;
-        }
+            function updateTimer() {
+                if (!startTime) { updateTimerDisplay(0,0,0,0); return; };
+                const now = new Date();
+                const difference = now - startTime;
+                if (difference < 0) { updateTimerDisplay(0,0,0,0); return; }
+                const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+                updateTimerDisplay(days, hours, minutes, seconds);
+            }
 
-        function updateTimer() {
-            if (!startTime) { updateTimerDisplay(0,0,0,0); return; };
-            const now = new Date();
-            const difference = now - startTime;
-            if (difference < 0) { updateTimerDisplay(0,0,0,0); return; }
-            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-            updateTimerDisplay(days, hours, minutes, seconds);
-        }
+            const settingsIcon = document.querySelector('.timer-settings-icon');
+            const settingsModalOverlay = document.getElementById('settings-modal-overlay');
+            const closeSettingsButton = document.getElementById('close-settings-button');
+            const resetTimerButton = document.getElementById('reset-timer-button');
+            const setDateButton = document.getElementById('set-date-button');
+            const dateTimePicker = document.getElementById('date-time-picker');
+            const confirmResetModal = document.getElementById('confirm-reset-modal');
+            const cancelResetButton = document.getElementById('cancel-reset-button');
+            const confirmResetActionButton = document.getElementById('confirm-reset-action-button');
 
-        const settingsIcon = document.querySelector('.timer-settings-icon');
-        const settingsModalOverlay = document.getElementById('settings-modal-overlay');
-        const closeSettingsButton = document.getElementById('close-settings-button');
-        const resetTimerButton = document.getElementById('reset-timer-button');
-        const setDateButton = document.getElementById('set-date-button');
-        const dateTimePicker = document.getElementById('date-time-picker');
-        const confirmResetModal = document.getElementById('confirm-reset-modal');
-        const cancelResetButton = document.getElementById('cancel-reset-button');
-        const confirmResetActionButton = document.getElementById('confirm-reset-action-button');
-
-        settingsIcon.addEventListener('click', () => settingsModalOverlay.classList.add('show'));
-        const closeSettingsModal = () => settingsModalOverlay.classList.remove('show');
-        closeSettingsButton.addEventListener('click', closeSettingsModal);
-        settingsModalOverlay.addEventListener('click', (e) => { if (e.target === settingsModalOverlay) closeSettingsModal(); });
-        
-        setDateButton.addEventListener('click', () => dateTimePicker.showPicker());
-        
-        dateTimePicker.addEventListener('change', async (e) => {
-            const user = auth.currentUser;
-            if (e.target.value) {
-                const newStartTime = new Date(e.target.value);
-                if (!isNaN(newStartTime.getTime())) {
-                    if (user && user.emailVerified) {
+            settingsIcon.addEventListener('click', () => settingsModalOverlay.classList.add('show'));
+            const closeSettingsModal = () => settingsModalOverlay.classList.remove('show');
+            closeSettingsButton.addEventListener('click', closeSettingsModal);
+            settingsModalOverlay.addEventListener('click', (e) => { if (e.target === settingsModalOverlay) closeSettingsModal(); });
+            setDateButton.addEventListener('click', () => dateTimePicker.showPicker());
+            dateTimePicker.addEventListener('change', async (e) => {
+                const user = auth.currentUser;
+                if (user && e.target.value) {
+                    const newStartTime = new Date(e.target.value);
+                    if (!isNaN(newStartTime.getTime())) {
                         const userDocRef = doc(db, "users", user.uid);
                         await setDoc(userDocRef, { timerStartDate: newStartTime }, { merge: true });
-                    } else {
-                        localStorage.setItem('visitorTimerStartDate', newStartTime.toISOString());
+                        location.reload();
                     }
+                }
+            });
+            resetTimerButton.addEventListener('click', () => { closeSettingsModal(); setTimeout(() => confirmResetModal.classList.add('show'), 300); });
+            const closeConfirmModal = () => confirmResetModal.classList.remove('show');
+            cancelResetButton.addEventListener('click', closeConfirmModal);
+            confirmResetModal.addEventListener('click', (e) => { if (e.target === confirmResetModal) closeConfirmModal(); });
+            confirmResetActionButton.addEventListener('click', async () => {
+                const user = auth.currentUser;
+                if (user) {
+                    const newStartTime = new Date();
+                    const userDocRef = doc(db, "users", user.uid);
+                    await setDoc(userDocRef, { timerStartDate: newStartTime }, { merge: true });
                     location.reload();
                 }
+            });
+
+            const najdaButton = document.getElementById('najda-button');
+            const breathingPage = document.getElementById('breathing-page');
+            const closeBreathingBtn = document.getElementById('close-breathing-btn');
+            const breathingText = document.getElementById('breathing-text');
+            const homePage = document.getElementById('home-page');
+            const quotePage = document.getElementById('quote-page');
+            const quoteText = document.getElementById('quote-text');
+            const closeQuoteBtn = document.getElementById('close-quote-btn');
+            const skipToQuoteBtn = document.getElementById('skip-to-quote-btn');
+            
+            function stopBreathingCycle() {
+                breathingTimeouts.forEach(clearTimeout); 
+                breathingTimeouts = [];
+                if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
             }
-        });
 
-        resetTimerButton.addEventListener('click', () => { 
-            closeSettingsModal(); 
-            setTimeout(() => confirmResetModal.classList.add('show'), 300); 
-        });
-        const closeConfirmModal = () => confirmResetModal.classList.remove('show');
-        cancelResetButton.addEventListener('click', closeConfirmModal);
-        confirmResetModal.addEventListener('click', (e) => { if (e.target === confirmResetModal) closeConfirmModal(); });
-        
-        confirmResetActionButton.addEventListener('click', async () => {
-            const user = auth.currentUser;
-            const newStartTime = new Date();
-             if (user && user.emailVerified) {
-                const userDocRef = doc(db, "users", user.uid);
-                await setDoc(userDocRef, { timerStartDate: newStartTime }, { merge: true });
-            } else {
-                localStorage.setItem('visitorTimerStartDate', newStartTime.toISOString());
+            function startBreathingCycle() {
+                breathingTimeouts.forEach(clearTimeout);
+                breathingTimeouts = [];
+                breathingText.textContent = 'شهيق';
+                breathingTimeouts.push(setTimeout(() => { breathingText.textContent = 'حبس النفس'; }, 4000));
+                breathingTimeouts.push(setTimeout(() => { breathingText.textContent = 'زفير'; }, 11000));
+                breathingTimeouts.push(setTimeout(startBreathingCycle, 19000));
             }
-            location.reload();
-        });
 
-        const najdaButton = document.getElementById('najda-button');
-        const breathingPage = document.getElementById('breathing-page');
-        const closeBreathingBtn = document.getElementById('close-breathing-btn');
-        const breathingText = document.getElementById('breathing-text');
-        const homePage = document.getElementById('home-page');
-        const quotePage = document.getElementById('quote-page');
-        const quoteText = document.getElementById('quote-text');
-        const closeQuoteBtn = document.getElementById('close-quote-btn');
-        const skipToQuoteBtn = document.getElementById('skip-to-quote-btn');
-
-        function stopBreathingCycle() {
-            breathingTimeouts.forEach(clearTimeout); 
-            breathingTimeouts = [];
-            if (countdownInterval) {
-                clearInterval(countdownInterval);
-                countdownInterval = null;
-            }
-        }
-
-        function startBreathingCycle() {
-            breathingTimeouts.forEach(clearTimeout);
-            breathingTimeouts = [];
-            breathingText.textContent = 'شهيق';
-            breathingTimeouts.push(setTimeout(() => { breathingText.textContent = 'حبس النفس'; }, 4000));
-            breathingTimeouts.push(setTimeout(() => { breathingText.textContent = 'زفير'; }, 11000));
-            breathingTimeouts.push(setTimeout(startBreathingCycle, 19000));
-        }
-
-        async function showQuotePage() {
-            const user = auth.currentUser;
-            const isLoggedIn = user && user.emailVerified;
-
-            let seenQuoteIds = [];
-            // Step 1: Get seenQuoteIds from the correct source
-            if (isLoggedIn) {
-                const userDocRef = doc(db, "users", user.uid);
-                const userDoc = await getDoc(userDocRef);
-                seenQuoteIds = userDoc.exists() && userDoc.data().seenQuoteIds ? userDoc.data().seenQuoteIds : [];
-            } else {
-                try {
-                    seenQuoteIds = JSON.parse(localStorage.getItem('visitorSeenQuoteIds')) || [];
-                } catch (e) {
-                    seenQuoteIds = [];
+            async function showQuotePage() {
+                let newImageIndex;
+                do { newImageIndex = Math.floor(Math.random() * natureImages.length); } while (newImageIndex === lastImageIndex);
+                lastImageIndex = newImageIndex;
+                quotePage.style.backgroundImage = `url('${natureImages[newImageIndex]}')`;
+                
+                breathingPage.classList.remove('active');
+                breathingPage.style.display = 'none';
+                quotePage.style.display = 'flex';
+                quotePage.classList.add('active');
+                
+                if (!apiKey) {
+                    quoteText.textContent = "استمر في التقدم، كل خطوة مهمه.";
+                    return;
                 }
+
+                quoteText.textContent = "لحظة من فضلك، أفكر في شيء ملهم لك...";
+                const prompt = "اكتب اقتباسًا عميقًا ومريحًا باللغة العربية لشخص يشعر بالإرهاق ويحاول أن يبقى قويًا. يجب أن يكون الاقتباس أصيلًا وملهمًا.";
+                const generatedQuote = await callGeminiAPI(prompt);
+                quoteText.textContent = generatedQuote;
             }
 
-            // Step 2: Fetch all quotes (this is public data)
-            const quotesSnapshot = await getDocs(collection(db, "quotes"));
-            const allQuotes = [];
-            quotesSnapshot.forEach(doc => allQuotes.push({ id: doc.id, ...doc.data() }));
-
-            // Step 3: Find an unseen quote
-            let unseenQuotes = allQuotes.filter(q => !seenQuoteIds.includes(q.id));
-
-            // Step 4: Handle case where all quotes have been seen
-            if (unseenQuotes.length === 0 && allQuotes.length > 0) {
-                if (isLoggedIn) {
-                    const userDocRef = doc(db, "users", user.uid);
-                    await updateDoc(userDocRef, { seenQuoteIds: [] });
-                } else {
-                    localStorage.setItem('visitorSeenQuoteIds', '[]');
-                }
-                unseenQuotes = allQuotes; // Now all quotes are "unseen" again
+            function startBreathingExperience() {
+                stopBreathingCycle();
+                homePage.classList.remove('active');
+                breathingPage.style.display = 'flex';
+                breathingPage.classList.add('active');
+                const breathingTimerEl = document.getElementById('breathing-timer');
+                remainingTime = 57;
+                breathingTimerEl.textContent = `الوقت المتبقي: ${remainingTime} ثانية`;
+                countdownInterval = setInterval(() => {
+                    remainingTime--;
+                    if (remainingTime >= 0) {
+                        breathingTimerEl.textContent = `الوقت المتبقي: ${remainingTime} ثانية`;
+                    }
+                    if (remainingTime < 0) {
+                        stopBreathingCycle();
+                        showQuotePage();
+                    }
+                }, 1000);
+                startBreathingCycle();
             }
 
-            // Step 5: Display the quote and update the source
-            if (unseenQuotes.length > 0) {
-                const randomQuote = unseenQuotes[Math.floor(Math.random() * unseenQuotes.length)];
-                quoteText.textContent = randomQuote.text;
-                if (isLoggedIn) {
-                    const userDocRef = doc(db, "users", user.uid);
-                    await updateDoc(userDocRef, { seenQuoteIds: arrayUnion(randomQuote.id) });
-                } else {
-                    seenQuoteIds.push(randomQuote.id);
-                    localStorage.setItem('visitorSeenQuoteIds', JSON.stringify(seenQuoteIds));
-                }
-            } else {
-                quoteText.textContent = "استمر في التقدم، كل خطوة مهمه.";
-            }
+            najdaButton.addEventListener('click', startBreathingExperience);
 
-            // Step 6: Show the page (UI logic)
-            quotePage.style.backgroundImage = `url('${getRandomNatureImage()}')`;
-            breathingPage.classList.remove('active');
-            breathingPage.style.display = 'none';
-            quotePage.style.display = 'flex';
-            quotePage.classList.add('active');
-        }
+            closeBreathingBtn.addEventListener('click', () => {
+                stopBreathingCycle();
+                breathingPage.classList.remove('active');
+                breathingPage.style.display = 'none';
+                homePage.classList.add('active');
+            });
 
-        najdaButton.addEventListener('click', () => {
-            stopBreathingCycle();
-            homePage.classList.remove('active');
-            breathingPage.style.display = 'flex';
-            breathingPage.classList.add('active');
-            const breathingTimerEl = document.getElementById('breathing-timer');
-            remainingTime = 57;
-            breathingTimerEl.textContent = `الوقت المتبقي: ${remainingTime} ثانية`;
-            countdownInterval = setInterval(() => {
-                remainingTime--;
-                if (remainingTime >= 0) {
-                    breathingTimerEl.textContent = `الوقت المتبقي: ${remainingTime} ثانية`;
-                }
-                if (remainingTime < 0) {
-                    stopBreathingCycle();
-                    showQuotePage();
-                }
-            }, 1000);
-            startBreathingCycle();
-        });
+            closeQuoteBtn.addEventListener('click', () => {
+                quotePage.classList.remove('active');
+                quotePage.style.display = 'none';
+                homePage.classList.add('active');
+            });
 
-        closeBreathingBtn.addEventListener('click', () => {
-            stopBreathingCycle();
-            breathingPage.classList.remove('active');
-            breathingPage.style.display = 'none';
-            homePage.classList.add('active');
-        });
+            skipToQuoteBtn.addEventListener('click', () => {
+                stopBreathingCycle();
+                showQuotePage();
+            });
 
-        closeQuoteBtn.addEventListener('click', () => {
-            quotePage.classList.remove('active');
-            quotePage.style.display = 'none';
-            homePage.classList.add('active');
-        });
-
-        skipToQuoteBtn.addEventListener('click', () => {
-            stopBreathingCycle();
-            showQuotePage();
+            // Finally, setup the Gemini features
+            setupGeminiFeatures();
         });
     </script>
 </body>
