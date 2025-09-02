@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        /* ستایلی گشتی وەک خۆی ماوەتەوە */
         :root {
             --primary-color: #00a884;
             --danger-color: #ff5c5c;
@@ -35,30 +36,12 @@
         .header-icons { display: flex; gap: 1.5rem; font-size: 1.5rem; color: var(--secondary-text-color); align-items: center;}
         .header-icons i { cursor: pointer; }
         .header-icons a { color: var(--secondary-text-color); text-decoration: none; }
-        
-        /* === START: Notification Badge Styles === */
-        .notification-icon-wrapper {
-            position: relative;
-            cursor: pointer;
-        }
-        .notification-badge {
-            position: absolute;
-            top: -2px;
-            right: -5px;
-            width: 10px;
-            height: 10px;
-            background-color: var(--danger-color);
-            border-radius: 50%;
-            border: 2px solid var(--background-color);
-            display: none; /* Hidden by default */
-        }
-        /* === END: Notification Badge Styles === */
-
+        .notification-icon-wrapper { position: relative; cursor: pointer; }
+        .notification-badge { position: absolute; top: -2px; right: -5px; width: 10px; height: 10px; background-color: var(--danger-color); border-radius: 50%; border: 2px solid var(--background-color); display: none; }
         .welcome-message { text-align: right; }
         .welcome-message h5 { margin: 0; font-weight: 700; color: var(--text-color);}
         .welcome-message p { margin: 0; font-size: 0.9rem; color: var(--secondary-text-color); }
         .progress-timer-card { background: linear-gradient(135deg, #054238, #008069); color: white; border-radius: 20px; padding: 1.5rem; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0, 128, 105, 0.3); margin-bottom: 1.5rem; }
-        .progress-timer-card::before { content: ''; position: absolute; bottom: -40px; left: -50px; width: 200px; height: 200px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' stroke='%23ffffff' stroke-width='4' fill='none'/%3E%3Cpath d='M50 5 L50 20' stroke='%23ffffff' stroke-width='4'/%3E%3Cpath d='M50 95 L50 80' stroke='%23ffffff' stroke-width='4'/%3E%3Cpath d='M5 50 L20 50' stroke='%23ffffff' stroke-width='4'/%3E%3Cpath d='M95 50 L80 50' stroke='%23ffffff' stroke-width='4'/%3E%3C/svg%3E"); background-repeat: no-repeat; opacity: 0.1; transform: rotate(-15deg); }
         .timer-settings-icon { position: absolute; top: 1rem; left: 1rem; background-color: rgba(255, 255, 255, 0.15); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; z-index: 10; }
         .progress-rows-container { position: relative; z-index: 5; margin-top: 2rem; }
         .progress-row { display: flex; align-items: center; background-color: var(--progress-bg); border-radius: 12px; padding: 0.7rem 1rem; margin-bottom: 0.8rem; position: relative; overflow: hidden; }
@@ -75,7 +58,6 @@
         .action-button.najda-style { background-color: rgba(255, 92, 92, 0.1); color: var(--danger-color); border: 1px solid rgba(255, 92, 92, 0.5); justify-content: center; gap: 10px; font-size: 1.2rem; font-weight: 700; }
         .action-button.najda-style i { font-size: 1.5rem; }
         .bottom-nav { display: flex; justify-content: space-around; padding: 0.5rem 0; background-color: var(--card-background); box-shadow: 0 -2px 5px rgba(0,0,0,0.2); position: fixed; bottom: 0; width: 100%; z-index: 100; border-top: 1px solid var(--border-color); }
-        
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--secondary-text-color); text-decoration: none; font-size: 0.75rem; cursor: pointer; width: 14%; height: 50px; justify-content: center; }
         .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary-color); }
@@ -105,14 +87,12 @@
         #breathing-circle-container { width: 200px; height: 200px; border: 5px solid rgba(255, 255, 255, 0.7); border-radius: 50%; display: flex; justify-content: center; align-items: center; }
         #breathing-circle { width: 100%; height: 100%; background-color: white; border-radius: 50%; transform: scale(0.2); animation-duration: 19s; animation-iteration-count: infinite; animation-name: breathe; animation-timing-function: ease-in-out; }
         @keyframes breathe { 0% { transform: scale(0.2); } 21% { transform: scale(1); } 58% { transform: scale(1); } 100% { transform: scale(0.2); } }
-        
         .notification-item { position: relative; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px; padding-left: 30px; }
         .notification-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .notification-title { font-weight: 700; color: #FFFFFF; }
         .notification-body { color: var(--secondary-text-color); font-size: 0.9rem; }
         .notification-date { font-size: 0.8rem; color: #aaa; }
         .delete-notification-btn { position: absolute; left: 5px; top: 50%; transform: translateY(-50%); color: var(--danger-color); cursor: pointer; font-size: 1.2rem; display: none; }
-
         #quote-page { justify-content: center; align-items: center; background: linear-gradient(135deg, #3b82f6, #60a5fa); padding: 2rem; text-align: center; color: white; }
         .quote-box { position: relative; background-color: rgba(0, 0, 0, 0.1); border: 2px solid white; border-radius: 25px; padding: 4rem 2rem; width: 100%; max-width: 500px; }
         .quote-box::before, .quote-box::after { font-family: serif; font-size: 6rem; font-weight: bold; color: white; position: absolute; opacity: 0.8; }
@@ -123,10 +103,92 @@
         #close-quote-btn { position: absolute; top: 20px; left: 20px; font-size: 1.8rem; cursor: pointer; z-index: 10; }
         .card-title { font-weight: 700; color: #FFFFFF; }
         .modal-title { color: #FFFFFF; }
-
         #notifications-modal .modal-content { background-color: var(--background-color); color: var(--text-color); }
         #notifications-modal .modal-header { border-bottom: 1px solid var(--border-color); }
         #notifications-modal .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+
+        /* === START: Animation Styles (Updated) === */
+        .climbing-animation-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .mountain-bg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                /* Layer 3: Farthest mountain */
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M-10 100 L20 70 L50 100 Z" fill="rgba(0,0,0,0.1)" /></svg>') -10% 0/40% 40% no-repeat,
+                /* Layer 2: Middle mountain */
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M0 100 L50 40 L100 100 Z" fill="rgba(0,0,0,0.2)" /></svg>') 50% 100%/80% 80% no-repeat,
+                /* Layer 1: Closest mountain */
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M0 100 L40 20 L80 100 Z" fill="rgba(0,0,0,0.3)" /></svg>') 10% 100%/60% 60% no-repeat;
+        }
+        .climber {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            animation: climb-path 20s linear infinite;
+        }
+        .climber-body {
+            position: absolute;
+            width: 35%; height: 50%;
+            background-color: #fff;
+            border-radius: 40% 40% 20% 20%;
+            top: 25%; left: 32.5%;
+        }
+        .climber-head {
+            position: absolute;
+            width: 30%; height: 30%;
+            background-color: #fff;
+            border-radius: 50%;
+            top: 5%; left: 35%;
+        }
+        .climber-backpack {
+            position: absolute;
+            width: 40%; height: 45%;
+            background-color: #ff6b6b;
+            border-radius: 20% 20% 30% 30%;
+            top: 30%; left: 10%;
+        }
+        .climber-leg, .climber-arm {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+        .climber-leg { width: 15%; height: 40%; bottom: -15%; }
+        .climber-arm { width: 15%; height: 35%; top: 30%; }
+        .leg-right { left: 35%; animation: walk-leg-right 1s infinite; }
+        .leg-left { left: 55%; animation: walk-leg-left 1s infinite; }
+        .arm-right { left: 35%; animation: walk-arm-right 1s infinite; }
+        .arm-left { left: 55%; animation: walk-arm-left 1s infinite; }
+
+        @keyframes walk-leg-right { 0%, 100% { transform: rotate(-20deg); } 50% { transform: rotate(20deg); } }
+        @keyframes walk-leg-left { 0%, 100% { transform: rotate(20deg); } 50% { transform: rotate(-20deg); } }
+        @keyframes walk-arm-right { 0%, 100% { transform: rotate(20deg); } 50% { transform: rotate(-20deg); } }
+        @keyframes walk-arm-left { 0%, 100% { transform: rotate(-20deg); } 50% { transform: rotate(20deg); } }
+
+        @keyframes climb-path {
+            0% { bottom: 5%; left: -10%; }
+            20% { bottom: 40%; left: 30%; }
+            25% { bottom: 30%; left: 28%; transform: rotate(90deg); } /* Fall 1 */
+            30% { bottom: 5%; left: 25%; transform: rotate(0deg); } /* Reset 1 */
+            50% { bottom: 70%; left: 60%; }
+            55% { bottom: 60%; left: 58%; transform: rotate(-90deg); } /* Fall 2 */
+            60% { bottom: 5%; left: 55%; transform: rotate(0deg); } /* Reset 2 */
+            95% { bottom: 110%; left: 85%; } /* Success */
+            100% { bottom: 120%; left: 90%; }
+        }
+        /* === END: Animation Styles (Updated) === */
+
     </style>
 </head>
 <body>
@@ -134,12 +196,10 @@
         <div class="home-container">
             <header class="top-header">
                 <div class="header-icons">
-                    <!-- START: Modified Notification Icon -->
                     <div class="notification-icon-wrapper" data-bs-toggle="modal" data-bs-target="#notifications-modal">
                         <i class="bi bi-bell"></i>
                         <span class="notification-badge"></span>
                     </div>
-                    <!-- END: Modified Notification Icon -->
                     <a href="settings.html"><i class="bi bi-person-circle"></i></a>
                 </div>
                 <div class="welcome-message">
@@ -149,6 +209,20 @@
             </header>
             <main class="content-area">
                 <div class="progress-timer-card">
+                    <!-- === START: Animation Container Updated === -->
+                    <div class="climbing-animation-container">
+                        <div class="mountain-bg"></div>
+                        <div class="climber">
+                            <div class="climber-head"></div>
+                            <div class="climber-backpack"></div>
+                            <div class="climber-body"></div>
+                            <div class="climber-leg leg-left"></div>
+                            <div class="climber-leg leg-right"></div>
+                            <div class="climber-arm arm-left"></div>
+                            <div class="climber-arm arm-right"></div>
+                        </div>
+                    </div>
+                    <!-- === END: Animation Container Updated === -->
                     <div class="timer-settings-icon d-none"><i class="bi bi-gear-fill"></i></div>
                     <div class="progress-rows-container">
                         <div class="progress-row">
@@ -196,6 +270,7 @@
         </div>
     </div>
     
+    <!-- هەموو مۆداڵ و پەیجەکانی تر وەک خۆیانن -->
     <div id="breathing-page" class="page" style="background: linear-gradient(to top, #28b485, #7ed56f); justify-content: center; align-items: center; text-align: center; color: white; padding: 1rem;">
         <i class="bi bi-x-lg" id="close-breathing-btn" style="position: absolute; top: 20px; right: 20px; font-size: 1.8rem; cursor: pointer; z-index: 10;"></i>
         <div id="breathing-circle-container"><div id="breathing-circle"></div></div>
@@ -229,7 +304,6 @@
             <div class="confirm-modal-footer"><button class="confirm-btn confirm-btn-cancel" id="cancel-reset-button">رجوع</button><button class="confirm-btn confirm-btn-accept" id="confirm-reset-action-button">تصفير</button></div>
         </div>
     </div>
-
     <div class="modal fade" id="notifications-modal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
@@ -408,7 +482,6 @@
                 }
             });
         }
-
         notificationsModalEl.addEventListener('show.bs.modal', async () => {
             const user = auth.currentUser;
             if (!user || !latestNotificationTimestamp) return;
