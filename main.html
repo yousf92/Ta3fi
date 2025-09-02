@@ -447,43 +447,61 @@
             }
 
             onAuthStateChanged(auth, async (user) => {
-                if (user && user.emailVerified) {
-                    welcomeUserEl.textContent = `مرحباً ${user.displayName || 'المستخدم'}`;
-                    const userDocRef = doc(db, "users", user.uid);
-                    const userDoc = await getDoc(userDocRef);
-                    if (userDoc.exists()) {
-                        currentUserRole = userDoc.data().role || 'user';
-                        if (currentUserRole === 'developer') { openSendModalBtn.classList.remove('d-none'); }
-                        if (userDoc.data().timerStartDate) {
-                            startTime = userDoc.data().timerStartDate.toDate();
-                            startTimerBtn.classList.add('d-none'); 
-                            timerSettingsIcon.classList.remove('d-none'); 
-                            updateTimer();
-                            if (timerInterval) clearInterval(timerInterval);
-                            timerInterval = setInterval(updateTimer, 1000);
-                        } else {
-                            startTimerBtn.classList.remove('d-none'); 
-                            timerSettingsIcon.classList.add('d-none'); 
-                            updateTimerDisplay(0,0,0,0); 
-                        }
+                if (user && (user.emailVerified || user.isAnonymous)) {
+                    
+                    if (user.isAnonymous) {
+                        // Logic for guest user
+                        welcomeUserEl.textContent = `مرحباً أيها الزائر`;
+                        openSendModalBtn.classList.add('d-none'); // Guests can't send notifications
+                        startTimerBtn.classList.remove('d-none'); // Let guests use the timer
+                        timerSettingsIcon.classList.add('d-none'); // but they can't save settings
+                        updateTimerDisplay(0, 0, 0, 0);
+                        loadNotifications(null); // Load notifications without user-specific data
                     } else {
-                        await setDoc(userDocRef, { role: 'user', lastSeenNotificationTimestamp: new Date(0) }, { merge: true });
-                        startTimerBtn.classList.remove('d-none');
-                        timerSettingsIcon.classList.add('d-none');
-                        updateTimerDisplay(0,0,0,0);
+                        // Logic for registered user
+                        welcomeUserEl.textContent = `مرحباً ${user.displayName || 'المستخدم'}`;
+                        const userDocRef = doc(db, "users", user.uid);
+                        const userDoc = await getDoc(userDocRef);
+                        if (userDoc.exists()) {
+                            currentUserRole = userDoc.data().role || 'user';
+                            if (currentUserRole === 'developer') { openSendModalBtn.classList.remove('d-none'); }
+                            if (userDoc.data().timerStartDate) {
+                                startTime = userDoc.data().timerStartDate.toDate();
+                                startTimerBtn.classList.add('d-none'); 
+                                timerSettingsIcon.classList.remove('d-none'); 
+                                updateTimer();
+                                if (timerInterval) clearInterval(timerInterval);
+                                timerInterval = setInterval(updateTimer, 1000);
+                            } else {
+                                startTimerBtn.classList.remove('d-none'); 
+                                timerSettingsIcon.classList.add('d-none'); 
+                                updateTimerDisplay(0,0,0,0); 
+                            }
+                        } else {
+                            await setDoc(userDocRef, { role: 'user', lastSeenNotificationTimestamp: new Date(0) }, { merge: true });
+                            startTimerBtn.classList.remove('d-none');
+                            timerSettingsIcon.classList.add('d-none');
+                            updateTimerDisplay(0,0,0,0);
+                        }
+                        loadNotifications(user.uid);
                     }
-                    loadNotifications(user.uid);
                 } else {
+                    // If not logged in at all, or email not verified for a registered user, go to login.
                     window.location.href = 'index.html';
                 }
             });
+
 
             startTimerBtn.addEventListener('click', async () => {
                 const user = auth.currentUser;
                 if (!user) return;
                 startTime = new Date();
-                const userDocRef = doc(db, "users", user.uid);
-                await setDoc(userDocRef, { timerStartDate: startTime }, { merge: true });
+                // For anonymous users, this will be temporary and not saved.
+                // For registered users, we save it.
+                if (!user.isAnonymous) {
+                    const userDocRef = doc(db, "users", user.uid);
+                    await setDoc(userDocRef, { timerStartDate: startTime }, { merge: true });
+                }
                 startTimerBtn.classList.add('d-none');
                 timerSettingsIcon.classList.remove('d-none');
                 updateTimer();
@@ -493,9 +511,14 @@
 
             async function loadNotifications(userId) {
                 const notificationsList = document.getElementById('notifications-list');
-                const userDocRef = doc(db, "users", userId);
-                const userDoc = await getDoc(userDocRef);
-                const lastSeenTimestamp = userDoc.data()?.lastSeenNotificationTimestamp?.toDate() || new Date(0);
+                let lastSeenTimestamp = new Date(0);
+
+                if (userId) { // Only for registered users
+                    const userDocRef = doc(db, "users", userId);
+                    const userDoc = await getDoc(userDocRef);
+                    lastSeenTimestamp = userDoc.data()?.lastSeenNotificationTimestamp?.toDate() || new Date(0);
+                }
+
                 const q = query(collection(db, "notifications"), orderBy("createdAt", "desc"));
                 onSnapshot(q, (snapshot) => {
                     notificationsList.innerHTML = "";
@@ -504,26 +527,33 @@
                         notificationBadge.style.display = 'none';
                         return;
                     }
-                    const firstDoc = snapshot.docs[0];
-                    latestNotificationTimestamp = firstDoc.data().createdAt?.toDate();
-                    if (latestNotificationTimestamp && latestNotificationTimestamp > lastSeenTimestamp) {
-                        notificationBadge.style.display = 'block';
+
+                    if (userId) { // Badge logic only for registered users
+                        const firstDoc = snapshot.docs[0];
+                        latestNotificationTimestamp = firstDoc.data().createdAt?.toDate();
+                        if (latestNotificationTimestamp && latestNotificationTimestamp > lastSeenTimestamp) {
+                            notificationBadge.style.display = 'block';
+                        } else {
+                            notificationBadge.style.display = 'none';
+                        }
                     } else {
-                        notificationBadge.style.display = 'none';
+                         notificationBadge.style.display = 'none';
                     }
+
                     snapshot.forEach(docSnapshot => {
                         const notification = docSnapshot.data();
                         const date = notification.createdAt?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }) || '';
                         const item = document.createElement('div');
                         item.className = 'notification-item';
                         let deleteIconHTML = '';
-                        if (currentUserRole === 'developer') {
+                        if (currentUserRole === 'developer' && userId) {
                             deleteIconHTML = `<i class="bi bi-trash delete-notification-btn" data-id="${docSnapshot.id}" style="display: inline-block;"></i>`;
                         }
                         item.innerHTML = `${deleteIconHTML}<div class="d-flex justify-content-between align-items: center"><h6 class="notification-title mb-1">${notification.title}</h6><span class="notification-date">${date}</span></div><p class="notification-body mb-0">${notification.message}</p>`;
                         notificationsList.appendChild(item);
                     });
-                    if (currentUserRole === 'developer') {
+
+                    if (currentUserRole === 'developer' && userId) {
                         document.querySelectorAll('.delete-notification-btn').forEach(button => {
                             button.addEventListener('click', async (e) => {
                                 e.stopPropagation();
@@ -536,12 +566,14 @@
                     }
                 });
             }
+
             notificationsModalEl.addEventListener('show.bs.modal', async () => {
                 const user = auth.currentUser;
-                if (!user || !latestNotificationTimestamp) return;
-                notificationBadge.style.display = 'none';
-                const userDocRef = doc(db, "users", user.uid);
-                try { await updateDoc(userDocRef, { lastSeenNotificationTimestamp: latestNotificationTimestamp }); } catch (error) { console.error("Error updating last seen timestamp: ", error); }
+                if (user && !user.isAnonymous && latestNotificationTimestamp) {
+                    notificationBadge.style.display = 'none';
+                    const userDocRef = doc(db, "users", user.uid);
+                    try { await updateDoc(userDocRef, { lastSeenNotificationTimestamp: latestNotificationTimestamp }); } catch (error) { console.error("Error updating last seen timestamp: ", error); }
+                }
             });
             
             const sendNotificationBtn = document.getElementById('send-notification-btn');
@@ -617,7 +649,7 @@
             setDateButton.addEventListener('click', () => dateTimePicker.showPicker());
             dateTimePicker.addEventListener('change', async (e) => {
                 const user = auth.currentUser;
-                if (user && e.target.value) {
+                if (user && !user.isAnonymous && e.target.value) {
                     const newStartTime = new Date(e.target.value);
                     if (!isNaN(newStartTime.getTime())) {
                         const userDocRef = doc(db, "users", user.uid);
@@ -632,7 +664,7 @@
             confirmResetModal.addEventListener('click', (e) => { if (e.target === confirmResetModal) closeConfirmModal(); });
             confirmResetActionButton.addEventListener('click', async () => {
                 const user = auth.currentUser;
-                if (user) {
+                if (user && !user.isAnonymous) {
                     const newStartTime = new Date();
                     const userDocRef = doc(db, "users", user.uid);
                     await setDoc(userDocRef, { timerStartDate: newStartTime }, { merge: true });
