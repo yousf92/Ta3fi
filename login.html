@@ -63,13 +63,19 @@
         .btn-primary:hover {
             background: #667eea;
         }
+        /* New secondary button style for guest login */
         .btn-secondary {
-            background-color: #4a4a4a;
-            border-color: #6c757d;
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: bold;
+            background-color: #3a3a3a;
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text-color);
+            transition: background-color 0.3s, color 0.3s;
         }
         .btn-secondary:hover {
-            background-color: #5a5a5a;
-            border-color: #8c959d;
+            background-color: #4a4a4a;
+            color: var(--text-color);
         }
         h2 {
             color: #FFFFFF; /* White title */
@@ -81,23 +87,9 @@
         a {
             color: #8ab4f8;
         }
-        .divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
+        .divider-text {
             color: var(--secondary-text-color);
-            margin: 20px 0;
-        }
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .divider:not(:empty)::before {
-            margin-right: .25em;
-        }
-        .divider:not(:empty)::after {
-            margin-left: .25em;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -105,7 +97,7 @@
 
     <div class="form-container text-center">
         <h2>مرحبا بعودتك!</h2>
-        <p class="text-muted mb-4">سجل الدخول للمتابعة إلى غرفة الدردشة</p>
+        <p class="text-muted mb-4">سجل الدخول للمتابعة إلى حسابك</p>
         
         <div class="mb-3 text-end">
             <label for="signin-email" class="form-label">البريد الإلكتروني</label>
@@ -121,10 +113,10 @@
         <div id="auth-message" class="alert mt-3 d-none"></div>
 
         <p class="mt-4 text-muted">ليس لديك حساب؟ <a href="signup.html">إنشاء حساب جديد</a></p>
-
-        <div class="divider">أو</div>
         
-        <button id="guest-signin-button" class="btn btn-secondary w-100">الدخول كزائر</button>
+        <p class="divider-text my-3">أو</p>
+
+        <button id="guest-signin-button" class="btn btn-secondary w-100">الدخول كزائر للدردشة</button>
     </div>
 
     <script type="module">
@@ -150,7 +142,9 @@
         }
 
         onAuthStateChanged(auth, user => {
-            if (user) { // Redirect both verified and anonymous users
+            // This logic allows verified users to be redirected automatically.
+            // Anonymous users will be handled by the button click.
+            if (user && user.emailVerified) {
                 window.location.href = 'main.html';
             }
         });
@@ -162,25 +156,43 @@
             if (!email || !password) {
                 return showAuthMessage("الرجاء إدخال البريد الإلكتروني وكلمة المرور.");
             }
+            signinButton.disabled = true; // Disable button
+            signinButton.textContent = 'جاري التحقق...';
+
             signInWithEmailAndPassword(auth, email, password)
                 .then(userCredential => {
                     if (!userCredential.user.emailVerified) {
                         showAuthMessage("حسابك غير مفعل. الرجاء التحقق من بريدك الإلكتروني.");
+                        signinButton.disabled = false; // Re-enable button
+                        signinButton.textContent = 'تسجيل الدخول';
                     } else {
-                        // onAuthStateChanged will handle redirection
+                        // The onAuthStateChanged listener will handle the redirect.
                     }
                 })
-                .catch(error => showAuthMessage("خطأ: البريد الإلكتروني أو كلمة المرور غير صحيحة."));
+                .catch(error => {
+                    showAuthMessage("خطأ: البريد الإلكتروني أو كلمة المرور غير صحيحة.");
+                    signinButton.disabled = false; // Re-enable button
+                    signinButton.textContent = 'تسجيل الدخول';
+                });
         });
 
         const guestSigninButton = document.getElementById('guest-signin-button');
         guestSigninButton.addEventListener('click', () => {
+            guestSigninButton.disabled = true;
+            guestSigninButton.textContent = 'جاري الدخول...';
+
             signInAnonymously(auth)
-                .catch(error => {
+                .then(() => {
+                    // === لێرە گۆڕانکارییەکە کرا ===
+                    // لە جیاتی main.html، ڕەوانەی chat.html دەکرێت
+                    window.location.href = 'chat.html';
+                })
+                .catch((error) => {
                     console.error("Anonymous sign-in failed:", error);
-                    showAuthMessage("حدث خطأ أثناء محاولة الدخول كزائر.");
+                    showAuthMessage("فشل تسجيل الدخول كزائر. الرجاء المحاولة مرة أخرى.");
+                    guestSigninButton.disabled = false; // Re-enable button
+                    guestSigninButton.textContent = 'الدخول كزائر للدردشة';
                 });
-            // onAuthStateChanged will handle redirection
         });
     </script>
 
