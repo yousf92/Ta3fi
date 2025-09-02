@@ -63,14 +63,6 @@
         .btn-primary:hover {
             background: #667eea;
         }
-        .btn-secondary {
-            background-color: #4a4a4a;
-            border-color: #6c757d;
-        }
-        .btn-secondary:hover {
-            background-color: #5a5a5a;
-            border-color: #8c959d;
-        }
         h2 {
             color: #FFFFFF; /* White title */
             font-weight: 700;
@@ -80,24 +72,6 @@
         }
         a {
             color: #8ab4f8;
-        }
-        .divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            color: var(--secondary-text-color);
-            margin: 20px 0;
-        }
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .divider:not(:empty)::before {
-            margin-right: .25em;
-        }
-        .divider:not(:empty)::after {
-            margin-left: .25em;
         }
     </style>
 </head>
@@ -121,15 +95,11 @@
         <div id="auth-message" class="alert mt-3 d-none"></div>
 
         <p class="mt-4 text-muted">ليس لديك حساب؟ <a href="signup.html">إنشاء حساب جديد</a></p>
-
-        <div class="divider">أو</div>
-        
-        <button id="guest-signin-button" class="btn btn-secondary w-100">الدخول كزائر</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -150,7 +120,7 @@
         }
 
         onAuthStateChanged(auth, user => {
-            if (user) { // Redirect both verified and anonymous users
+            if (user && user.emailVerified) {
                 window.location.href = 'main.html';
             }
         });
@@ -167,20 +137,10 @@
                     if (!userCredential.user.emailVerified) {
                         showAuthMessage("حسابك غير مفعل. الرجاء التحقق من بريدك الإلكتروني.");
                     } else {
-                        // onAuthStateChanged will handle redirection
+                        window.location.href = 'main.html';
                     }
                 })
                 .catch(error => showAuthMessage("خطأ: البريد الإلكتروني أو كلمة المرور غير صحيحة."));
-        });
-
-        const guestSigninButton = document.getElementById('guest-signin-button');
-        guestSigninButton.addEventListener('click', () => {
-            signInAnonymously(auth)
-                .catch(error => {
-                    console.error("Anonymous sign-in failed:", error);
-                    showAuthMessage("حدث خطأ أثناء محاولة الدخول كزائر.");
-                });
-            // onAuthStateChanged will handle redirection
         });
     </script>
 
