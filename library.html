@@ -126,6 +126,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
+        // Firebase initialization is not strictly necessary if the page is public,
+        // but it's good practice to keep it for consistency in case you add
+        // user-specific features later.
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         
@@ -141,11 +144,10 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        onAuthStateChanged(auth, (user) => {
-            if (!user || !user.emailVerified) {
-                window.location.href = 'index.html';
-            }
-        });
+        // This page is now public, so we don't need to check for a logged-in user.
+        // The onAuthStateChanged listener is removed.
+        // Everyone can see the "under development" message.
+        
     </script>
 </body>
 </html>

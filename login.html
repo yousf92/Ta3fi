@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إنشاء حساب جديد</title>
+    <title>تسجيل الدخول</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -52,16 +52,24 @@
             color: var(--text-color);
             box-shadow: 0 0 0 0.25rem rgba(0, 168, 132, 0.25);
         }
-        .btn-success {
+        .btn-primary {
             border-radius: 10px;
             padding: 12px;
             font-weight: bold;
-            background: #28a745;
+            background: #764ba2;
             border: none;
             transition: background 0.3s;
         }
-        .btn-success:hover {
-            background: #218838;
+        .btn-primary:hover {
+            background: #667eea;
+        }
+        .btn-secondary {
+            background-color: #4a4a4a;
+            border-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a5a5a;
+            border-color: #8c959d;
         }
         h2 {
             color: #FFFFFF; /* White title */
@@ -73,38 +81,55 @@
         a {
             color: #8ab4f8;
         }
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--secondary-text-color);
+            margin: 20px 0;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .divider:not(:empty)::before {
+            margin-right: .25em;
+        }
+        .divider:not(:empty)::after {
+            margin-left: .25em;
+        }
     </style>
 </head>
 <body>
 
     <div class="form-container text-center">
-        <h2>انضم إلينا!</h2>
-        <p class="text-muted mb-4">أنشئ حسابك وابدأ الدردشة فورا</p>
+        <h2>مرحبا بعودتك!</h2>
+        <p class="text-muted mb-4">سجل الدخول للمتابعة إلى غرفة الدردشة</p>
         
         <div class="mb-3 text-end">
-            <label for="signup-name" class="form-label">الاسم الكامل</label>
-            <input type="text" id="signup-name" class="form-control" required>
+            <label for="signin-email" class="form-label">البريد الإلكتروني</label>
+            <input type="email" id="signin-email" class="form-control" required>
         </div>
         <div class="mb-3 text-end">
-            <label for="signup-email" class="form-label">البريد الإلكتروني</label>
-            <input type="email" id="signup-email" class="form-control" required>
-        </div>
-        <div class="mb-3 text-end">
-            <label for="signup-password" class="form-label">كلمة المرور</label>
-            <input type="password" id="signup-password" class="form-control" required>
+            <label for="signin-password" class="form-label">كلمة المرور</label>
+            <input type="password" id="signin-password" class="form-control" required>
         </div>
         
-        <button id="signup-button" class="btn btn-success w-100 mt-3">إنشاء حساب</button>
+        <button id="signin-button" class="btn btn-primary w-100 mt-3">تسجيل الدخول</button>
         
         <div id="auth-message" class="alert mt-3 d-none"></div>
 
-        <p class="mt-4 text-muted">لديك حساب بالفعل؟ <a href="index.html">تسجيل الدخول</a></p>
+        <p class="mt-4 text-muted">ليس لديك حساب؟ <a href="signup.html">إنشاء حساب جديد</a></p>
+
+        <div class="divider">أو</div>
+        
+        <button id="guest-signin-button" class="btn btn-secondary w-100">الدخول كزائر</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -117,7 +142,6 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
 
         const authMessage = document.getElementById('auth-message');
         function showAuthMessage(message, isError = true) {
@@ -125,43 +149,38 @@
             authMessage.className = `alert mt-3 ${isError ? 'alert-danger' : 'alert-success'}`;
         }
 
-        const signupButton = document.getElementById('signup-button');
-        signupButton.addEventListener('click', () => {
-            const name = document.getElementById('signup-name').value.trim();
-            const email = document.getElementById('signup-email').value.trim();
-            const password = document.getElementById('signup-password').value.trim();
-            if (!name || !email || !password) {
-                return showAuthMessage("الرجاء ملء جميع الحقول.");
+        onAuthStateChanged(auth, user => {
+            if (user) { // Redirect both verified and anonymous users
+                window.location.href = 'main.html';
             }
-            if (password.length < 6) {
-                return showAuthMessage("يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.");
+        });
+
+        const signinButton = document.getElementById('signin-button');
+        signinButton.addEventListener('click', () => {
+            const email = document.getElementById('signin-email').value.trim();
+            const password = document.getElementById('signin-password').value.trim();
+            if (!email || !password) {
+                return showAuthMessage("الرجاء إدخال البريد الإلكتروني وكلمة المرور.");
             }
-            
-            createUserWithEmailAndPassword(auth, email, password)
+            signInWithEmailAndPassword(auth, email, password)
                 .then(userCredential => {
-                    const user = userCredential.user;
-                    // Update profile and create user document in Firestore
-                    return Promise.all([
-                        updateProfile(user, { displayName: name }),
-                        setDoc(doc(db, "users", user.uid), {
-                            displayName: name,
-                            email: email,
-                            role: 'user', // Default role
-                            createdAt: new Date()
-                        }),
-                        sendEmailVerification(user)
-                    ]);
-                })
-                .then(() => {
-                    showAuthMessage("تم إنشاء حسابك بنجاح! لتفعيله، يرجى التحقق من بريدك الإلكتروني. ملاحظة هامة: ستجد رسالة التفعيل في مجلد البريد المزعج (Spam)، وليس في البريد الوارد. بعد الضغط على رابط التفعيل، يمكنك تسجيل الدخول.", false);
-                })
-                .catch(error => {
-                    if (error.code === 'auth/email-already-in-use') {
-                        showAuthMessage("هذا البريد الإلكتروني مستخدم بالفعل.");
+                    if (!userCredential.user.emailVerified) {
+                        showAuthMessage("حسابك غير مفعل. الرجاء التحقق من بريدك الإلكتروني.");
                     } else {
-                        showAuthMessage("خطأ: " + error.message);
+                        // onAuthStateChanged will handle redirection
                     }
+                })
+                .catch(error => showAuthMessage("خطأ: البريد الإلكتروني أو كلمة المرور غير صحيحة."));
+        });
+
+        const guestSigninButton = document.getElementById('guest-signin-button');
+        guestSigninButton.addEventListener('click', () => {
+            signInAnonymously(auth)
+                .catch(error => {
+                    console.error("Anonymous sign-in failed:", error);
+                    showAuthMessage("حدث خطأ أثناء محاولة الدخول كزائر.");
                 });
+            // onAuthStateChanged will handle redirection
         });
     </script>
 

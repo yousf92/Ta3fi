@@ -155,25 +155,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUserRole = 'user';
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user && user.emailVerified) {
-                const userDocRef = doc(db, "users", user.uid);
-                const userDoc = await getDoc(userDocRef);
-                if (userDoc.exists() && (userDoc.data().role === 'admin' || userDoc.data().role === 'developer')) {
-                    currentUserRole = userDoc.data().role;
-                    adminArticleForm.style.display = 'block';
-                } else {
-                    currentUserRole = 'user';
-                    adminArticleForm.style.display = 'none';
-                }
-                loadArticles(); 
-            } else {
-                window.location.href = 'index.html';
-            }
-        });
-
         const adminArticleForm = document.getElementById('admin-article-form');
         const articlesList = document.getElementById('articles-list');
         const saveArticleButton = document.getElementById('save-article-button');
@@ -187,6 +168,29 @@
         const articleModal = new bootstrap.Modal(articleModalEl);
         const CLOUDINARY_CLOUD_NAME = "dbkzk1oe2";
         const CLOUDINARY_UPLOAD_PRESET = "my-articles";
+
+        let currentUserRole = 'user';
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user && user.emailVerified) {
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists() && (userDoc.data().role === 'admin' || userDoc.data().role === 'developer')) {
+                    currentUserRole = userDoc.data().role;
+                    adminArticleForm.style.display = 'block';
+                } else {
+                    currentUserRole = 'user';
+                    adminArticleForm.style.display = 'none';
+                }
+            } else {
+                // Visitor
+                currentUserRole = 'user';
+                adminArticleForm.style.display = 'none';
+            }
+            // Load articles for everyone
+            loadArticles(); 
+        });
+
 
         async function uploadToCloudinary(file) {
             const formData = new FormData();

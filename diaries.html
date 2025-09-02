@@ -86,7 +86,7 @@
         
         .add-note-btn { position: fixed; left: 20px; bottom: 100px; width: 60px; height: 60px; background-color: var(--primary-color); color: white; border-radius: 50%; display: none; /* سەرەتا شاردراوەتەوە */ align-items: center; justify-content: center; font-size: 1.8rem; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 1021; border: none; cursor: pointer; }
         
-        .modal-content { background-color: var(--background-color); border: 1px solid var(--border-color); }
+        .modal-content { background-color: var(--background-color); border: 1px solid var(--border-color); color: var(--text-color); }
         .modal-header { border-bottom: 1px solid var(--border-color); }
         .modal-header .btn-close { filter: invert(1) grayscale(100%) brightness(200%); margin: 0 -0.5rem 0 auto; }
         .modal-title { color: #FFFFFF; }
@@ -159,37 +159,73 @@
         let currentUserId = null;
 
         onAuthStateChanged(auth, user => {
+            addNoteBtn.style.display = 'flex'; // Show add button for everyone
             if (user && user.emailVerified) {
                 currentUserId = user.uid;
-                addNoteBtn.style.display = 'flex'; // Show the add button
-                loadNotes(currentUserId);
+                loadNotesFromFirestore(currentUserId);
             } else {
-                window.location.href = 'index.html';
+                // Visitor mode
+                currentUserId = null;
+                loadNotesFromLocalStorage();
             }
         });
 
-        function loadNotes(userId) {
+        // --- Firestore Functions ---
+        function loadNotesFromFirestore(userId) {
             const notesQuery = query(collection(db, "notes"), where("userId", "==", userId), orderBy("createdAt", "desc"));
-            
             onSnapshot(notesQuery, (snapshot) => {
-                loadingSpinner.style.display = 'none'; // Hide spinner on first data load
-                notesContainer.innerHTML = ''; // Clear previous notes
-                
+                loadingSpinner.style.display = 'none';
+                notesContainer.innerHTML = '';
                 if (snapshot.empty) {
-                    notesContainer.innerHTML = `<div class="card text-center mt-3"><div class="card-body"><h5 class="card-title">لا توجد ملاحظات</h5><p class="card-text text-muted">أضف أول ملاحظة لك باستخدام الزر الأخضر!</p></div></div>`;
+                    displayEmptyNotesMessage();
                 } else {
                     snapshot.forEach(doc => createNoteCard(doc.data(), doc.id));
                 }
             }, (error) => {
                 console.error("Firestore Error:", error);
-                loadingSpinner.style.display = 'none';
-                notesContainer.innerHTML = `<div class="alert alert-danger text-center"><h5>خطأ في الاتصال</h5><p>حدث خطأ أثناء تحميل ملاحظاتك. الرجاء التأكد من اتصالك بالإنترنت والمحاولة مرة أخرى.</p></div>`;
+                displayErrorMessage();
             });
+        }
+
+        // --- Local Storage Functions ---
+        function getVisitorNotes() {
+            try {
+                return JSON.parse(localStorage.getItem('visitorNotes')) || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveVisitorNotes(notes) {
+            localStorage.setItem('visitorNotes', JSON.stringify(notes));
+        }
+
+        function loadNotesFromLocalStorage() {
+            loadingSpinner.style.display = 'none';
+            notesContainer.innerHTML = '';
+            const notes = getVisitorNotes();
+            // Sort by ID (timestamp) descending to show newest first
+            notes.sort((a, b) => b.id - a.id); 
+            if (notes.length === 0) {
+                displayEmptyNotesMessage();
+            } else {
+                notes.forEach(note => createNoteCard(note, note.id));
+            }
+        }
+        
+        // --- UI Helper Functions ---
+        function displayEmptyNotesMessage() {
+            notesContainer.innerHTML = `<div class="card text-center mt-3" style="background-color: #000; color: #fff;"><div class="card-body"><h5 class="card-title">لا توجد يوميات</h5><p class="card-text text-muted">أضف أول يومية لك باستخدام الزر الأخضر!</p></div></div>`;
+        }
+        
+        function displayErrorMessage() {
+            loadingSpinner.style.display = 'none';
+            notesContainer.innerHTML = `<div class="alert alert-danger text-center"><h5>خطأ في الاتصال</h5><p>حدث خطأ أثناء تحميل ملاحظاتك. الرجاء التأكد من اتصالك بالإنترنت والمحاولة مرة أخرى.</p></div>`;
         }
 
         function createNoteCard(note, noteId) {
             const content = note.content || '';
-            const displayContent = content.length > 150 ? `${content.substring(0, 150)}... <a href="#" class="read-more-btn">قراءة المزيد...</a>` : content;
+            const displayContent = content.length > 150 ? `${content.substring(0, 150)}... <a href="#" class="read-more-btn" data-bs-toggle="modal" data-bs-target="#readNoteModal">قراءة المزيد...</a>` : content;
             
             const noteCardHTML = `
                 <div class="card note-card" data-note-id="${noteId}" data-full-note="${encodeURIComponent(content)}" data-mood-emoji="${note.moodEmoji}" data-mood-text="${note.moodText}" data-date="${note.date}">
@@ -212,28 +248,41 @@
             notesContainer.insertAdjacentHTML('beforeend', noteCardHTML);
         }
 
-        // Make functions available globally for the other script tag
+        // --- Global Functions for UI Script ---
         window.saveNote = async (noteData) => {
-            if (!currentUserId) return;
-            try {
-                await addDoc(collection(db, "notes"), {
-                    ...noteData,
-                    userId: currentUserId,
-                    createdAt: serverTimestamp()
-                });
-            } catch (e) {
-                console.error("Error adding document: ", e);
-                alert("حدث خطأ أثناء حفظ الملاحظة.");
+            if (currentUserId) { // Logged-in user
+                try {
+                    await addDoc(collection(db, "notes"), {
+                        ...noteData,
+                        userId: currentUserId,
+                        createdAt: serverTimestamp()
+                    });
+                } catch (e) {
+                    console.error("Error adding document to Firestore: ", e);
+                    alert("حدث خطأ أثناء حفظ اليومية.");
+                }
+            } else { // Visitor
+                const notes = getVisitorNotes();
+                notes.push({ ...noteData, id: Date.now() }); // Use timestamp as a unique ID
+                saveVisitorNotes(notes);
+                loadNotesFromLocalStorage();
             }
         };
 
         window.deleteNote = async (noteId) => {
-            if (!currentUserId) return;
-            try {
-                await deleteDoc(doc(db, "notes", noteId));
-            } catch (e) {
-                console.error("Error deleting document: ", e);
-                alert("حدث خطأ أثناء حذف الملاحظة.");
+            if (currentUserId) { // Logged-in user
+                try {
+                    await deleteDoc(doc(db, "notes", noteId));
+                } catch (e) {
+                    console.error("Error deleting document from Firestore: ", e);
+                    alert("حدث خطأ أثناء حذف اليومية.");
+                }
+            } else { // Visitor
+                let notes = getVisitorNotes();
+                // noteId from visitor is a timestamp string, convert to number for comparison
+                notes = notes.filter(note => note.id !== Number(noteId));
+                saveVisitorNotes(notes);
+                loadNotesFromLocalStorage();
             }
         };
     </script>
@@ -243,7 +292,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             const addNoteModal = new bootstrap.Modal(document.getElementById('addNoteModal'));
             const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-            const readNoteModal = new bootstrap.Modal(document.getElementById('readNoteModal'));
+            const readNoteModalEl = document.getElementById('readNoteModal');
+            const readNoteModal = new bootstrap.Modal(readNoteModalEl);
             
             let cardToDelete = null;
 
@@ -271,7 +321,7 @@
                 const formattedDate = selectedDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
                 const selectedMood = moods[parseInt(moodSlider.value)];
                 const noteContent = noteContentInput.value.trim();
-                if (!noteContent) { alert('يرجى كتابة محتوى الملاحظة.'); return; }
+                if (!noteContent) { alert('يرجى كتابة محتوى اليومية.'); return; }
                 
                 const noteData = {
                     date: formattedDate,
@@ -296,22 +346,26 @@
                     confirmDeleteModal.show();
                     return;
                 }
+            });
 
-                const readMoreBtn = e.target.closest('.read-more-btn');
-                if (readMoreBtn) {
-                    e.preventDefault();
-                    const card = readMoreBtn.closest('.note-card');
-                    document.getElementById('full-note-content').innerHTML = decodeURIComponent(card.dataset.fullNote).replace(/\n/g, '<br>');
-                    document.getElementById('readNoteModalHeader').innerHTML = `
-                        <div class="d-flex align-items-center">
-                            <span class="fs-4 me-3">${card.dataset.moodEmoji}</span>
-                            <div>
-                                <h5 class="m-0">${card.dataset.moodText}</h5>
-                                <small class="text-muted">${card.dataset.date}</small>
-                            </div>
-                        </div>`;
-                    readNoteModal.show();
-                }
+            readNoteModalEl.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget; 
+                const card = button.closest('.note-card');
+                
+                const fullNote = decodeURIComponent(card.dataset.fullNote);
+                const moodEmoji = card.dataset.moodEmoji;
+                const moodText = card.dataset.moodText;
+                const date = card.dataset.date;
+
+                document.getElementById('full-note-content').innerHTML = fullNote.replace(/\n/g, '<br>');
+                document.getElementById('readNoteModalHeader').innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <span class="fs-4 me-3">${moodEmoji}</span>
+                        <div>
+                            <h5 class="m-0">${moodText}</h5>
+                            <small class="text-muted">${date}</small>
+                        </div>
+                    </div>`;
             });
 
             document.getElementById('confirm-delete-btn').addEventListener('click', () => {
@@ -329,3 +383,4 @@
 
 </body>
 </html>
+
