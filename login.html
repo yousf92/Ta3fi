@@ -18,7 +18,7 @@
         }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: #121212; /* Dark background */
+            background: #121212;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -34,6 +34,7 @@
             width: 100%;
             box-shadow: 0 15px 35px rgba(0,0,0,0.4);
             border: 1px solid var(--border-color);
+            transition: height 0.3s ease;
         }
         .form-control {
             border-radius: 10px;
@@ -56,14 +57,13 @@
             border-radius: 10px;
             padding: 12px;
             font-weight: bold;
-            background: #764ba2;
+            background-color: var(--primary-color);
             border: none;
             transition: background 0.3s;
         }
         .btn-primary:hover {
-            background: #667eea;
+            background-color: #008a69;
         }
-        /* New secondary button style for guest login */
         .btn-secondary {
             border-radius: 10px;
             padding: 12px;
@@ -78,7 +78,7 @@
             color: var(--text-color);
         }
         h2 {
-            color: #FFFFFF; /* White title */
+            color: #FFFFFF;
             font-weight: 700;
         }
         .text-muted {
@@ -86,37 +86,41 @@
         }
         a {
             color: #8ab4f8;
+            text-decoration: none;
         }
-        .divider-text {
-            color: var(--secondary-text-color);
-            font-size: 0.9rem;
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
 
     <div class="form-container text-center">
-        <h2>مرحبا بعودتك!</h2>
-        <p class="text-muted mb-4">سجل الدخول للمتابعة إلى حسابك</p>
-        
-        <div class="mb-3 text-end">
-            <label for="signin-email" class="form-label">البريد الإلكتروني</label>
-            <input type="email" id="signin-email" class="form-control" required>
+        <!-- Initial View -->
+        <div id="initial-view">
+            <h2>أهلاً بك في رحلتك</h2>
+            <p class="text-muted mb-4">ابدأ الآن وتصفح التطبيق كزائر</p>
+            <button id="guest-signin-button" class="btn btn-primary w-100 mb-3">الدخول كزائر</button>
+            <button id="show-email-login-btn" class="btn btn-secondary w-100">لدي حساب بالفعل</button>
+            <p class="mt-4 text-muted">ليس لديك حساب؟ <a href="signup.html">إنشاء حساب جديد</a></p>
         </div>
-        <div class="mb-3 text-end">
-            <label for="signin-password" class="form-label">كلمة المرور</label>
-            <input type="password" id="signin-password" class="form-control" required>
+
+        <!-- Email Login View (Hidden by default) -->
+        <div id="email-login-view" class="d-none">
+            <h2>مرحبا بعودتك!</h2>
+            <p class="text-muted mb-4">سجل الدخول للمتابعة إلى حسابك</p>
+            <div class="mb-3 text-end">
+                <label for="signin-email" class="form-label">البريد الإلكتروني</label>
+                <input type="email" id="signin-email" class="form-control" required>
+            </div>
+            <div class="mb-3 text-end">
+                <label for="signin-password" class="form-label">كلمة المرور</label>
+                <input type="password" id="signin-password" class="form-control" required>
+            </div>
+            <button id="signin-button" class="btn btn-primary w-100 mt-3">تسجيل الدخول</button>
+            <div id="auth-message" class="alert mt-3 d-none"></div>
+            <p class="mt-4 text-muted"><a href="#" id="back-to-initial-view">&larr; العودة</a></p>
         </div>
-        
-        <button id="signin-button" class="btn btn-primary w-100 mt-3">تسجيل الدخول</button>
-        
-        <div id="auth-message" class="alert mt-3 d-none"></div>
-
-        <p class="mt-4 text-muted">ليس لديك حساب؟ <a href="signup.html">إنشاء حساب جديد</a></p>
-        
-        <p class="divider-text my-3">أو</p>
-
-        <button id="guest-signin-button" class="btn btn-secondary w-100">الدخول كزائر للدردشة</button>
     </div>
 
     <script type="module">
@@ -136,16 +140,40 @@
         const auth = getAuth(app);
 
         const authMessage = document.getElementById('auth-message');
+        const initialView = document.getElementById('initial-view');
+        const emailLoginView = document.getElementById('email-login-view');
+        const showEmailLoginBtn = document.getElementById('show-email-login-btn');
+        const backToInitialViewLink = document.getElementById('back-to-initial-view');
+
+        // Function to switch to email login view
+        showEmailLoginBtn.addEventListener('click', () => {
+            initialView.classList.add('d-none');
+            emailLoginView.classList.remove('d-none');
+        });
+
+        // Function to switch back to initial view
+        backToInitialViewLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            emailLoginView.classList.add('d-none');
+            initialView.classList.remove('d-none');
+        });
+
+
         function showAuthMessage(message, isError = true) {
             authMessage.textContent = message;
             authMessage.className = `alert mt-3 ${isError ? 'alert-danger' : 'alert-success'}`;
         }
 
         onAuthStateChanged(auth, user => {
-            // This logic allows verified users to be redirected automatically.
-            // Anonymous users will be handled by the button click.
-            if (user && user.emailVerified) {
-                window.location.href = 'main.html';
+            if (user && (user.emailVerified || user.isAnonymous)) {
+                // Check which page the guest should be redirected to
+                // Based on the provided file, guests who sign in from `login.html` are sent to `chat.html`
+                // Regular users are sent to `main.html`
+                if(user.isAnonymous) {
+                     window.location.href = 'chat.html';
+                } else {
+                     window.location.href = 'main.html';
+                }
             }
         });
 
@@ -156,22 +184,20 @@
             if (!email || !password) {
                 return showAuthMessage("الرجاء إدخال البريد الإلكتروني وكلمة المرور.");
             }
-            signinButton.disabled = true; // Disable button
+            signinButton.disabled = true;
             signinButton.textContent = 'جاري التحقق...';
-
             signInWithEmailAndPassword(auth, email, password)
                 .then(userCredential => {
                     if (!userCredential.user.emailVerified) {
                         showAuthMessage("حسابك غير مفعل. الرجاء التحقق من بريدك الإلكتروني.");
-                        signinButton.disabled = false; // Re-enable button
+                        signinButton.disabled = false;
                         signinButton.textContent = 'تسجيل الدخول';
-                    } else {
-                        // The onAuthStateChanged listener will handle the redirect.
                     }
+                    // onAuthStateChanged will handle the redirect on success
                 })
                 .catch(error => {
                     showAuthMessage("خطأ: البريد الإلكتروني أو كلمة المرور غير صحيحة.");
-                    signinButton.disabled = false; // Re-enable button
+                    signinButton.disabled = false;
                     signinButton.textContent = 'تسجيل الدخول';
                 });
         });
@@ -180,20 +206,16 @@
         guestSigninButton.addEventListener('click', () => {
             guestSigninButton.disabled = true;
             guestSigninButton.textContent = 'جاري الدخول...';
-
             signInAnonymously(auth)
-                .then(() => {
-                    // === لێرە گۆڕانکارییەکە کرا ===
-                    // لە جیاتی main.html، ڕەوانەی chat.html دەکرێت
-                    window.location.href = 'chat.html';
-                })
                 .catch((error) => {
                     console.error("Anonymous sign-in failed:", error);
                     showAuthMessage("فشل تسجيل الدخول كزائر. الرجاء المحاولة مرة أخرى.");
-                    guestSigninButton.disabled = false; // Re-enable button
-                    guestSigninButton.textContent = 'الدخول كزائر للدردشة';
+                    guestSigninButton.disabled = false;
+                    guestSigninButton.textContent = 'الدخول كزائر';
                 });
+            // onAuthStateChanged will handle the redirect on success
         });
+
     </script>
 
 </body>
