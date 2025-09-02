@@ -219,7 +219,7 @@
         // --- زیادکردنی پێداویستییەکانی Firestore ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -236,7 +236,7 @@
         const db = getFirestore(app);
 
         let currentUserId = null;
-        let userHabitData = {}; // گۆڕاوێک بۆ هەڵگرتنی داتای بەکارهێنەر
+        let userHabitData = {}; // گۆڕاوێک بۆ هەڵگرتنی داتای بەکارهێنەر لە کاتی کارکردندا
 
         onAuthStateChanged(auth, (user) => {
             if (user && user.emailVerified) {
@@ -273,11 +273,18 @@
             if (!currentUserId) return;
             const userDocRef = doc(db, "users", currentUserId);
             try {
-                await setDoc(userDocRef, { habitData: data }, { merge: true });
+                // بەکارهێنانی updateDoc بۆ ئەوەی تەنها habitData نوێ بکرێتەوە بێ سڕینەوەی داتای تر
+                await updateDoc(userDocRef, { habitData: data });
                 userHabitData = data; // نوێکردنەوەی داتای ناوخۆیی
             } catch (error) {
-                console.error("Error saving habit data: ", error);
-                alert("هەڵەیەک ڕوویدا لەکاتی خەزنکردنی داتاکان.");
+                // ئەگەر دۆکیومێنتەکە بوونی نەبوو، دروستی بکە
+                if (error.code === 'not-found') {
+                    await setDoc(userDocRef, { habitData: data }, { merge: true });
+                    userHabitData = data;
+                } else {
+                    console.error("Error saving habit data: ", error);
+                    alert("هەڵەیەک ڕوویدا لەکاتی خەزنکردنی داتاکان.");
+                }
             }
         }
 
@@ -286,7 +293,7 @@
         }
 
         async function autoFillAbsence() {
-            const habitData = await getHabitData(); // دڵنیابوون لەوەی نوێترین داتا بەکاردێت
+            const habitData = await getHabitData();
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
@@ -330,10 +337,9 @@
                 daysEl.innerHTML += `<div></div>`;
             }
 
-            const habitData = userHabitData; // بەکارهێنانی داتای خەزنکراو
+            const habitData = userHabitData;
             let counts = { absence: 0, relapse: 0, slip: 0, victory: 0 };
 
-            // ژماردنی هەموو حاڵەتەکان لە داتاکاندا
             for (const dateStr in habitData) {
                 const status = habitData[dateStr];
                 if (counts[status] !== undefined) {
@@ -368,7 +374,7 @@
         }
 
         async function initializeCalendar() {
-            await renderCalendar(); // گۆڕدرا بۆ async
+            await renderCalendar();
 
             prevMonthBtn.addEventListener('click', () => {
                 currentDate.setMonth(currentDate.getMonth() - 1);
@@ -381,16 +387,16 @@
             });
 
             document.querySelectorAll('#addStatusModal button[data-status]').forEach(button => {
-                button.addEventListener('click', async () => { // گۆڕدرا بۆ async
+                button.addEventListener('click', async () => {
                     const status = button.dataset.status;
                     const dateString = toDateString(new Date());
                     
-                    const habitData = await getHabitData(); // هێنانی نوێترین داتا
-                    habitData[dateString] = status;
-                    await saveHabitData(habitData); // خەزنکردنی داتای نوێ
+                    const currentData = await getHabitData();
+                    currentData[dateString] = status;
+                    await saveHabitData(currentData);
                     
                     addStatusModal.hide();
-                    await renderCalendar(); // دووبارە پیشاندانەوە
+                    await renderCalendar();
                 });
             });
         }
