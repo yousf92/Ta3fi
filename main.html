@@ -189,6 +189,110 @@
         }
         /* === END: Animation Styles (Updated) === */
 
+        /* === START: Fire Animation === */
+        .action-button.najda-style .bi-fire {
+            animation: fire-flicker 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes fire-flicker {
+            0% {
+                transform: scale(1.0) translateY(0) rotate(0);
+                color: #ffad00; /* Orange-yellow */
+                text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00;
+            }
+            25% {
+                transform: scale(1.1) translateY(-2px) rotate(3deg);
+                color: #facc15; /* Yellow --second-color */
+                text-shadow: 0 0 6px #ff5c5c, 0 0 10px #ff5c5c, 0 0 16px #facc15;
+            }
+            50% {
+                transform: scale(0.95) translateY(1px) rotate(-2deg);
+                color: var(--danger-color); /* Red #ff5c5c */
+                text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00;
+            }
+            75% {
+                transform: scale(1.05) translateY(-1px) rotate(2deg);
+                color: #facc15; /* Yellow */
+                text-shadow: 0 0 6px #ff5c5c, 0 0 12px #ff5c5c, 0 0 18px #facc15;
+            }
+            100% {
+                transform: scale(1.0) translateY(0) rotate(0);
+                color: #ffad00;
+                text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00;
+            }
+        }
+        /* === END: Fire Animation === */
+
+        /* === START: Fire Alarm Animation (Beacon Style) === */
+        .fire-alarm {
+            width: 28px;
+            height: 24px;
+            position: relative;
+        }
+
+        .fire-alarm-dome {
+            width: 100%;
+            height: 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: radial-gradient(circle at 50% 0%, #ff8a8a, #d10000 90%);
+            border-radius: 14px 14px 3px 3px;
+            overflow: hidden;
+            z-index: 2;
+            border: 1px solid #ff5c5c;
+        }
+
+        .fire-alarm-dome::before { /* Concentric rings effect */
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: repeating-linear-gradient(to bottom, 
+                rgba(255, 255, 255, 0.15) 0px, 
+                rgba(255, 255, 255, 0.15) 1px, 
+                transparent 1px, 
+                transparent 3px);
+            z-index: 3;
+        }
+
+        .fire-alarm-dome::after { /* Inner light bulb flash */
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,220,150,0.9) 0%, rgba(255,100,100,0) 35%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: beacon-flash 1.2s infinite ease-in-out;
+            z-index: 4;
+        }
+
+        .fire-alarm-base {
+            width: 28px;
+            height: 5px;
+            background: linear-gradient(to top, #c00000, #e02020);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border-radius: 0 0 4px 4px;
+            z-index: 1;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.5);
+        }
+
+        @keyframes beacon-flash {
+            0%, 100% {
+                opacity: 0.4;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+        /* === END: Fire Alarm Animation (Beacon Style) === */
+
     </style>
 </head>
 <body>
@@ -256,7 +360,14 @@
                     </div>
                 </div>
                 <button id="start-timer-btn" class="btn btn-success btn-lg w-100 mb-3 d-none">بدء العداد</button>
-                <button id="najda-button" class="action-button najda-style"><i class="bi bi-fire"></i><span>النجدة!</span><i class="bi bi-siren-fill"></i></button>
+                <button id="najda-button" class="action-button najda-style">
+                    <i class="bi bi-fire"></i>
+                    <span>النجدة!</span>
+                    <div class="fire-alarm">
+                        <div class="fire-alarm-dome"></div>
+                        <div class="fire-alarm-base"></div>
+                    </div>
+                </button>
             </main>
             <nav class="bottom-nav">
                 <a href="main.html" class="nav-item active"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
@@ -460,7 +571,7 @@
                     if (currentUserRole === 'developer') {
                         deleteIconHTML = `<i class="bi bi-trash delete-notification-btn" data-id="${docSnapshot.id}" style="display: inline-block;"></i>`;
                     }
-                    item.innerHTML = `${deleteIconHTML}<div class="d-flex justify-content-between align-items-center"><h6 class="notification-title mb-1">${notification.title}</h6><span class="notification-date">${date}</span></div><p class="notification-body mb-0">${notification.message}</p>`;
+                    item.innerHTML = `${deleteIconHTML}<div class="d-flex justify-content-between align-items: center"><h6 class="notification-title mb-1">${notification.title}</h6><span class="notification-date">${date}</span></div><p class="notification-body mb-0">${notification.message}</p>`;
                     notificationsList.appendChild(item);
                 });
 
@@ -693,3 +804,4 @@
     </script>
 </body>
 </html>
+
