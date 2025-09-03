@@ -111,7 +111,13 @@
                     <div class="mb-3"><textarea class="form-control" id="gemini-pro-prompt" rows="3" placeholder="اطرح سؤالك هنا عن مقالات التعافي..."></textarea></div>
                     <button id="ask-gemini-pro-button" class="btn btn-info w-100"><i class="bi bi-send-fill me-2"></i>إرسال السؤال</button>
                     <div id="gemini-pro-response-container" class="mt-3 p-3 rounded" style="background-color: var(--background-color); display: none;">
-                        <p id="gemini-pro-response" style="white-space: pre-wrap;"></p>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">الإجابة:</h6>
+                            <button id="copy-gemini-response-button" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-clipboard me-1"></i> نسخ
+                            </button>
+                        </div>
+                        <p id="gemini-pro-response" style="white-space: pre-wrap; border-top: 1px solid var(--border-color); padding-top: 1rem;"></p>
                     </div>
                 </div>
 
@@ -179,6 +185,7 @@
         const geminiProPrompt = document.getElementById('gemini-pro-prompt');
         const geminiProResponseContainer = document.getElementById('gemini-pro-response-container');
         const geminiProResponse = document.getElementById('gemini-pro-response');
+        const copyGeminiResponseButton = document.getElementById('copy-gemini-response-button');
 
         let currentUserRole = 'user';
 
@@ -203,7 +210,7 @@
             loadArticles(); 
         });
 
-        async function callGeminiAPI(prompt, model = 'gemini-2.5-flash-preview-05-20') {
+        async function callGeminiAPI(prompt, model) { // Removed default model to use the one passed from the event listener
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
             const payload = { contents: [{ parts: [{ text: prompt }] }], };
             try {
@@ -235,22 +242,44 @@
             geminiProResponseContainer.style.display = 'none';
 
             const systemPrompt = `
-                أنت مساعد متخصص في تقديم المشورة والإرشاد حول التعافي من إدمان الإباحية والعادة السرية، بناءً على المنهج السلفي.
-                يجب أن تلتزم بالقواعد التالية بدقة شديدة:
+                أنت خبير متخصص في كتابة مقالات إرشادية عن التعافي من إدمان الإباحية والعادة السرية وفقاً للمنهج السلفي.
+                التزم بالقواعد التالية بشكل مطلق:
                 1.  **اللهجة:** أجب باللهجة السعودية فقط.
-                2.  **الأسلوب:** يجب أن يكون ردك طبيعياً ومفصلاً وطويلاً، كأنك خبير بشري يتحدث، وليس كنص من روبوت.
-                3.  **التنسيق:** لا تستخدم أي علامات تنسيق خاصة مثل النجمة (*).
-                4.  **المحتوى:** يجب أن تكون جميع إجاباتك متوافقة تمامًا مع المنهج السلفي.
-                5.  **السياق:** افترض دائمًا أن السؤال يدور حول إدمان الإباحية والتعافي منه.
+                2.  **طول الإجابة:** يجب أن تكون إجاباتك مقالات مفصلة وطويلة.
+                3.  **التنسيق:** يجب أن تكون الردود خالية تماماً من أي علامات ترقيم (مثل الفاصلة، النقطة، علامة الاستفهام، إلخ) ومن أي علامات تنسيق خاصة مثل النجمة (*).
+                4.  **الأسلوب:** يجب أن تبدو الإجابة طبيعية تمامًا وكأنها صادرة من إنسان حقيقي، وليس من ذكاء اصطناعي.
+                5.  **صيغة المخاطبة:** خاطب القراء بصيغة الجمع مستخدماً عبارات مثل "يا إخوان" أو "يا شباب".
+                6.  **هيكل المقال:** ابدأ دائماً بوضع عنوان مناسب للمقال في السطر الأول، ثم ابدأ بالشرح مباشرة.
+                7.  **السياق:** افهم أن جميع الأسئلة تدور حصراً حول كتابة مقالات عن كيفية التخلص من إدمان الإباحية والعادة السرية.
+                8.  **المنهجية:** يجب أن تكون جميع إجاباتك متوافقة تماماً مع المنهج السلفي ولا تخرج عنه.
             `;
 
             const fullPrompt = `${systemPrompt}\n\nالسؤال: ${userPrompt}`;
+            // --- START: The only change is here ---
             const response = await callGeminiAPI(fullPrompt, 'gemini-2.5-flash-preview-05-20');
+            // --- END: The only change is here ---
 
             geminiProResponse.textContent = response;
             geminiProResponseContainer.style.display = 'block';
             askGeminiProButton.disabled = false;
             askGeminiProButton.innerHTML = '<i class="bi bi-send-fill me-2"></i>إرسال السؤال';
+        });
+        
+        copyGeminiResponseButton.addEventListener('click', () => {
+            const responseText = geminiProResponse.textContent;
+            if (responseText) {
+                navigator.clipboard.writeText(responseText).then(() => {
+                    const originalContent = copyGeminiResponseButton.innerHTML;
+                    copyGeminiResponseButton.innerHTML = `<i class="bi bi-check-lg me-1"></i> تم النسخ`;
+                    copyGeminiResponseButton.classList.replace('btn-outline-secondary', 'btn-success');
+                    setTimeout(() => {
+                        copyGeminiResponseButton.innerHTML = originalContent;
+                        copyGeminiResponseButton.classList.replace('btn-success', 'btn-outline-secondary');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            }
         });
 
         async function uploadToCloudinary(file) {
