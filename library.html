@@ -600,7 +600,7 @@
             } catch (error) { console.error("Error moving book:", error); }
         });
 
-        // --- All PDF Reader functions remain unchanged ---
+        // --- PDF Reader functions that now correctly handle user-specific data ---
         async function fetchAndApplyUserPreferences() {
             if (!currentUser) return;
             const profileRef = doc(db, 'user_profiles', currentUser.uid);
@@ -637,12 +637,14 @@
         const queueRenderPage = num => { if(pageIsRendering) pageNumIsPending = num; else renderPage(num); }
         const showPrevPage = () => { if(pageNum <= 1) return; pageNum--; queueRenderPage(pageNum); }
         const showNextPage = () => { if(pageNum >= pdfDoc.numPages) return; pageNum++; queueRenderPage(pageNum); }
+        
         async function getUserBookProgress(bookId) {
             if (!currentUser) return {};
             const progressRef = doc(db, 'user_profiles', currentUser.uid, 'books_progress', bookId);
             const progressSnap = await getDoc(progressRef);
             return progressSnap.exists() ? progressSnap.data() : {};
         }
+
         async function openPdfReader(bookId, pdfUrl, title) {
             if (!pdfUrl) return;
             currentBookId = bookId;
@@ -664,6 +666,7 @@
                 closePdfReader();
             }
         }
+        
         async function closePdfReader() {
             if (currentUser && currentBookId) {
                 const progressRef = doc(db, 'user_profiles', currentUser.uid, 'books_progress', currentBookId);
@@ -692,6 +695,7 @@
             updateZoomDisplay();
             if (pdfDoc) queueRenderPage(pageNum);
         });
+        
         displayModeBtn.addEventListener('click', async () => {
             if (!currentUser) return;
             let newMode = 0; // 0: Normal, 1: Comfort, 2: Night
