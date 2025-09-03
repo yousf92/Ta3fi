@@ -16,6 +16,7 @@
             --text-color: #FAFAFA;
             --secondary-text-color: #CCCCCC;
             --border-color: #383838;
+            --primary-glow: rgba(0, 168, 132, 0.5);
         }
         body, html {
             margin: 0; padding: 0; font-family: 'Tajawal', sans-serif;
@@ -23,109 +24,113 @@
             position: fixed; width: 100%; height: 100%; overflow: hidden;
         }
         .page { display: flex; flex-direction: column; height: 100%; width: 100%; }
-        .bottom-nav { display: flex; justify-content: space-around; padding: 0.5rem 0; background-color: var(--card-background); box-shadow: 0 -2px 5px rgba(0,0,0,0.2); position: fixed; bottom: 0; width: 100%; z-index: 100; border-top: 1px solid var(--border-color); }
+        .bottom-nav { display: flex; justify-content: space-around; padding: 0.5rem 0; background-color: rgba(30, 30, 30, 0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 -2px 15px rgba(0,0,0,0.3); position: fixed; bottom: 0; width: 100%; z-index: 100; border-top: 1px solid var(--border-color); }
         
-        /* === چارەسەری کێشەی ناڤبار لێرە زیادکرا === */
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--secondary-text-color);
-            text-decoration: none;
-            font-size: 0.75rem;
-            cursor: pointer;
-            width: 14%; /* بۆ دابەشکردنی یەکسانی شوێن */
-            height: 50px; /* بەرزییەکی دیاریکراو بۆ هەموو ئایتمەکان */
-            justify-content: center; /* بۆ ناوەڕاست هێنانی ئایکۆن و نووسین */
-        }
-        /* ======================================= */
-
-        .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--secondary-text-color); text-decoration: none; font-size: 0.75rem; cursor: pointer; width: 14%; height: 50px; justify-content: center; transition: color 0.3s ease; }
+        .nav-item:hover { color: var(--text-color); }
+        .nav-item i { font-size: 1.5rem; margin-bottom: 4px; transition: transform 0.3s ease; }
+        .nav-item:hover i { transform: translateY(-3px); }
         .nav-item.active { color: var(--primary-color); }
         .nav-item.special-item { transform: translateY(-20px); }
-        .special-item .icon-background { background: linear-gradient(135deg, #00a884, #00c896); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 168, 132, 0.4); }
+        .special-item .icon-background { background: linear-gradient(135deg, #00a884, #00c896); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--primary-glow); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .special-item:hover .icon-background { transform: scale(1.1); box-shadow: 0 6px 20px var(--primary-glow); }
         .special-item i { color: white; font-size: 2rem; margin: 0; }
-        #articles-section-wrapper { background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-position: center; flex-grow: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px; /* بۆ ناڤبار */ }
-        .article-card { 
-            margin-bottom: 1rem; 
-            background-color: rgba(30, 30, 30, 0.85); 
-            border: 1px solid var(--border-color); 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            backdrop-filter: blur(5px);
+
+        #articles-section-wrapper { 
+            background-image: linear-gradient(rgba(18,18,18,0.8), rgba(18,18,18,0.95)), url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop'); 
+            background-size: cover; 
+            background-position: center; 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding: 20px; 
+            padding-bottom: 90px;
         }
-        .articles-header { display: flex; justify-content: flex-end; align-items: center; padding: 1rem; background-color: rgba(18, 18, 18, 0.8); backdrop-filter: blur(5px); border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
-        #admin-article-form {
+        
+        .article-card { 
+            margin-bottom: 1.5rem; 
+            background-color: rgba(30, 30, 30, 0.75); 
+            border: 1px solid var(--border-color); 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .article-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+        }
+        
+        .articles-header { display: flex; justify-content: center; align-items: center; padding: 1rem; background-color: transparent; border-bottom: 1px solid var(--border-color); flex-shrink: 0; position: relative; z-index: 2; }
+        .articles-header h5 { text-shadow: 0 0 10px var(--primary-glow); font-weight: 700; }
+
+        #admin-article-form, #gemini-pro-section {
             background-color: var(--card-background) !important;
             border-color: var(--border-color) !important;
+            border-radius: 15px;
         }
-        .form-control, .form-label {
-            color: var(--text-color);
-        }
-        .form-control {
-            background-color: var(--background-color);
-            border-color: var(--border-color);
-        }
-        .form-control::placeholder {
-            color: var(--secondary-text-color);
-            opacity: 0.7;
-        }
-        .form-control:focus {
-            background-color: var(--background-color);
-            border-color: var(--primary-color);
-            color: var(--text-color);
-            box-shadow: 0 0 0 0.25rem rgba(0, 168, 132, 0.25);
-        }
-        #articleModal .modal-content { background-color: var(--card-background); color: var(--text-color); border: 1px solid var(--border-color); }
-        #articleModal .modal-header { border-bottom-color: var(--border-color); }
-        #articleModal .modal-title { color: #FFFFFF; }
-        #articleModal .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
-        .article-modal-body { font-size: 1.1rem; line-height: 1.8; }
-        .article-modal-body img { max-width: 100%; border-radius: 10px; margin-bottom: 1.5rem; }
-        @media (max-width: 767px) {
-            #articleModal .modal-dialog { margin: 0; max-width: 100%; height: 100%; }
-            #articleModal .modal-content { height: 100%; border-radius: 0; }
-            #articleModal .modal-body { overflow-y: auto; }
-        }
-        .card-title { font-weight: 700; color: #FFFFFF; }
-        .card-footer.text-muted { color: var(--secondary-text-color) !important; }
+        .form-control, .form-label { color: var(--text-color); }
+        .form-control { background-color: var(--background-color); border-color: var(--border-color); border-radius: 10px; padding: 12px; }
+        .form-control::placeholder { color: var(--secondary-text-color); opacity: 0.7; }
+        .form-control:focus { background-color: var(--background-color); border-color: var(--primary-color); color: var(--text-color); box-shadow: 0 0 0 0.25rem var(--primary-glow); }
         
-        .article-card .card-text {
-            color: var(--text-color);
-        }
+        #articleModal .modal-content { background-color: var(--card-background); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 20px; }
+        #articleModal .modal-header { border-bottom-color: var(--border-color); }
+        #articleModal .modal-title { color: #FFFFFF; font-weight: 700; }
+        #articleModal .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+        .article-modal-body { font-size: 1.1rem; line-height: 1.8; color: var(--secondary-text-color); }
+        .article-modal-body img { max-width: 100%; border-radius: 15px; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        
+        .card-title { font-weight: 700; color: #FFFFFF; }
+        .card-footer.text-muted { background-color: rgba(0,0,0,0.2); color: var(--secondary-text-color) !important; }
+        .article-card .card-text { color: var(--secondary-text-color); }
+        .btn-read-more { background-color: var(--primary-color); border: none; font-weight: 700; border-radius: 10px; }
+        .btn-read-more:hover { background-color: #008a6e; }
 
     </style>
 </head>
 <body>
 
     <div id="articles-page" class="page">
-        <header class="articles-header"><h5 class="m-0">قائمة المقالات</h5></header>
+        <header class="articles-header"><h5 class="m-0">المقالات</h5></header>
         <div id="articles-section-wrapper">
             <div class="container">
                 <div id="admin-article-form" class="mb-4 p-3 border rounded" style="display: none;">
-                    <h6>إضافة/تعديل مقال</h6>
+                    <h6><i class="bi bi-pencil-square me-2"></i>إضافة/تعديل مقال</h6>
                     <input type="hidden" id="article-id-input">
                     <div class="mb-3"><label for="article-title-input" class="form-label">عنوان المقال</label><input type="text" class="form-control" id="article-title-input"></div>
                     <div class="mb-3"><label for="article-image-input" class="form-label">صورة للمقال</label><input type="file" class="form-control" id="article-image-input" accept="image/*"><small id="upload-status" class="form-text text-muted"></small></div>
                     <div class="mb-3"><label for="article-content-input" class="form-label">محتوى المقال</label><textarea class="form-control" id="article-content-input" rows="5"></textarea></div>
-                    <button id="save-article-button" class="btn btn-success w-100">حفظ المقال</button>
-                    <button id="cancel-edit-button" class="btn btn-secondary w-100 mt-2" style="display: none;">إلغاء التعديل</button>
+                    <button id="save-article-button" class="btn btn-success w-100"><i class="bi bi-check-circle-fill me-2"></i>حفظ المقال</button>
+                    <button id="cancel-edit-button" class="btn btn-secondary w-100 mt-2" style="display: none;"><i class="bi bi-x-circle-fill me-2"></i>إلغاء التعديل</button>
                 </div>
+                
+                <div id="gemini-pro-section" class="mb-4 p-3 border rounded" style="display: none;">
+                    <h6><i class="bi bi-robot me-2"></i>اسأل Gemini Pro (للمطورين)</h6>
+                    <div class="mb-3"><textarea class="form-control" id="gemini-pro-prompt" rows="3" placeholder="اطرح سؤالك هنا عن مقالات التعافي..."></textarea></div>
+                    <button id="ask-gemini-pro-button" class="btn btn-info w-100"><i class="bi bi-send-fill me-2"></i>إرسال السؤال</button>
+                    <div id="gemini-pro-response-container" class="mt-3 p-3 rounded" style="background-color: var(--background-color); display: none;">
+                        <p id="gemini-pro-response" style="white-space: pre-wrap;"></p>
+                    </div>
+                </div>
+
                 <div id="articles-list"></div>
             </div>
         </div>
         <nav class="bottom-nav">
             <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
-            <a href="diaries.html" class="nav-item"><i class="bi bi-book"></i><span>اليوميات</span></a>
-            <a href="articles.html" class="nav-item active"><i class="bi bi-award"></i><span>المقالات</span></a>
+            <a href="diaries.html" class="nav-item"><i class="bi bi-book-heart-fill"></i><span>اليوميات</span></a>
+            <a href="articles.html" class="nav-item active"><i class="bi bi-award-fill"></i><span>المقالات</span></a>
             <a href="chat.html" class="nav-item special-item"><div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div><span>دردشة</span></a>
-            <a href="follow-up.html" class="nav-item"><i class="bi bi-signpost-split"></i><span>المتابعة</span></a>
-            <a href="library.html" class="nav-item"><i class="bi bi-collection"></i><span>المكتبة</span></a>
+            <a href="follow-up.html" class="nav-item"><i class="bi bi-signpost-split-fill"></i><span>المتابعة</span></a>
+            <a href="library.html" class="nav-item"><i class="bi bi-collection-fill"></i><span>المكتبة</span></a>
             <a href="settings.html" class="nav-item"><i class="bi bi-gear-fill"></i><span>الاعدادات</span></a>
         </nav>
     </div>
 
     <div class="modal fade" id="articleModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="articleModalTitle"></h5>
@@ -151,11 +156,13 @@
             appId: "1:789086064752:web:d081f1b6832dabca1d64b5"
         };
         
+        const apiKey = "AIzaSyDB_0f4D2ugw-r6jajigBmhZepR0ZXU_c0";
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
         const adminArticleForm = document.getElementById('admin-article-form');
+        const geminiProSection = document.getElementById('gemini-pro-section');
         const articlesList = document.getElementById('articles-list');
         const saveArticleButton = document.getElementById('save-article-button');
         const articleTitleInput = document.getElementById('article-title-input');
@@ -168,6 +175,10 @@
         const articleModal = new bootstrap.Modal(articleModalEl);
         const CLOUDINARY_CLOUD_NAME = "dbkzk1oe2";
         const CLOUDINARY_UPLOAD_PRESET = "my-articles";
+        const askGeminiProButton = document.getElementById('ask-gemini-pro-button');
+        const geminiProPrompt = document.getElementById('gemini-pro-prompt');
+        const geminiProResponseContainer = document.getElementById('gemini-pro-response-container');
+        const geminiProResponse = document.getElementById('gemini-pro-response');
 
         let currentUserRole = 'user';
 
@@ -175,22 +186,72 @@
             if (user && user.emailVerified) {
                 const userDocRef = doc(db, "users", user.uid);
                 const userDoc = await getDoc(userDocRef);
-                if (userDoc.exists() && (userDoc.data().role === 'admin' || userDoc.data().role === 'developer')) {
+                if (userDoc.exists()) {
                     currentUserRole = userDoc.data().role;
-                    adminArticleForm.style.display = 'block';
-                } else {
-                    currentUserRole = 'user';
-                    adminArticleForm.style.display = 'none';
-                }
+                    if (currentUserRole === 'admin' || currentUserRole === 'developer') {
+                        adminArticleForm.style.display = 'block';
+                    }
+                    if (currentUserRole === 'developer') {
+                         geminiProSection.style.display = 'block';
+                    }
+                } 
             } else {
-                // Visitor
                 currentUserRole = 'user';
                 adminArticleForm.style.display = 'none';
+                geminiProSection.style.display = 'none';
             }
-            // Load articles for everyone
             loadArticles(); 
         });
 
+        async function callGeminiAPI(prompt, model = 'gemini-2.5-flash-preview-05-20') {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const payload = { contents: [{ parts: [{ text: prompt }] }], };
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) {
+                    const errorBody = await response.json();
+                    console.error(`Gemini API Error (${model}):`, response.status, errorBody);
+                    return `حدث خطأ أثناء الاتصال بالخادم لنموذج ${model}.`;
+                }
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    return candidate.content.parts[0].text.trim().replace(/\*/g, '');
+                } else {
+                    return "لم يتم العثور على إجابة.";
+                }
+            } catch (error) {
+                console.error(`Error calling Gemini API (${model}):`, error);
+                return "خطأ في الشبكة.";
+            }
+        }
+
+        askGeminiProButton.addEventListener('click', async () => {
+            const userPrompt = geminiProPrompt.value.trim();
+            if (!userPrompt) return;
+
+            askGeminiProButton.disabled = true;
+            askGeminiProButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> جارٍ التفكير...`;
+            geminiProResponseContainer.style.display = 'none';
+
+            const systemPrompt = `
+                أنت مساعد متخصص في تقديم المشورة والإرشاد حول التعافي من إدمان الإباحية والعادة السرية، بناءً على المنهج السلفي.
+                يجب أن تلتزم بالقواعد التالية بدقة شديدة:
+                1.  **اللهجة:** أجب باللهجة السعودية فقط.
+                2.  **الأسلوب:** يجب أن يكون ردك طبيعياً ومفصلاً وطويلاً، كأنك خبير بشري يتحدث، وليس كنص من روبوت.
+                3.  **التنسيق:** لا تستخدم أي علامات تنسيق خاصة مثل النجمة (*).
+                4.  **المحتوى:** يجب أن تكون جميع إجاباتك متوافقة تمامًا مع المنهج السلفي.
+                5.  **السياق:** افترض دائمًا أن السؤال يدور حول إدمان الإباحية والتعافي منه.
+            `;
+
+            const fullPrompt = `${systemPrompt}\n\nالسؤال: ${userPrompt}`;
+            const response = await callGeminiAPI(fullPrompt, 'gemini-2.5-flash-preview-05-20'); // Using Flash as Pro isn't working with the key
+
+            geminiProResponse.textContent = response;
+            geminiProResponseContainer.style.display = 'block';
+            askGeminiProButton.disabled = false;
+            askGeminiProButton.innerHTML = '<i class="bi bi-send-fill me-2"></i>إرسال السؤال';
+        });
 
         async function uploadToCloudinary(file) {
             const formData = new FormData();
@@ -225,13 +286,13 @@
             const articleData = { title, content, imageUrl, author: auth.currentUser.displayName, authorId: auth.currentUser.uid, lastUpdatedAt: serverTimestamp() };
             if (articleId) { await updateDoc(doc(db, "articles", articleId), articleData); alert("تم تحديث المقال بنجاح!"); } else { articleData.createdAt = serverTimestamp(); await addDoc(collection(db, "articles"), articleData); alert("تم إضافة المقال بنجاح!"); }
             articleIdInput.value = ''; articleTitleInput.value = ''; articleContentInput.value = ''; articleImageInput.value = '';
-            uploadStatus.textContent = ''; saveArticleButton.textContent = 'حفظ المقال';
+            uploadStatus.textContent = ''; saveArticleButton.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>حفظ المقال';
             cancelEditButton.style.display = 'none'; saveArticleButton.disabled = false;
         });
 
         cancelEditButton.addEventListener('click', () => {
             articleIdInput.value = ''; articleTitleInput.value = ''; articleContentInput.value = ''; articleImageInput.value = '';
-            saveArticleButton.textContent = 'حفظ المقال'; cancelEditButton.style.display = 'none';
+            saveArticleButton.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>حفظ المقال'; cancelEditButton.style.display = 'none';
         });
 
         function loadArticles() {
@@ -247,34 +308,38 @@
                     const contentPreview = article.content.substring(0, 100) + (article.content.length > 100 ? '...' : '');
                     let adminButtonsHtml = '';
                     if (currentUserRole === 'developer' || currentUserRole === 'admin') {
-                        adminButtonsHtml = `<button class="btn btn-sm btn-outline-secondary me-2 btn-edit" data-id="${articleId}" data-title="${article.title.replace(/"/g, '&quot;')}" data-content="${article.content.replace(/"/g, '&quot;')}">تعديل</button>
-                                            <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${articleId}">حذف</button>`;
+                        adminButtonsHtml = `<button class="btn btn-sm btn-outline-secondary me-2 btn-edit" data-id="${articleId}" data-title="${article.title.replace(/"/g, '&quot;')}" data-content="${article.content.replace(/"/g, '&quot;')}"><i class="bi bi-pencil-fill"></i></button>
+                                            <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${articleId}"><i class="bi bi-trash3-fill"></i></button>`;
                     }
-                    card.innerHTML = `${article.imageUrl ? `<img src="${article.imageUrl}" class="card-img-top" alt="${article.title}">` : ''}
+                    card.innerHTML = `${article.imageUrl ? `<img src="${article.imageUrl}" class="card-img-top" alt="${article.title}" style="aspect-ratio: 16/9; object-fit: cover;">` : ''}
                         <div class="card-body">
                             <h5 class="card-title">${article.title}</h5>
                             <p class="card-text">${contentPreview}</p>
-                            <button class="btn btn-primary btn-read-more" data-title="${article.title.replace(/"/g, '&quot;')}" data-content="${article.content.replace(/"/g, '&quot;')}" data-image="${article.imageUrl || ''}">قراءة المزيد</button>
-                            <div class="mt-3">${adminButtonsHtml}</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button class="btn btn-primary btn-sm btn-read-more" data-title="${article.title.replace(/"/g, '&quot;')}" data-content="${article.content.replace(/"/g, '&quot;')}" data-image="${article.imageUrl || ''}">قراءة المزيد</button>
+                                <div class="admin-buttons">${adminButtonsHtml}</div>
+                            </div>
                         </div>
-                        <div class="card-footer text-muted">${article.lastUpdatedAt ? new Date(article.lastUpdatedAt.toDate()).toLocaleString('ar-EG') : 'غير معروف'}</div>`;
+                        <div class="card-footer text-muted small">${article.lastUpdatedAt ? new Date(article.lastUpdatedAt.toDate()).toLocaleString('ar-EG') : 'غير معروف'}</div>`;
                     articlesList.appendChild(card);
                 });
             });
         }
 
         articlesList.addEventListener('click', async (e) => {
-            const target = e.target;
+            const target = e.target.closest('button');
+            if (!target) return;
+            
             if (target.classList.contains('btn-read-more')) {
                 document.getElementById('articleModalTitle').textContent = target.dataset.title;
-                document.getElementById('articleModalBody').innerHTML = `${target.dataset.image ? `<img src="${target.dataset.image}" class="img-fluid rounded mb-3" alt="${target.dataset.title}">` : ''}<p>${target.dataset.content.replace(/\n/g, '<br>')}</p>`;
+                document.getElementById('articleModalBody').innerHTML = `${target.dataset.image ? `<img src="${target.dataset.image}" class="img-fluid" alt="${target.dataset.title}">` : ''}<p>${target.dataset.content.replace(/\n/g, '<br>')}</p>`;
                 articleModal.show();
             }
             if (target.classList.contains('btn-edit')) {
                 articleIdInput.value = target.dataset.id;
                 articleTitleInput.value = target.dataset.title;
                 articleContentInput.value = target.dataset.content;
-                saveArticleButton.textContent = 'تحديث المقال';
+                saveArticleButton.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>تحديث المقال';
                 cancelEditButton.style.display = 'block';
                 adminArticleForm.scrollIntoView({ behavior: 'smooth' });
             }
@@ -288,3 +353,4 @@
     </script>
 </body>
 </html>
+
