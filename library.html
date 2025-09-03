@@ -24,7 +24,8 @@
         }
         .page { display: flex; flex-direction: column; height: 100%; width: 100%; }
         .content-area { flex-grow: 1; overflow-y: auto; padding: 1rem; padding-bottom: 80px; }
-        .top-header { display: flex; justify-content: flex-end; align-items: center; padding: 1rem; background-color: var(--background-color); border-bottom: 1px solid var(--border-color); }
+        .top-header { display: flex; justify-content: center; align-items: center; padding: 1rem; background-color: var(--background-color); border-bottom: 1px solid var(--border-color); }
+        .top-header h5 { margin: 0; font-weight: 700; }
         .bottom-nav { display: flex; justify-content: space-around; padding: 0.5rem 0; background-color: var(--card-background); box-shadow: 0 -2px 5px rgba(0,0,0,0.2); position: fixed; bottom: 0; width: 100%; z-index: 100; border-top: 1px solid var(--border-color); }
         
         .nav-item {
@@ -43,17 +44,13 @@
         .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary-color); }
         
-        /* === چارەسەری کێشەی ئایکۆنی تایبەت لێرە زیادکرا === */
         .nav-item.special-item {
-            position: relative; /* گرنگە بۆ absolute positioning */
             transform: translateY(-20px);
-            /* لێرە width و height لابرا چونکە لە .icon-background دانراوە */
         }
         
-        /* ئەم ستایلە دڵنیایی دەدات کە قەبارەی ئایکۆنی چاتەکە هەمیشە جێگیرە */
         .nav-item.special-item .icon-background {
-            width: 60px !important; /* گرنگە بۆ ئەوەی قەبارەکەی نەگۆڕێت */
-            height: 60px !important; /* گرنگە بۆ ئەوەی قەبارەکەی نەگۆڕێت */
+            width: 60px;
+            height: 60px;
             background: linear-gradient(135deg, #00a884, #00c896);
             border-radius: 50%;
             display: flex;
@@ -67,17 +64,7 @@
             font-size: 2rem;
             margin: 0;
         }
-        .special-item span {
-            position: absolute;
-            bottom: -15px;
-            font-size: 0.75rem;
-            color: var(--secondary-text-color);
-        }
-        .special-item.active span {
-            color: var(--primary-color);
-        }
-        /* ================================================== */
-
+       
         .card {
             background-color: var(--card-background);
             border: 1px solid var(--border-color);
@@ -110,27 +97,24 @@
         </main>
         <nav class="bottom-nav">
             <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
-            <a href="diaries.html" class="nav-item"><i class="bi bi-book"></i><span>اليوميات</span></a>
-            <a href="articles.html" class="nav-item"><i class="bi bi-award"></i><span>المقالات</span></a>
+            <a href="diaries.html" class="nav-item"><i class="bi bi-book-fill"></i><span>اليوميات</span></a>
+            <a href="articles.html" class="nav-item"><i class="bi bi-award-fill"></i><span>المقالات</span></a>
             
             <a href="chat.html" class="nav-item special-item">
                 <div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div>
                 <span>دردشة</span>
             </a>
 
-            <a href="follow-up.html" class="nav-item"><i class="bi bi-signpost-split"></i><span>المتابعة</span></a>
-            <a href="library.html" class="nav-item active"><i class="bi bi-collection"></i><span>المكتبة</span></a>
+            <a href="follow-up.html" class="nav-item"><i class="bi bi-signpost-split-fill"></i><span>المتابعة</span></a>
+            <a href="library.html" class="nav-item active"><i class="bi bi-collection-fill"></i><span>المكتبة</span></a>
             <a href="settings.html" class="nav-item"><i class="bi bi-gear-fill"></i><span>الاعدادات</span></a>
         </nav>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
-        // Firebase initialization is not strictly necessary if the page is public,
-        // but it's good practice to keep it for consistency in case you add
-        // user-specific features later.
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -143,10 +127,6 @@
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-
-        // This page is now public, so we don't need to check for a logged-in user.
-        // The onAuthStateChanged listener is removed.
-        // Everyone can see the "under development" message.
         
     </script>
 </body>

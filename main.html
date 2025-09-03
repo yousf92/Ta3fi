@@ -151,7 +151,7 @@
             <header class="top-header">
                 <div class="header-icons">
                     <div class="notification-icon-wrapper" data-bs-toggle="modal" data-bs-target="#notifications-modal">
-                        <i class="bi bi-bell"></i>
+                        <i class="bi bi-bell-fill"></i>
                         <span class="notification-badge"></span>
                     </div>
                     <a href="settings.html"><i class="bi bi-person-circle"></i></a>
@@ -181,14 +181,14 @@
                             <div class="progress-bar-fill" id="days-fill"></div>
                             <div class="row-content">
                                 <span class="time-label"><span id="days-value">0</span> أيام</span>
-                                <i class="bi bi-calendar-check time-icon"></i>
+                                <i class="bi bi-calendar-check-fill time-icon"></i>
                             </div>
                         </div>
                         <div class="progress-row">
                             <div class="progress-bar-fill" id="hours-fill"></div>
                             <div class="row-content">
                                 <span class="time-label"><span id="hours-value">0</span> ساعات</span>
-                                <i class="bi bi-clock time-icon"></i>
+                                <i class="bi bi-clock-fill time-icon"></i>
                             </div>
                         </div>
                         <div class="progress-row">
@@ -227,11 +227,11 @@
             </main>
             <nav class="bottom-nav">
                 <a href="main.html" class="nav-item active"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
-                <a href="diaries.html" class="nav-item"><i class="bi bi-book"></i><span>اليوميات</span></a>
-                <a href="articles.html" class="nav-item"><i class="bi bi-award"></i><span>المقالات</span></a>
+                <a href="diaries.html" class="nav-item"><i class="bi bi-book-fill"></i><span>اليوميات</span></a>
+                <a href="articles.html" class="nav-item"><i class="bi bi-award-fill"></i><span>المقالات</span></a>
                 <a href="chat.html" class="nav-item special-item"><div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div><span>دردشة</span></a>
-                <a href="follow-up.html" class="nav-item"><i class="bi bi-signpost-split"></i><span>المتابعة</span></a>
-                <a href="library.html" class="nav-item"><i class="bi bi-collection"></i><span>المكتبة</span></a>
+                <a href="follow-up.html" class="nav-item"><i class="bi bi-signpost-split-fill"></i><span>المتابعة</span></a>
+                <a href="library.html" class="nav-item"><i class="bi bi-collection-fill"></i><span>المكتبة</span></a>
                 <a href="settings.html" class="nav-item"><i class="bi bi-gear-fill"></i><span>الاعدادات</span></a>
             </nav>
         </div>
@@ -259,7 +259,7 @@
             <header class="modal-header-custom"><h5>اعدادات العداد</h5><i class="bi bi-x-lg" id="close-settings-button"></i></header>
             <div class="modal-body-custom">
                 <button class="action-button" id="reset-timer-button"><span>تصفير العداد</span><div class="icon-container yellow"><i class="bi bi-arrow-counterclockwise"></i></div></button>
-                <button class="action-button" id="set-date-button"><span>تعيين تاريخ بداية جديد</span><div class="icon-container blue"><i class="bi bi-calendar-plus"></i></div></button>
+                <button class="action-button" id="set-date-button"><span>تعيين تاريخ بداية جديد</span><div class="icon-container blue"><i class="bi bi-calendar-plus-fill"></i></div></button>
                 <input type="datetime-local" id="date-time-picker" style="opacity: 0; position: absolute; left: -9999px; width: 1px; height: 1px;">
             </div>
         </div>
@@ -415,7 +415,7 @@
                          previousSolutions.push(generatedText);
                     }
 
-                    inspirationText.innerHTML = generatedText.replace(/\n/g, '<br>'); // Preserve line breaks
+                    inspirationText.innerHTML = generatedText.replace(/\n/g, '<br>');
                     inspirationDisplay.classList.remove('d-none');
                     inspirationBtn.disabled = false;
                     inspirationBtn.innerHTML = `<span>🔥 أبغى حل ثاني</span>`;
@@ -426,7 +426,7 @@
                 if (user && (user.emailVerified || user.isAnonymous)) {
                     
                     if (user.isAnonymous) {
-                        welcomeUserEl.textContent = `مرحباً أيها الزائر`;
+                        welcomeUserEl.textContent = `مرحبا ٲيها الزائر`;
                         openSendModalBtn.classList.add('d-none');
                         const visitorTimerStart = localStorage.getItem('visitorTimerStart');
                         if (visitorTimerStart) {
@@ -443,7 +443,7 @@
                         }
                         loadNotifications(null);
                     } else {
-                        welcomeUserEl.textContent = `مرحباً ${user.displayName || 'المستخدم'}`;
+                        welcomeUserEl.textContent = `مرحبا ${user.displayName || 'المستخدم'}`;
                         const userDocRef = doc(db, "users", user.uid);
                         const userDoc = await getDoc(userDocRef);
                         if (userDoc.exists()) {

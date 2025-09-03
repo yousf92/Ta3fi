@@ -20,124 +20,103 @@
             --red-color: #e55454;
             --green-color: #27ae60;
             --grey-color: #6c757d;
+            --primary-glow: rgba(0, 168, 132, 0.5);
         }
         body, html {
             margin: 0; padding: 0; font-family: 'Tajawal', sans-serif;
             background-color: var(--background-color); color: var(--text-color);
             position: fixed; width: 100%; height: 100%; overflow: hidden;
+            background: linear-gradient(180deg, #2a2a2e 0%, #121212 100%);
         }
         .page { display: flex; flex-direction: column; height: 100%; width: 100%; }
-        .content-area { flex-grow: 1; overflow-y: auto; padding: 1rem; padding-bottom: 80px; }
-        .top-header { display: flex; justify-content: flex-end; align-items: center; padding: 1rem; background-color: var(--background-color); border-bottom: 1px solid var(--border-color); }
-        .bottom-nav { display: flex; justify-content: space-around; padding: 0.5rem 0; background-color: var(--card-background); box-shadow: 0 -2px 5px rgba(0,0,0,0.2); position: fixed; bottom: 0; width: 100%; z-index: 100; border-top: 1px solid var(--border-color); }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--secondary-text-color); text-decoration: none; font-size: 0.75rem; cursor: pointer; width: 14%; height: 50px; justify-content: center; }
-        .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
+        .content-area { flex-grow: 1; overflow-y: auto; padding: 1.5rem; padding-bottom: 100px; }
+        .top-header { display: flex; justify-content: center; align-items: center; padding: 1rem; background-color: transparent; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+        .top-header h5 { text-shadow: 0 0 10px var(--primary-glow); font-weight: 700; margin: 0; }
+        .bottom-nav { display: flex; justify-content: space-around; padding: 0.5rem 0; background-color: rgba(30, 30, 30, 0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 -2px 15px rgba(0,0,0,0.3); position: fixed; bottom: 0; width: 100%; z-index: 100; border-top: 1px solid var(--border-color); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--secondary-text-color); text-decoration: none; font-size: 0.75rem; cursor: pointer; width: 14%; height: 50px; justify-content: center; transition: color 0.3s ease; }
+        .nav-item:hover { color: var(--text-color); }
+        .nav-item i { font-size: 1.5rem; margin-bottom: 4px; transition: transform 0.3s ease; }
+        .nav-item:hover i { transform: translateY(-3px); }
         .nav-item.active { color: var(--primary-color); }
         .nav-item.special-item { transform: translateY(-20px); }
-        .special-item .icon-background { background: linear-gradient(135deg, #00a884, #00c896); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 168, 132, 0.4); }
+        .special-item .icon-background { background: linear-gradient(135deg, #00a884, #00c896); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--primary-glow); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .special-item:hover .icon-background { transform: scale(1.1); box-shadow: 0 6px 20px var(--primary-glow); }
         .special-item i { color: white; font-size: 2rem; margin: 0; }
-        .card {
-            background-color: var(--card-background);
-            border: 1px solid var(--border-color);
-        }
+
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
             gap: 0.75rem;
             margin-bottom: 1.5rem;
         }
         .stat-card {
-            padding: 1rem 0.5rem;
+            padding: 0.75rem 0.5rem;
             border-radius: 12px;
             text-align: center;
             color: white;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .stat-card .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            line-height: 1;
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
-        .stat-card .stat-label {
-            font-size: 0.8rem;
-            font-weight: 500;
-            opacity: 0.9;
-        }
-        .stat-card.orange { background-color: var(--orange-color); }
-        .stat-card.red { background-color: var(--red-color); }
-        .stat-card.green { background-color: var(--green-color); }
-        .stat-card.grey { background-color: var(--grey-color); }
+        .stat-card .stat-number { font-size: 1.5rem; font-weight: 700; line-height: 1; }
+        .stat-card .stat-label { font-size: 0.7rem; font-weight: 500; opacity: 0.9; margin-top: 4px; }
+        .stat-card.orange { background: linear-gradient(135deg, #fd9843, #e67e22); }
+        .stat-card.red { background: linear-gradient(135deg, #e55454, #c0392b); }
+        .stat-card.green { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        .stat-card.grey { background: linear-gradient(135deg, #6c757d, #5a6268); }
 
         .calendar-card {
             background-color: var(--card-background);
-            border-radius: 15px;
-            padding: 1rem;
+            border-radius: 20px;
+            padding: 1.5rem;
             border: 1px solid var(--border-color);
-        }
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             margin-bottom: 1.5rem;
         }
-        .calendar-header button {
-            background: none;
-            border: none;
-            color: var(--text-color);
-            font-size: 1.5rem;
-        }
-        #month-year {
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 0.5rem;
-        }
-        .calendar-day, .weekday {
-            text-align: center;
-            font-size: 0.9rem;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .weekday {
-            color: var(--secondary-text-color);
-            font-weight: 700;
-        }
-        .calendar-day {
-            border-radius: 50%;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .calendar-day.other-month {
-            opacity: 0.3;
-        }
-        .calendar-day.today {
-            border: 2px solid var(--primary-color);
-        }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .calendar-header button { background-color: rgba(255,255,255,0.1); border-radius: 50%; border: none; color: var(--text-color); width: 40px; height: 40px; display:flex; align-items:center; justify-content:center; transition: background-color 0.3s ease; }
+        .calendar-header button:hover { background-color: rgba(255,255,255,0.2); }
+        #month-year { font-size: 1.3rem; font-weight: 700; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; }
+        .calendar-day, .weekday { text-align: center; font-size: 0.9rem; height: 40px; display: flex; align-items: center; justify-content: center; }
+        .weekday { color: var(--secondary-text-color); font-weight: 700; }
+        .calendar-day { border-radius: 50%; cursor: pointer; transition: all 0.3s ease; }
+        .calendar-day.other-month { opacity: 0.3; pointer-events: none; }
+        .calendar-day.today { border: 2px solid var(--primary-color); box-shadow: 0 0 10px var(--primary-glow); }
         .calendar-day.orange { background-color: var(--orange-color); color: white; }
         .calendar-day.red { background-color: var(--red-color); color: white; }
         .calendar-day.green { background-color: var(--green-color); color: white; }
         .calendar-day.grey { background-color: var(--grey-color); color: white; }
+        .calendar-day:not(.other-month):hover { transform: scale(1.1); box-shadow: 0 0 15px rgba(255,255,255,0.2); }
 
         .add-status-button {
             position: fixed;
-            bottom: 90px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--primary-color);
+            bottom: 95px;
+            left: 20px;
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(45deg, var(--primary-color), #00c896);
             color: white;
             border: none;
-            border-radius: 30px;
-            padding: 0.8rem 2rem;
-            font-size: 1.1rem;
-            font-weight: 700;
-            box-shadow: 0 5px 15px rgba(0, 168, 132, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.7rem;
+            box-shadow: 0 5px 20px rgba(0, 168, 132, 0.4);
             z-index: 105;
             cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+        .add-status-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0, 168, 132, 0.5);
+        }
+        #addStatusModal .modal-content { border-radius: 20px; }
+        #addStatusModal .btn-lg { border-radius: 12px; font-weight: 700; padding: 1rem; }
     </style>
 </head>
 <body>
@@ -177,20 +156,30 @@
                 <div class="calendar-grid" id="calendar-days"></div>
             </div>
 
+            <div class="card mt-4" style="background-color: var(--card-background); border-radius: 15px;">
+                 <div class="card-body">
+                      <button id="analyze-performance-btn" class="btn btn-info w-100 fw-bold">
+                           <i class="bi bi-magic me-2"></i>حلل أدائي
+                      </button>
+                      <div id="analysis-result-container" class="mt-3 p-3 rounded d-none" style="background-color: var(--background-color);">
+                           <p id="analysis-result-text" class="mb-0" style="white-space: pre-wrap;"></p>
+                      </div>
+                 </div>
+            </div>
+
         </main>
 
-        <button class="add-status-button" data-bs-toggle="modal" data-bs-target="#addStatusModal">
-            <i class="bi bi-plus-circle-fill me-2"></i>
-            <span>إضافة حالة اليوم</span>
+        <button class="add-status-button" data-bs-toggle="modal" data-bs-target="#addStatusModal" title="إضافة حالة اليوم">
+            <i class="bi bi-plus-lg"></i>
         </button>
 
         <nav class="bottom-nav">
             <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
-            <a href="diaries.html" class="nav-item"><i class="bi bi-book"></i><span>اليوميات</span></a>
-            <a href="articles.html" class="nav-item"><i class="bi bi-award"></i><span>المقالات</span></a>
+            <a href="diaries.html" class="nav-item"><i class="bi bi-book-fill"></i><span>اليوميات</span></a>
+            <a href="articles.html" class="nav-item"><i class="bi bi-award-fill"></i><span>المقالات</span></a>
             <a href="chat.html" class="nav-item special-item"><div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div><span>دردشة</span></a>
-            <a href="follow-up.html" class="nav-item active"><i class="bi bi-signpost-split"></i><span>المتابعة</span></a>
-            <a href="library.html" class="nav-item"><i class="bi bi-collection"></i><span>المكتبة</span></a>
+            <a href="follow-up.html" class="nav-item active"><i class="bi bi-signpost-split-fill"></i><span>المتابعة</span></a>
+            <a href="library.html" class="nav-item"><i class="bi bi-collection-fill"></i><span>المكتبة</span></a>
             <a href="settings.html" class="nav-item"><i class="bi bi-gear-fill"></i><span>الاعدادات</span></a>
         </nav>
     </div>
@@ -229,17 +218,31 @@
             appId: "1:789086064752:web:d081f1b6832dabca1d64b5"
         };
         
+        const apiKey = "AIzaSyDB_0f4D2ugw-r6jajigBmhZepR0ZXU_c0";
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
         let currentUserId = null;
         let isVisitor = true;
-        let userHabitData = {}; // Global object to hold habit data
+        let userHabitData = {};
+
+        async function callGeminiAPI(prompt) {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const payload = { contents: [{ parts: [{ text: prompt }] }], };
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) { return "حدث خطأ أثناء تحليل البيانات."; }
+                const result = await response.json();
+                return result.candidates?.[0]?.content?.parts?.[0]?.text.trim() || "لم أتمكن من تقديم تحليل حاليًا.";
+            } catch (error) {
+                return "خطأ في الشبكة.";
+            }
+        }
 
         onAuthStateChanged(auth, (user) => {
-            if (user && user.emailVerified) {
-                isVisitor = false;
+            if (user && (user.emailVerified || user.isAnonymous)) {
+                isVisitor = user.isAnonymous;
                 currentUserId = user.uid;
                 initializeCalendar();
             } else {
@@ -255,6 +258,9 @@
         const prevMonthBtn = document.getElementById('prev-month');
         const nextMonthBtn = document.getElementById('next-month');
         const addStatusModal = new bootstrap.Modal(document.getElementById('addStatusModal'));
+        const analyzeBtn = document.getElementById('analyze-performance-btn');
+        const analysisResultContainer = document.getElementById('analysis-result-container');
+        const analysisResultText = document.getElementById('analysis-result-text');
 
         let currentDate = new Date();
 
@@ -263,24 +269,18 @@
                 try {
                     const localData = localStorage.getItem('visitorHabitData');
                     userHabitData = localData ? JSON.parse(localData) : {};
-                } catch (e) {
-                    userHabitData = {};
-                }
+                } catch (e) { userHabitData = {}; }
             } else {
                 if (!currentUserId) return {};
                 const userDocRef = doc(db, "users", currentUserId);
                 const docSnap = await getDoc(userDocRef);
-                if (docSnap.exists() && docSnap.data().habitData) {
-                    userHabitData = docSnap.data().habitData;
-                } else {
-                    userHabitData = {};
-                }
+                userHabitData = (docSnap.exists() && docSnap.data().habitData) ? docSnap.data().habitData : {};
             }
             return userHabitData;
         }
         
         async function saveHabitData(data) {
-            userHabitData = data; // Update global object immediately
+            userHabitData = data;
             if (isVisitor) {
                 localStorage.setItem('visitorHabitData', JSON.stringify(data));
             } else {
@@ -290,7 +290,6 @@
                     await setDoc(userDocRef, { habitData: data }, { merge: true });
                 } catch (error) {
                     console.error("Error saving habit data: ", error);
-                    alert("هەڵەیەک ڕوویدا لەکاتی خەزنکردنی داتاکان.");
                 }
             }
         }
@@ -300,7 +299,7 @@
         }
 
         async function autoFillAbsence() {
-            const habitData = await getHabitData(); // Ensures we have the latest data
+            const habitData = await getHabitData();
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
@@ -379,9 +378,53 @@
             document.getElementById('slip-count').textContent = counts.slip;
             document.getElementById('victory-count').textContent = counts.victory;
         }
+        
+        let previousAnalyses = [];
+        analyzeBtn.addEventListener('click', async () => {
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> جار التحليل...`;
+            analysisResultContainer.classList.add('d-none');
+
+            const counts = {
+                victory: document.getElementById('victory-count').textContent,
+                slip: document.getElementById('slip-count').textContent,
+                relapse: document.getElementById('relapse-count').textContent,
+                absence: document.getElementById('absence-count').textContent,
+            };
+
+            let prompt = `
+                بصفتك مدرب شخصي وناصح أمين، حلل بيانات الأداء هذي لشخص يحاول يتعافى من إدمان:
+                - أيام الانتصار: ${counts.victory}
+                - أيام الزلات: ${counts.slip}
+                - أيام الانتكاسات: ${counts.relapse}
+                - أيام الغياب: ${counts.absence}
+
+                عطني تقرير مختصر وداعم. التزم بالقواعد هذي بدقة:
+                1.  **اللهجة:** تكلم باللهجة السعودية العامية فقط.
+                2.  **التنسيق:** لا تستخدم أي تشكيل أو علامات ترقيم أبداً.
+                3.  **الأسلوب:** خل كلامك طبيعي كأنك تسولف مع واحد تعرفه وتشجعه.
+                4.  **المحتوى:** عطني كلام تشجيعي وركز على الإيجابيات وقدم نصيحة عملية للخطوة الجاية.
+            `;
+            
+            if (previousAnalyses.length > 0) {
+                prompt += `\nالتحليلات اللي عطيتها قبل هي: "${previousAnalyses.join('", "')}". لا تكرر نفس الكلام وعطني تحليل جديد ومختلف.`;
+            }
+
+            const result = await callGeminiAPI(prompt);
+            
+            if(result && !previousAnalyses.includes(result)) {
+                previousAnalyses.push(result);
+            }
+
+            analysisResultText.textContent = result;
+            analysisResultContainer.classList.remove('d-none');
+            
+            analyzeBtn.disabled = false;
+            analyzeBtn.innerHTML = '✨ إعادة تحليل أدائي';
+        });
 
         async function initializeCalendar() {
-            await getHabitData(); // Initial data load
+            await getHabitData();
             await renderCalendar();
 
             prevMonthBtn.addEventListener('click', () => {
@@ -399,15 +442,16 @@
                     const status = button.dataset.status;
                     const dateString = toDateString(new Date());
                     
-                    const currentData = await getHabitData(); // Get latest before updating
+                    const currentData = await getHabitData();
                     currentData[dateString] = status;
                     await saveHabitData(currentData);
                     
                     addStatusModal.hide();
-                    await renderCalendar(); // Re-render with new data
+                    await renderCalendar();
                 });
             });
         }
     </script>
 </body>
 </html>
+
