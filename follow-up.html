@@ -117,6 +117,7 @@
         }
         #addStatusModal .modal-content { border-radius: 20px; }
         #addStatusModal .btn-lg { border-radius: 12px; font-weight: 700; padding: 1rem; }
+        #analysis-result-text { color: var(--text-color); }
     </style>
 </head>
 <body>
@@ -226,6 +227,7 @@
         let currentUserId = null;
         let isVisitor = true;
         let userHabitData = {};
+        let previousAnalyses = [];
 
         async function callGeminiAPI(prompt) {
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
@@ -378,8 +380,7 @@
             document.getElementById('slip-count').textContent = counts.slip;
             document.getElementById('victory-count').textContent = counts.victory;
         }
-        
-        let previousAnalyses = [];
+
         analyzeBtn.addEventListener('click', async () => {
             analyzeBtn.disabled = true;
             analyzeBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> جار التحليل...`;
