@@ -8,7 +8,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* ستایلی گشتی وەک خۆی ماوەتەوە */
         :root {
             --primary-color: #00a884;
             --danger-color: #ff5c5c;
@@ -115,29 +114,11 @@
         #notifications-modal .modal-content { background-color: var(--background-color); color: var(--text-color); }
         #notifications-modal .modal-header { border-bottom: 1px solid var(--border-color); }
         #notifications-modal .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
-
-        /* === START: Animation Styles (Updated) === */
         .climbing-animation-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            pointer-events: none;
-            z-index: 1;
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; pointer-events: none; z-index: 1;
         }
-        .mountain-bg {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M-10 100 L20 70 L50 100 Z" fill="rgba(0,0,0,0.1)" /></svg>') -10% 0/40% 40% no-repeat,
-                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M0 100 L50 40 L100 100 Z" fill="rgba(0,0,0,0.2)" /></svg>') 50% 100%/80% 80% no-repeat,
-                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M0 100 L40 20 L80 100 Z" fill="rgba(0,0,0,0.3)" /></svg>') 10% 100%/60% 60% no-repeat;
-        }
+        .mountain-bg { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M-10 100 L20 70 L50 100 Z" fill="rgba(0,0,0,0.1)" /></svg>') -10% 0/40% 40% no-repeat, url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M0 100 L50 40 L100 100 Z" fill="rgba(0,0,0,0.2)" /></svg>') 50% 100%/80% 80% no-repeat, url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M0 100 L40 20 L80 100 Z" fill="rgba(0,0,0,0.3)" /></svg>') 10% 100%/60% 60% no-repeat; }
         .climber { position: absolute; width: 45px; height: 45px; animation: climb-path 20s linear infinite; }
         .climber-body { position: absolute; width: 35%; height: 50%; background-color: #fff; border-radius: 40% 40% 20% 20%; top: 25%; left: 32.5%; }
         .climber-head { position: absolute; width: 30%; height: 30%; background-color: #fff; border-radius: 50%; top: 5%; left: 35%; }
@@ -154,26 +135,14 @@
         @keyframes walk-arm-right { 0%, 100% { transform: rotate(20deg); } 50% { transform: rotate(-20deg); } }
         @keyframes walk-arm-left { 0%, 100% { transform: rotate(-20deg); } 50% { transform: rotate(20deg); } }
         @keyframes climb-path { 0% { bottom: 5%; left: -10%; } 20% { bottom: 40%; left: 30%; } 25% { bottom: 30%; left: 28%; transform: rotate(90deg); } 30% { bottom: 5%; left: 25%; transform: rotate(0deg); } 50% { bottom: 70%; left: 60%; } 55% { bottom: 60%; left: 58%; transform: rotate(-90deg); } 60% { bottom: 5%; left: 55%; transform: rotate(0deg); } 95% { bottom: 110%; left: 85%; } 100% { bottom: 120%; left: 90%; } }
-        /* === END: Animation Styles (Updated) === */
-
-        /* === START: Fire Animation === */
-        .action-button.najda-style .bi-fire {
-            animation: fire-flicker 1.5s ease-in-out infinite alternate;
-            position: relative;
-            top: 3px;
-        }
+        .action-button.najda-style .bi-fire { animation: fire-flicker 1.5s ease-in-out infinite alternate; position: relative; top: 3px; }
         @keyframes fire-flicker { 0% { transform: scale(1.0) translateY(0) rotate(0); color: #ffad00; text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00; } 25% { transform: scale(1.1) translateY(-2px) rotate(3deg); color: #facc15; text-shadow: 0 0 6px #ff5c5c, 0 0 10px #ff5c5c, 0 0 16px #facc15; } 50% { transform: scale(0.95) translateY(1px) rotate(-2deg); color: var(--danger-color); text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00; } 75% { transform: scale(1.05) translateY(-1px) rotate(2deg); color: #facc15; text-shadow: 0 0 6px #ff5c5c, 0 0 12px #ff5c5c, 0 0 18px #facc15; } 100% { transform: scale(1.0) translateY(0) rotate(0); color: #ffad00; text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00; } }
-        /* === END: Fire Animation === */
-
-        /* === START: Fire Alarm Animation (Beacon Style) === */
         .fire-alarm { width: 28px; height: 24px; position: relative; }
         .fire-alarm-dome { width: 100%; height: 20px; position: absolute; top: 0; left: 0; background: radial-gradient(circle at 50% 0%, #ff8a8a, #d10000 90%); border-radius: 14px 14px 3px 3px; overflow: hidden; z-index: 2; border: 1px solid #ff5c5c; }
         .fire-alarm-dome::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 0px, rgba(255, 255, 255, 0.15) 1px, transparent 1px, transparent 3px); z-index: 3; }
         .fire-alarm-dome::after { content: ''; position: absolute; top: 50%; left: 50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,220,150,0.9) 0%, rgba(255,100,100,0) 35%); border-radius: 50%; transform: translate(-50%, -50%); animation: beacon-flash 1.2s infinite ease-in-out; z-index: 4; }
         .fire-alarm-base { width: 28px; height: 5px; background: linear-gradient(to top, #c00000, #e02020); position: absolute; bottom: 0; left: 0; border-radius: 0 0 4px 4px; z-index: 1; box-shadow: 0 2px 3px rgba(0,0,0,0.5); }
         @keyframes beacon-flash { 0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.5); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
-        /* === END: Fire Alarm Animation (Beacon Style) === */
-
     </style>
 </head>
 <body>
@@ -238,7 +207,6 @@
                         </div>
                     </div>
                 </div>
-                 <!-- START: Gemini Feature - Daily Inspiration -->
                  <div id="inspiration-container" class="mb-3">
                     <button id="inspiration-btn" class="action-button" style="justify-content: center; text-align: center; gap: 10px; font-weight: 700; width: 100%;">
                         <span>🔥 عندي رغبة شديدة لمشاهدة الإباحية، أعطني حلا جذريا</span>
@@ -247,7 +215,6 @@
                         <p id="inspiration-text" class="mb-0" style="text-align: right; color: var(--text-color); line-height: 1.8;"></p>
                     </div>
                 </div>
-                <!-- END: Gemini Feature - Daily Inspiration -->
                 <button id="start-timer-btn" class="btn btn-success btn-lg w-100 mb-3 d-none">بدء العداد</button>
                 <button id="najda-button" class="action-button najda-style">
                     <i class="bi bi-fire"></i>
@@ -270,7 +237,6 @@
         </div>
     </div>
     
-    <!-- Modals and other pages -->
     <div id="breathing-page" class="page" style="background: linear-gradient(to top, #28b485, #7ed56f); justify-content: center; align-items: center; text-align: center; color: white; padding: 1rem;">
         <i class="bi bi-x-lg" id="close-breathing-btn" style="position: absolute; top: 20px; right: 20px; font-size: 1.8rem; cursor: pointer; z-index: 10;"></i>
         <div id="breathing-circle-container"><div id="breathing-circle"></div></div>
@@ -450,15 +416,23 @@
                 if (user && (user.emailVerified || user.isAnonymous)) {
                     
                     if (user.isAnonymous) {
-                        // Logic for guest user
                         welcomeUserEl.textContent = `مرحباً أيها الزائر`;
-                        openSendModalBtn.classList.add('d-none'); // Guests can't send notifications
-                        startTimerBtn.classList.remove('d-none'); // Let guests use the timer
-                        timerSettingsIcon.classList.add('d-none'); // but they can't save settings
-                        updateTimerDisplay(0, 0, 0, 0);
-                        loadNotifications(null); // Load notifications without user-specific data
+                        openSendModalBtn.classList.add('d-none');
+                        const visitorTimerStart = localStorage.getItem('visitorTimerStart');
+                        if (visitorTimerStart) {
+                            startTime = new Date(parseInt(visitorTimerStart));
+                            startTimerBtn.classList.add('d-none');
+                            timerSettingsIcon.classList.remove('d-none');
+                            updateTimer();
+                            if(timerInterval) clearInterval(timerInterval);
+                            timerInterval = setInterval(updateTimer, 1000);
+                        } else {
+                            startTimerBtn.classList.remove('d-none');
+                            timerSettingsIcon.classList.add('d-none');
+                            updateTimerDisplay(0, 0, 0, 0);
+                        }
+                        loadNotifications(null);
                     } else {
-                        // Logic for registered user
                         welcomeUserEl.textContent = `مرحباً ${user.displayName || 'المستخدم'}`;
                         const userDocRef = doc(db, "users", user.uid);
                         const userDoc = await getDoc(userDocRef);
@@ -486,7 +460,6 @@
                         loadNotifications(user.uid);
                     }
                 } else {
-                    // If not logged in at all, or email not verified for a registered user, go to login.
                     window.location.href = 'index.html';
                 }
             });
@@ -494,13 +467,12 @@
 
             startTimerBtn.addEventListener('click', async () => {
                 const user = auth.currentUser;
-                if (!user) return;
                 startTime = new Date();
-                // For anonymous users, this will be temporary and not saved.
-                // For registered users, we save it.
-                if (!user.isAnonymous) {
+                if (user && !user.isAnonymous) {
                     const userDocRef = doc(db, "users", user.uid);
                     await setDoc(userDocRef, { timerStartDate: startTime }, { merge: true });
+                } else {
+                    localStorage.setItem('visitorTimerStart', startTime.getTime());
                 }
                 startTimerBtn.classList.add('d-none');
                 timerSettingsIcon.classList.remove('d-none');
@@ -513,7 +485,7 @@
                 const notificationsList = document.getElementById('notifications-list');
                 let lastSeenTimestamp = new Date(0);
 
-                if (userId) { // Only for registered users
+                if (userId) {
                     const userDocRef = doc(db, "users", userId);
                     const userDoc = await getDoc(userDocRef);
                     lastSeenTimestamp = userDoc.data()?.lastSeenNotificationTimestamp?.toDate() || new Date(0);
@@ -528,7 +500,7 @@
                         return;
                     }
 
-                    if (userId) { // Badge logic only for registered users
+                    if (userId) {
                         const firstDoc = snapshot.docs[0];
                         latestNotificationTimestamp = firstDoc.data().createdAt?.toDate();
                         if (latestNotificationTimestamp && latestNotificationTimestamp > lastSeenTimestamp) {
@@ -647,29 +619,38 @@
             closeSettingsButton.addEventListener('click', closeSettingsModal);
             settingsModalOverlay.addEventListener('click', (e) => { if (e.target === settingsModalOverlay) closeSettingsModal(); });
             setDateButton.addEventListener('click', () => dateTimePicker.showPicker());
+            
             dateTimePicker.addEventListener('change', async (e) => {
                 const user = auth.currentUser;
-                if (user && !user.isAnonymous && e.target.value) {
-                    const newStartTime = new Date(e.target.value);
-                    if (!isNaN(newStartTime.getTime())) {
-                        const userDocRef = doc(db, "users", user.uid);
-                        await setDoc(userDocRef, { timerStartDate: newStartTime }, { merge: true });
-                        location.reload();
-                    }
+                if (!e.target.value) return;
+
+                const newStartTime = new Date(e.target.value);
+                if (isNaN(newStartTime.getTime())) return;
+
+                if (user && !user.isAnonymous) {
+                    const userDocRef = doc(db, "users", user.uid);
+                    await setDoc(userDocRef, { timerStartDate: newStartTime }, { merge: true });
+                } else {
+                     localStorage.setItem('visitorTimerStart', newStartTime.getTime());
                 }
+                location.reload();
             });
+
             resetTimerButton.addEventListener('click', () => { closeSettingsModal(); setTimeout(() => confirmResetModal.classList.add('show'), 300); });
             const closeConfirmModal = () => confirmResetModal.classList.remove('show');
             cancelResetButton.addEventListener('click', closeConfirmModal);
             confirmResetModal.addEventListener('click', (e) => { if (e.target === confirmResetModal) closeConfirmModal(); });
+            
             confirmResetActionButton.addEventListener('click', async () => {
                 const user = auth.currentUser;
+                const newStartTime = new Date();
                 if (user && !user.isAnonymous) {
-                    const newStartTime = new Date();
                     const userDocRef = doc(db, "users", user.uid);
                     await setDoc(userDocRef, { timerStartDate: newStartTime }, { merge: true });
-                    location.reload();
+                } else {
+                    localStorage.setItem('visitorTimerStart', newStartTime.getTime());
                 }
+                location.reload();
             });
 
             const najdaButton = document.getElementById('najda-button');
@@ -766,3 +747,5 @@
     </script>
 </body>
 </html>
+}
+
