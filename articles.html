@@ -120,7 +120,7 @@
         </div>
         <nav class="bottom-nav">
             <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
-            <a href="diaries.html" class="nav-item"><i class="bi bi-book-heart-fill"></i><span>اليوميات</span></a>
+            <a href="diaries.html" class="nav-item"><i class="bi bi-book-fill"></i><span>اليوميات</span></a>
             <a href="articles.html" class="nav-item active"><i class="bi bi-award-fill"></i><span>المقالات</span></a>
             <a href="chat.html" class="nav-item special-item"><div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div><span>دردشة</span></a>
             <a href="follow-up.html" class="nav-item"><i class="bi bi-signpost-split-fill"></i><span>المتابعة</span></a>
@@ -245,7 +245,7 @@
             `;
 
             const fullPrompt = `${systemPrompt}\n\nالسؤال: ${userPrompt}`;
-            const response = await callGeminiAPI(fullPrompt, 'gemini-2.5-flash-preview-05-20'); // Using Flash as Pro isn't working with the key
+            const response = await callGeminiAPI(fullPrompt, 'gemini-2.5-flash-preview-05-20');
 
             geminiProResponse.textContent = response;
             geminiProResponseContainer.style.display = 'block';
