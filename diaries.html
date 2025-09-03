@@ -30,9 +30,9 @@
             width: 100%;
         }
         .top-header {
-            flex-shrink: 0; /* ڕێگری دەکات لە بچووکبوونەوە */
+            flex-shrink: 0;
             display: flex;
-            justify-content: center; /* ناونیشان لە ناوەڕاست */
+            justify-content: center;
             align-items: center;
             padding: 1rem;
             background-color: var(--background-color);
@@ -42,10 +42,10 @@
             flex-grow: 1;
             overflow-y: auto;
             padding: 1rem;
-            padding-bottom: 90px; /* شوێن بۆ ناڤباری خوارەوە */
+            padding-bottom: 90px;
         }
         .bottom-nav {
-            flex-shrink: 0; /* ڕێگری دەکات لە بچووکبوونەوە */
+            flex-shrink: 0;
             display: flex;
             justify-content: space-around;
             padding: 0.5rem 0;
@@ -55,7 +55,6 @@
         }
         .top-header h5 { margin: 0; font-weight: 700; color: var(--text-color);}
         
-        /* === چارەسەری کێشەی ناڤبار لێرە زیادکرا === */
         .nav-item {
             display: flex;
             flex-direction: column;
@@ -64,11 +63,10 @@
             text-decoration: none;
             font-size: 0.75rem;
             cursor: pointer;
-            width: 14%; /* بۆ دابەشکردنی یەکسانی شوێن */
-            height: 50px; /* بەرزییەکی دیاریکراو بۆ هەموو ئایتمەکان */
-            justify-content: center; /* بۆ ناوەڕاست هێنانی ئایکۆن و نووسین */
+            width: 14%;
+            height: 50px;
+            justify-content: center;
         }
-        /* ======================================= */
 
         .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary-color); }
@@ -76,7 +74,13 @@
         .special-item .icon-background { background: linear-gradient(135deg, #00a884, #00c896); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 168, 132, 0.4); }
         .special-item i { color: white; font-size: 2rem; margin: 0; }
 
-        .note-card { background-color: var(--card-background); border: 1px solid var(--border-color); margin-bottom: 1rem; }
+        .note-card { 
+            background-color: var(--card-background); 
+            border: 1px solid var(--border-color); 
+            margin-bottom: 1rem;
+            border-radius: 15px; /* Added border-radius */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Added box-shadow */
+        }
         .note-card .card-title { font-weight: 700; color: #FFFFFF; }
         .note-card .card-text { color: var(--text-color); font-size: 0.95rem; line-height: 1.6; }
         .note-card .mood-emoji { font-size: 1.5rem; margin-left: 0.75rem; }
@@ -84,7 +88,30 @@
         .delete-note-btn:hover { opacity: 1; color: var(--danger-color) !important; }
         .read-more-btn { font-weight: 700; color: var(--primary-color); cursor: pointer; text-decoration: none; }
         
-        .add-note-btn { position: fixed; left: 20px; bottom: 100px; width: 60px; height: 60px; background-color: var(--primary-color); color: white; border-radius: 50%; display: none; /* سەرەتا شاردراوەتەوە */ align-items: center; justify-content: center; font-size: 1.8rem; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 1021; border: none; cursor: pointer; }
+        /* White date color */
+        .note-card small.text-muted {
+            color: var(--text-color) !important;
+        }
+
+        .add-note-btn { 
+            position: fixed; 
+            left: 20px; 
+            bottom: 100px; 
+            width: 60px; 
+            height: 60px; 
+            background-color: var(--primary-color); 
+            color: white; 
+            border-radius: 50%; 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.8rem; 
+            text-decoration: none; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4); 
+            z-index: 1021; 
+            border: none; 
+            cursor: pointer; 
+        }
         
         .modal-content { background-color: var(--background-color); border: 1px solid var(--border-color); color: var(--text-color); }
         .modal-header { border-bottom: 1px solid var(--border-color); }
@@ -103,7 +130,6 @@
         </header>
         <main class="content-area">
             <div id="notes-container">
-                <!-- Spinner for loading -->
                 <div id="loading-spinner" class="text-center p-5">
                     <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
                         <span class="visually-hidden">Loading...</span>
@@ -159,18 +185,16 @@
         let currentUserId = null;
 
         onAuthStateChanged(auth, user => {
-            addNoteBtn.style.display = 'flex'; // Show add button for everyone
+            addNoteBtn.style.display = 'flex';
             if (user && user.emailVerified) {
                 currentUserId = user.uid;
                 loadNotesFromFirestore(currentUserId);
             } else {
-                // Visitor mode
                 currentUserId = null;
                 loadNotesFromLocalStorage();
             }
         });
 
-        // --- Firestore Functions ---
         function loadNotesFromFirestore(userId) {
             const notesQuery = query(collection(db, "notes"), where("userId", "==", userId), orderBy("createdAt", "desc"));
             onSnapshot(notesQuery, (snapshot) => {
@@ -187,7 +211,6 @@
             });
         }
 
-        // --- Local Storage Functions ---
         function getVisitorNotes() {
             try {
                 return JSON.parse(localStorage.getItem('visitorNotes')) || [];
@@ -204,7 +227,6 @@
             loadingSpinner.style.display = 'none';
             notesContainer.innerHTML = '';
             const notes = getVisitorNotes();
-            // Sort by ID (timestamp) descending to show newest first
             notes.sort((a, b) => b.id - a.id); 
             if (notes.length === 0) {
                 displayEmptyNotesMessage();
@@ -213,9 +235,8 @@
             }
         }
         
-        // --- UI Helper Functions ---
         function displayEmptyNotesMessage() {
-            notesContainer.innerHTML = `<div class="card text-center mt-3" style="background-color: #000; color: #fff;"><div class="card-body"><h5 class="card-title">لا توجد يوميات</h5><p class="card-text text-muted">أضف أول يومية لك باستخدام الزر الأخضر!</p></div></div>`;
+            notesContainer.innerHTML = `<div class="card text-center mt-3" style="background-color: transparent; border: none;"><div class="card-body text-muted"><i class="bi bi-journal-richtext" style="font-size: 5rem; color: var(--border-color);"></i><h5 class="card-title mt-3" style="color: var(--text-color);">لا توجد يوميات بعد</h5><p>ابدأ بتدوين أفكارك ومشاعرك بالضغط على زر الإضافة.</p></div></div>`;
         }
         
         function displayErrorMessage() {
@@ -239,7 +260,7 @@
                                 <small class="text-muted d-block mt-1">${note.date}</small>
                             </div>
                             <button class="btn btn-link text-danger p-1 delete-note-btn" title="حذف الملاحظة">
-                                <i class="bi bi-trash3" style="font-size: 1.2rem;"></i>
+                                <i class="bi bi-trash3-fill" style="font-size: 1.2rem;"></i>
                             </button>
                         </div>
                         <p class="card-text">${displayContent.replace(/\n/g, '<br>')}</p>
@@ -248,9 +269,8 @@
             notesContainer.insertAdjacentHTML('beforeend', noteCardHTML);
         }
 
-        // --- Global Functions for UI Script ---
         window.saveNote = async (noteData) => {
-            if (currentUserId) { // Logged-in user
+            if (currentUserId) {
                 try {
                     await addDoc(collection(db, "notes"), {
                         ...noteData,
@@ -261,25 +281,24 @@
                     console.error("Error adding document to Firestore: ", e);
                     alert("حدث خطأ أثناء حفظ اليومية.");
                 }
-            } else { // Visitor
+            } else {
                 const notes = getVisitorNotes();
-                notes.push({ ...noteData, id: Date.now() }); // Use timestamp as a unique ID
+                notes.push({ ...noteData, id: Date.now() });
                 saveVisitorNotes(notes);
                 loadNotesFromLocalStorage();
             }
         };
 
         window.deleteNote = async (noteId) => {
-            if (currentUserId) { // Logged-in user
+            if (currentUserId) {
                 try {
                     await deleteDoc(doc(db, "notes", noteId));
                 } catch (e) {
                     console.error("Error deleting document from Firestore: ", e);
                     alert("حدث خطأ أثناء حذف اليومية.");
                 }
-            } else { // Visitor
+            } else {
                 let notes = getVisitorNotes();
-                // noteId from visitor is a timestamp string, convert to number for comparison
                 notes = notes.filter(note => note.id !== Number(noteId));
                 saveVisitorNotes(notes);
                 loadNotesFromLocalStorage();
@@ -288,7 +307,6 @@
     </script>
     
     <script>
-        // This script handles UI interactions (Modals, etc.)
         document.addEventListener('DOMContentLoaded', () => {
             const addNoteModal = new bootstrap.Modal(document.getElementById('addNoteModal'));
             const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
@@ -330,7 +348,7 @@
                     content: noteContent
                 };
                 
-                window.saveNote(noteData); // Use the global function
+                window.saveNote(noteData);
                 
                 noteContentInput.value = '';
                 moodSlider.value = '3';
@@ -363,7 +381,7 @@
                         <span class="fs-4 me-3">${moodEmoji}</span>
                         <div>
                             <h5 class="m-0">${moodText}</h5>
-                            <small class="text-muted">${date}</small>
+                            <small class="text-white">${date}</small>
                         </div>
                     </div>`;
             });
@@ -371,7 +389,7 @@
             document.getElementById('confirm-delete-btn').addEventListener('click', () => {
                 if (cardToDelete) {
                     const noteId = cardToDelete.dataset.noteId;
-                    window.deleteNote(noteId); // Use the global function
+                    window.deleteNote(noteId);
                     cardToDelete = null;
                 }
                 confirmDeleteModal.hide();
