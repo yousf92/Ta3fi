@@ -49,7 +49,20 @@
         .fab { position: fixed; bottom: 80px; left: 20px; width: 56px; height: 56px; border-radius: 50%; background-color: var(--primary-color); color: white; display: none; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); cursor: pointer; z-index: 101; }
         
         #pdf-reader-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--background-color); z-index: 1050; display: flex; flex-direction: column; overflow: hidden; }
-        #pdf-viewer-container { flex-grow: 1; overflow: auto; display: flex; align-items: flex-start; padding: 10px; }
+        
+        #pdf-viewer-container { 
+            flex-grow: 1; 
+            overflow: auto; 
+            display: flex; 
+            align-items: flex-start; 
+            justify-content: flex-start; 
+            padding: 2.5rem 10px; 
+            cursor: grab;
+        }
+        #pdf-viewer-container:active {
+            cursor: grabbing;
+        }
+
         #pdf-canvas { border: 1px solid var(--border-color); direction: ltr; }
         #pdf-canvas.comfort-mode { filter: sepia(70%) contrast(95%) brightness(95%); }
         #pdf-canvas.night-mode { filter: invert(1) hue-rotate(180deg) brightness(95%) contrast(90%); }
@@ -57,46 +70,50 @@
         #zoom-controls { display: flex; align-items: center; gap: 5px; }
         #zoom-range { width: 80px; margin: 0 5px; }
         #current-zoom-percent { min-width: 40px; text-align: center; }
-        .floating-btn { position: fixed; bottom: 90px; z-index: 1051; width: 50px; height: 50px; border-radius: 50%; background-color: rgba(30, 30, 30, 0.8); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; color: white; }
+        
+        /* --- MODIFICATION START HERE --- */
+        .floating-btn { 
+            position: fixed; 
+            bottom: 75px; /* تم تعديل الموضع ليكون في مكان مثالي فوق شريط التحكم */
+            z-index: 1051; 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            background-color: rgba(30, 30, 30, 0.8); 
+            border: 1px solid var(--border-color); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+        }
+        /* --- MODIFICATION END HERE --- */
+
         #floating-back-btn { right: 20px; }
         #floating-display-mode-btn { left: 20px; }
 
-        /* --- Styles for Sections --- */
         .section-container { margin-bottom: 2rem; }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
         .section-header h5 { margin: 0; font-weight: 700; }
         .section-header .show-more-btn { color: var(--primary-color); text-decoration: none; font-size: 0.9rem; }
-        .books-row { display: flex; overflow-x: auto; gap: 1rem; padding-bottom: 1rem; /* for scrollbar */ scrollbar-width: none; /* Firefox */ }
-        .books-row::-webkit-scrollbar { display: none; /* Safari and Chrome */ }
+        .books-row { display: flex; overflow-x: auto; gap: 1rem; padding-bottom: 1rem; scrollbar-width: none; }
+        .books-row::-webkit-scrollbar { display: none; }
         
-        /* --- MODIFICATIONS START HERE --- */
         .book-card { 
-            flex: 0 0 140px; /* Do not grow, do not shrink, base width 140px */ 
+            flex: 0 0 140px; 
             width: 140px; 
             background-color: transparent; 
             border: none; 
             cursor: pointer; 
             position: relative; 
-            transition: transform 0.2s ease-in-out; /* ADDED for smooth hover effect */
+            transition: transform 0.2s ease-in-out; 
         }
-        .book-card:hover {
-            transform: scale(1.05); /* ADDED to lift the card on hover */
-            z-index: 10; /* ADDED to bring the hovered card to the front */
-        }
+        .book-card:hover { transform: scale(1.05); z-index: 10; }
         .book-card img { 
-            width: 100%; 
-            height: 200px; /* MODIFIED from 180px to elongate the rectangle */ 
-            object-fit: cover; 
-            border-radius: 8px; 
-            margin-bottom: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5); /* ADDED for depth and beauty */
-            transition: box-shadow 0.2s ease-in-out; /* ADDED for smooth shadow change */
+            width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); 
+            transition: box-shadow 0.2s ease-in-out; 
         }
-        .book-card:hover img {
-            box-shadow: 0 8px 24px rgba(0,0,0,0.7); /* ADDED for a more pronounced shadow on hover */
-        }
-        /* --- MODIFICATIONS END HERE --- */
-
+        .book-card:hover img { box-shadow: 0 8px 24px rgba(0,0,0,0.7); }
         .book-actions { position: absolute; top: 5px; left: 5px; }
         .dropdown-menu { min-width: auto; }
     </style>
@@ -121,7 +138,6 @@
     </div>
     
     <div id="pdf-reader-view" class="d-none">
-        <!-- PDF Reader content remains unchanged -->
         <div id="pdf-viewer-container"><canvas id="pdf-canvas"></canvas></div>
         <button class="btn floating-btn" id="floating-display-mode-btn" title="تغيير وضع العرض"><i class="bi bi-moon-fill fs-5"></i></button>
         <button class="btn floating-btn" id="floating-back-btn" title="الرجوع"><i class="bi bi-arrow-right fs-5"></i></button>
@@ -138,7 +154,6 @@
         </div>
     </div>
 
-    <!-- Add Section Modal (Modified for Delete Functionality) -->
     <div class="modal fade" id="addSectionModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -156,15 +171,12 @@
             </form>
             <hr>
             <h6>الأقسام الحالية</h6>
-            <ul class="list-group" id="sections-list-modal">
-                <!-- Sections will be listed here dynamically -->
-            </ul>
+            <ul class="list-group" id="sections-list-modal"></ul>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Add Book Modal (Unchanged from your file) -->
     <div class="modal fade" id="addBookModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -176,9 +188,7 @@
             <form id="add-book-form">
               <div class="mb-3">
                   <label for="book-section" class="form-label">القسم</label>
-                  <select class="form-select" id="book-section" required>
-                      <option value="">اختر قسمًا...</option>
-                  </select>
+                  <select class="form-select" id="book-section" required><option value="">اختر قسمًا...</option></select>
               </div>
               <div class="mb-3">
                 <label for="book-pdf-file" class="form-label">ملف الكتاب (PDF)</label>
@@ -209,7 +219,6 @@
       </div>
     </div>
 
-    <!-- Move Book Modal (New Addition) -->
     <div class="modal fade" id="moveBookModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -236,7 +245,6 @@
     </div>
 
     <nav class="bottom-nav">
-        <!-- Bottom nav remains unchanged -->
         <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
         <a href="diaries.html" class="nav-item"><i class="bi bi-book-fill"></i><span>اليوميات</span></a>
         <a href="articles.html" class="nav-item"><i class="bi bi-award-fill"></i><span>المقالات</span></a>
@@ -250,7 +258,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        // ADDITION: Added getDocs for new features
         import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc, getDoc, setDoc, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
         const DEVELOPER_UID = "sytCf4Ru91ZplxTeXYfvqGhDnn12";
@@ -270,7 +277,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- Unchanged variables ---
         const libraryView = document.getElementById('library-view');
         const pdfReaderView = document.getElementById('pdf-reader-view');
         const pdfCanvas = document.getElementById('pdf-canvas');
@@ -287,14 +293,12 @@
         let currentBookId = null, currentScale = parseFloat(zoomRange.value);
         let currentUser = null;
         let addBookModalInstance = null;
-        // --- End of Unchanged variables ---
-
+        
         const sectionsContainer = document.getElementById('sections-container');
         const noBooksPlaceholder = document.getElementById('no-books-placeholder');
         const addBookModalEl = document.getElementById('addBookModal');
         const addSectionModalEl = document.getElementById('addSectionModal');
 
-        // --- New variables for new features ---
         let moveBookModalInstance = null;
         const moveBookModalEl = document.getElementById('moveBookModal');
         const moveBookForm = document.getElementById('move-book-form');
@@ -308,9 +312,10 @@
         document.addEventListener('DOMContentLoaded', () => {
              addBookModalInstance = new bootstrap.Modal(addBookModalEl);
              new bootstrap.Modal(addSectionModalEl);
-             moveBookModalInstance = new bootstrap.Modal(moveBookModalEl); // New addition
+             moveBookModalInstance = new bootstrap.Modal(moveBookModalEl);
              pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js`;
              updateZoomDisplay();
+             setupPdfPanning();
         });
 
         onAuthStateChanged(auth, async (user) => {
@@ -369,7 +374,7 @@
                 e.preventDefault();
                 const hiddenBooks = document.querySelectorAll(`#section-${sectionId} .book-card.d-none`);
                 hiddenBooks.forEach(book => book.classList.remove('d-none'));
-                e.target.style.display = 'none'; // Hide button after click
+                e.target.style.display = 'none';
             });
         }
         
@@ -386,8 +391,6 @@
                 booksRow.innerHTML = '';
 
                 if (snapshot.empty) {
-                    // FIX: The following line is disabled with a comment instead of being deleted.
-                    // This prevents the section from disappearing and moving when it's empty.
                     // sectionEl.style.display = 'none';
                     return;
                 }
@@ -395,11 +398,7 @@
                 
                 showMoreBtn.style.display = snapshot.size > 10 ? 'inline' : 'none';
                 
-                const sortedDocs = snapshot.docs.sort((a, b) => {
-                    const timeA = a.data().createdAt?.toMillis() || 0;
-                    const timeB = b.data().createdAt?.toMillis() || 0;
-                    return timeB - timeA;
-                });
+                const sortedDocs = snapshot.docs.sort((a, b) => (a.data().createdAt?.toMillis() || 0) - (b.data().createdAt?.toMillis() || 0));
 
                 sortedDocs.forEach((doc, index) => {
                     const book = doc.data();
@@ -599,8 +598,51 @@
                 moveBookModalInstance.hide();
             } catch (error) { console.error("Error moving book:", error); }
         });
+        
+        function setupPdfPanning() {
+            const viewer = document.getElementById('pdf-viewer-container');
+            let isPanning = false;
+            let startX, startY, scrollLeftStart, scrollTopStart;
 
-        // --- PDF Reader functions that now correctly handle user-specific data ---
+            const startPan = (e) => {
+                isPanning = true;
+                const pageX = e.pageX || e.touches[0].pageX;
+                const pageY = e.pageY || e.touches[0].pageY;
+                startX = pageX - viewer.offsetLeft;
+                startY = pageY - viewer.offsetTop;
+                scrollLeftStart = viewer.scrollLeft;
+                scrollTopStart = viewer.scrollTop;
+                if(e.type === 'mousedown') e.preventDefault();
+            };
+
+            const endPan = () => {
+                isPanning = false;
+            };
+
+            const doPan = (e) => {
+                if (!isPanning) return;
+                if(e.type === 'touchmove') e.preventDefault();
+                const pageX = e.pageX || e.touches[0].pageX;
+                const pageY = e.pageY || e.touches[0].pageY;
+                const x = pageX - viewer.offsetLeft;
+                const y = pageY - viewer.offsetTop;
+                const walkX = (x - startX);
+                const walkY = (y - startY);
+                viewer.scrollLeft = scrollLeftStart - walkX;
+                viewer.scrollTop = scrollTopStart - walkY;
+            };
+
+            viewer.addEventListener('mousedown', startPan);
+            viewer.addEventListener('mouseup', endPan);
+            viewer.addEventListener('mouseleave', endPan);
+            viewer.addEventListener('mousemove', doPan);
+
+            viewer.addEventListener('touchstart', startPan, { passive: true });
+            viewer.addEventListener('touchend', endPan);
+            viewer.addEventListener('touchcancel', endPan);
+            viewer.addEventListener('touchmove', doPan, { passive: false });
+        }
+
         async function fetchAndApplyUserPreferences() {
             if (!currentUser) return;
             const profileRef = doc(db, 'user_profiles', currentUser.uid);
@@ -612,12 +654,14 @@
                 else if (prefs.displayMode === 2) pdfCanvas.classList.add('night-mode');
             }
         }
+
         const renderPage = num => {
             pageIsRendering = true;
             pdfDoc.getPage(num).then(page => {
                 const viewport = page.getViewport({ scale: currentScale });
                 const canvasContext = pdfCanvas.getContext('2d');
-                const devicePixelRatio = window.devicePixelRatio || 1;
+                const qualityFactor = 3;
+                const devicePixelRatio = (window.devicePixelRatio || 1) * qualityFactor;
                 pdfCanvas.width = Math.floor(viewport.width * devicePixelRatio);
                 pdfCanvas.height = Math.floor(viewport.height * devicePixelRatio);
                 pdfCanvas.style.width = `${Math.floor(viewport.width)}px`;
@@ -698,7 +742,7 @@
         
         displayModeBtn.addEventListener('click', async () => {
             if (!currentUser) return;
-            let newMode = 0; // 0: Normal, 1: Comfort, 2: Night
+            let newMode = 0;
             if (pdfCanvas.classList.contains('comfort-mode')) {
                 pdfCanvas.classList.remove('comfort-mode');
                 pdfCanvas.classList.add('night-mode');
@@ -719,4 +763,3 @@
     </script>
 </body>
 </html>
-
