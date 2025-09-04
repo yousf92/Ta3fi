@@ -71,10 +71,9 @@
         #zoom-range { width: 80px; margin: 0 5px; }
         #current-zoom-percent { min-width: 40px; text-align: center; }
         
-        /* --- MODIFICATION START HERE --- */
         .floating-btn { 
             position: fixed; 
-            bottom: 75px; /* تم تعديل الموضع ليكون في مكان مثالي فوق شريط التحكم */
+            bottom: 75px;
             z-index: 1051; 
             width: 50px; 
             height: 50px; 
@@ -86,7 +85,6 @@
             justify-content: center; 
             color: white; 
         }
-        /* --- MODIFICATION END HERE --- */
 
         #floating-back-btn { right: 20px; }
         #floating-display-mode-btn { left: 20px; }
@@ -147,9 +145,10 @@
             <button class="btn btn-primary btn-sm" id="next-page">التالي <i class="bi bi-arrow-left-short"></i></button>
             <div id="zoom-controls">
                 <button class="btn btn-secondary btn-sm" id="zoom-out-btn"><i class="bi bi-dash"></i></button>
-                <input type="range" id="zoom-range" min="0.5" max="3.0" step="0.1" value="1.5" class="form-range">
+                <!-- MODIFICATION: Changed default value to 0.8 -->
+                <input type="range" id="zoom-range" min="0.5" max="3.0" step="0.1" value="0.8" class="form-range">
                 <button class="btn btn-secondary btn-sm" id="zoom-in-btn"><i class="bi bi-plus"></i></button>
-                <span id="current-zoom-percent" class="text-white small">150%</span>
+                <span id="current-zoom-percent" class="text-white small">80%</span>
             </div>
         </div>
     </div>
@@ -316,6 +315,11 @@
              pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js`;
              updateZoomDisplay();
              setupPdfPanning();
+             window.addEventListener('resize', () => {
+                if (pdfDoc && !pageIsRendering) {
+                    renderPage(pageNum);
+                }
+             });
         });
 
         onAuthStateChanged(auth, async (user) => {
@@ -701,7 +705,8 @@
                 const loadingTask = pdfjsLib.getDocument(pdfUrl);
                 pdfDoc = await loadingTask.promise;
                 pageNum = userProgress.lastReadPage || 1;
-                currentScale = userProgress.zoomLevel || 1.5; 
+                // MODIFICATION: Set default zoom to 0.8 if no saved preference
+                currentScale = userProgress.zoomLevel || 0.8; 
                 zoomRange.value = currentScale;
                 updateZoomDisplay();
                 renderPage(pageNum);
@@ -763,3 +768,4 @@
     </script>
 </body>
 </html>
+
