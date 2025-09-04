@@ -33,15 +33,73 @@
         .nav-item.special-item { transform: translateY(-20px); }
         .special-item .icon-background { background: linear-gradient(135deg, #00a884, #00c896); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 168, 132, 0.4); }
         .special-item i { color: white; font-size: 2rem; margin: 0; }
-        .action-button { background-color: var(--card-background); border-radius: 15px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: var(--text-color); box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin-bottom: 1rem; font-weight: 500; border: 1px solid var(--border-color); width: 100%; }
-        .icon-container { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; }
-        .icon-container.red { background-color: rgba(255, 92, 92, 0.1); color: #ff5c5c; }
-        .card { background-color: var(--card-background); border: 1px solid var(--border-color); }
-        .card-title { font-weight: 700; color: #FFFFFF; }
-        .form-control { background-color: var(--background-color); border-color: var(--border-color); color: var(--text-color); }
-        .form-control::placeholder { color: var(--secondary-text-color); opacity: 0.7; }
-        .form-control:focus { background-color: var(--background-color); border-color: var(--primary-color); color: var(--text-color); box-shadow: 0 0 0 0.25rem rgba(0, 168, 132, 0.25); }
-        .text-muted { color: var(--secondary-text-color) !important; }
+        .settings-card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .settings-card .card-header {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem 1.25rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .settings-card .card-body {
+            padding: 1.5rem;
+        }
+        .list-group-item {
+            background-color: transparent;
+            border: none;
+            padding: 1rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-color);
+        }
+        .list-group-item:not(:last-child) {
+            border-bottom: 1px solid var(--border-color);
+        }
+        .list-group-item .form-switch .form-check-input {
+            width: 3.5em;
+            height: 1.75em;
+        }
+        .list-group-item i {
+            color: var(--secondary-text-color);
+            margin-inline-end: 1rem;
+        }
+        .list-group-item.actionable {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .list-group-item.actionable:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        #logout-btn {
+            color: var(--danger-color);
+        }
+        #logout-btn i {
+            color: var(--danger-color);
+        }
+        .modal-content {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+        }
+        .modal-header, .modal-footer {
+            border-color: var(--border-color);
+        }
+        .form-control {
+            background-color: var(--background-color);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+        .form-control:focus {
+            background-color: var(--background-color);
+            border-color: var(--primary-color);
+            color: var(--text-color);
+            box-shadow: 0 0 0 0.25rem rgba(0, 168, 132, 0.25);
+        }
     </style>
 </head>
 <body>
@@ -50,39 +108,35 @@
             <h5 class="m-0">الإعدادات</h5>
         </header>
         <main class="content-area">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">الملف الشخصي</h5>
-                    <div class="d-flex flex-column align-items-center text-center">
-                        <img id="profile-pic-preview" src="https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png" alt="صورة الملف الشخصي" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #333;">
-                        <input type="file" id="profile-pic-input" accept="image/*" class="d-none">
-                        <button id="change-pic-button" class="btn btn-outline-primary mb-2">تغيير الصورة</button>
-                        <button id="save-pic-button" class="btn btn-primary" style="display: none;">حفظ الصورة</button>
-                        <div id="upload-status" class="mt-2 small text-muted"></div>
-                    </div>
+
+            <div class="settings-card">
+                <div class="card-header">الحساب</div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item actionable" data-bs-toggle="modal" data-bs-target="#profileModal">
+                            <div><i class="bi bi-person-circle fs-5"></i><span>الملف الشخصي</span></div>
+                            <i class="bi bi-chevron-left"></i>
+                        </li>
+                        <li class="list-group-item actionable" data-bs-toggle="modal" data-bs-target="#changeNameModal">
+                            <div><i class="bi bi-pencil-square fs-5"></i><span>تغيير الاسم</span></div>
+                            <i class="bi bi-chevron-left"></i>
+                        </li>
+                    </ul>
                 </div>
             </div>
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">تغيير الاسم</h5>
-                    <div class="mb-3">
-                        <input type="text" class="form-control" id="new-name-input" placeholder="ادخل اسمك الجديد هنا">
-                    </div>
-                    <button id="save-name-btn" class="btn btn-primary w-100">حفظ الاسم الجديد</button>
-                    <div id="name-change-status" class="form-text mt-2 text-center"></div>
+
+            <div class="settings-card">
+                <div class="card-header">عام</div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                         <li class="list-group-item actionable" id="logout-btn" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal">
+                            <div><i class="bi bi-box-arrow-right fs-5"></i><span>تسجيل الخروج</span></div>
+                            <i class="bi bi-chevron-left"></i>
+                        </li>
+                    </ul>
                 </div>
             </div>
-            <div class="card">
-                 <div class="card-body">
-                    <h5 class="card-title mb-3">الإعدادات العامة</h5>
-                    <button class="action-button" id="logout-action-button">
-                        <span>تسجيل الخروج</span>
-                        <div class="icon-container red">
-                            <i class="bi bi-box-arrow-right"></i>
-                        </div>
-                    </button>
-                </div>
-            </div>
+
         </main>
         <nav class="bottom-nav">
             <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
@@ -94,6 +148,61 @@
             <a href="settings.html" class="nav-item active"><i class="bi bi-gear-fill"></i><span>الاعدادات</span></a>
         </nav>
     </div>
+
+    <div class="modal fade" id="profileModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">الملف الشخصي</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body text-center">
+            <img id="profile-pic-preview" src="https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png" alt="صورة الملف الشخصي" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid var(--border-color);">
+            <input type="file" id="profile-pic-input" accept="image/*" class="d-none">
+            <button id="change-pic-button" class="btn btn-outline-primary mb-2">تغيير الصورة</button>
+            <button id="save-pic-button" class="btn btn-primary" style="display: none;">حفظ الصورة</button>
+            <div id="upload-status" class="mt-2 small text-muted"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal fade" id="changeNameModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">تغيير الاسم</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+                <input type="text" class="form-control" id="new-name-input" placeholder="ادخل اسمك الجديد هنا">
+            </div>
+            <button id="save-name-btn" class="btn btn-primary w-100">حفظ الاسم الجديد</button>
+            <div id="name-change-status" class="form-text mt-2 text-center"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal fade" id="logoutConfirmModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="logoutModalLabel">تأكيد الخروج</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p id="logoutModalMessage">هل أنت متأكد من رغبتك في تسجيل الخروج؟</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+            <button type="button" class="btn btn-danger" id="confirm-logout-btn">تسجيل الخروج</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
@@ -125,10 +234,15 @@
         const changePicButton = document.getElementById('change-pic-button');
         const savePicButton = document.getElementById('save-pic-button');
         const uploadStatus = document.getElementById('upload-status');
-        const logoutActionButton = document.getElementById('logout-action-button');
+        const confirmLogoutBtn = document.getElementById('confirm-logout-btn');
+        const logoutModalLabel = document.getElementById('logoutModalLabel');
+        const logoutModalMessage = document.getElementById('logoutModalMessage');
         let selectedFile = null;
-        const CLOUDINARY_CLOUD_NAME = "dbkzk1oe2";
-        const CLOUDINARY_UPLOAD_PRESET = "profile-pictures";
+
+        // --- MODIFICATION START HERE ---
+        const CLOUDINARY_CLOUD_NAME = "du78yafrn";
+        const CLOUDINARY_UPLOAD_PRESET = "profile_photo";
+        // --- MODIFICATION END HERE ---
 
         onAuthStateChanged(auth, async (user) => {
             if (user && !user.isAnonymous) {
@@ -137,13 +251,15 @@
                 const userDocRef = doc(db, "users", currentUser.uid);
                 const userDoc = await getDoc(userDocRef);
                 if (userDoc.exists()) { currentUserData = userDoc.data(); }
-                logoutActionButton.querySelector('span').textContent = "تسجيل الخروج";
+                logoutModalMessage.textContent = "هل أنت متأكد من رغبتك في تسجيل الخروج؟";
+                confirmLogoutBtn.textContent = "تسجيل الخروج";
                 loadUserProfile();
                 checkNameChangeStatus();
             } else {
                 isVisitor = true;
                 currentUser = user;
-                logoutActionButton.querySelector('span').innerHTML = `العودة إلى تسجيل الدخول`;
+                logoutModalMessage.textContent = "هل أنت متأكد من رغبتك في العودة إلى صفحة تسجيل الدخول؟";
+                confirmLogoutBtn.textContent = "العودة";
                 loadVisitorProfile();
                 checkVisitorNameChangeStatus();
             }
@@ -292,20 +408,15 @@
             }
         });
         
-        logoutActionButton.addEventListener('click', () => {
-            const confirmationMessage = isVisitor 
-                ? "هل أنت متأكد من رغبتك في العودة إلى صفحة تسجيل الدخول؟" 
-                : "هل أنت متأكد من تسجيل الخروج؟";
-
-            if (confirm(confirmationMessage)) {
-                signOut(auth).then(() => {
-                    window.location.href = './login.html';
-                }).catch((error) => {
-                    console.error('Sign out error', error);
-                    alert('حدث خطأ أثناء محاولة الخروج.');
-                });
-            }
+        confirmLogoutBtn.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                window.location.href = './login.html';
+            }).catch((error) => {
+                console.error('Sign out error', error);
+                alert('حدث خطأ أثناء محاولة الخروج.');
+            });
         });
     </script>
 </body>
 </html>
+
