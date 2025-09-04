@@ -247,6 +247,36 @@
       </div>
     </div>
 
+    <!-- START: Add Edit Book Modal -->
+    <div class="modal fade" id="editBookModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">تعديل الكتاب</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="edit-book-form">
+              <input type="hidden" id="edit-book-id">
+              <div class="mb-3">
+                <label for="edit-book-title" class="form-label">عنوان الكتاب</label>
+                <input type="text" class="form-control" id="edit-book-title" required>
+              </div>
+              <div class="mb-3">
+                <label for="edit-book-description" class="form-label">وصف قصير</label>
+                <textarea class="form-control" id="edit-book-description" rows="2"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+            <button type="submit" form="edit-book-form" class="btn btn-primary">حفظ التغييرات</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END: Add Edit Book Modal -->
+
     <nav class="bottom-nav">
         <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
         <a href="diaries.html" class="nav-item"><i class="bi bi-book-fill"></i><span>اليوميات</span></a>
@@ -309,6 +339,12 @@
         const moveBookTitleEl = document.getElementById('move-book-title');
         const moveBookSectionSelect = document.getElementById('move-book-section');
 
+        // START: Add variables for Edit Book Modal
+        let editBookModalInstance = null;
+        const editBookModalEl = document.getElementById('editBookModal');
+        const editBookForm = document.getElementById('edit-book-form');
+        // END: Add variables for Edit Book Modal
+
         let unsubscribeSections = null;
         const bookUnsubscribers = {};
 
@@ -323,6 +359,9 @@
              addBookModalInstance = new bootstrap.Modal(addBookModalEl);
              new bootstrap.Modal(addSectionModalEl);
              moveBookModalInstance = new bootstrap.Modal(moveBookModalEl);
+             // START: Initialize Edit Book Modal
+             editBookModalInstance = new bootstrap.Modal(editBookModalEl);
+             // END: Initialize Edit Book Modal
              pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js`;
              updateZoomDisplay();
              setupPdfPanning();
@@ -453,11 +492,14 @@
                     if (index >= 10) el.classList.add('d-none');
 
                     const isDeveloper = currentUser && currentUser.uid === DEVELOPER_UID;
+                    // START: Add "Edit" option to dropdown
                     const developerOptions = isDeveloper
-                        ? `<li><a class="dropdown-item move-btn" href="#" data-book-id="${bookId}" data-book-title="${book.title}" data-current-section-id="${sectionId}">نقل...</a></li>
+                        ? `<li><a class="dropdown-item edit-btn" href="#" data-book-id="${bookId}">تعديل</a></li>
+                           <li><a class="dropdown-item move-btn" href="#" data-book-id="${bookId}" data-book-title="${book.title}" data-current-section-id="${sectionId}">نقل...</a></li>
                            <li><hr class="dropdown-divider"></li>
                            <li><a class="dropdown-item text-danger delete-btn" href="#" data-book-id="${bookId}">حذف</a></li>`
                         : `<li><a class="dropdown-item download-btn" href="${book.pdfUrl}" download="${book.title}.pdf">تنزيل</a></li>`;
+                    // END: Add "Edit" option to dropdown
                     
                     el.innerHTML = `
                         <img src="${book.coverImageUrl || 'https://placehold.co/280x360/1e1e1e/FAFAFA?text=غلاف'}" alt="غلاف">
@@ -491,6 +533,12 @@
                                 e.currentTarget.dataset.currentSectionId
                             );
                         });
+                        // START: Add listener for edit button
+                        el.querySelector('.edit-btn')?.addEventListener('click', (e) => {
+                            e.preventDefault(); e.stopPropagation();
+                            openEditBookModal(e.target.dataset.bookId);
+                        });
+                        // END: Add listener for edit button
                     }
                     booksRow.appendChild(el);
                 });
@@ -504,6 +552,21 @@
              } catch(error) { console.error("Error deleting book:", error); }
         }
         
+        // START: Add function to edit section title
+        async function editSection(sectionId, currentTitle) {
+            const newTitle = prompt("أدخل العنوان الجديد للقسم:", currentTitle);
+            if (newTitle && newTitle.trim() !== '' && newTitle.trim() !== currentTitle) {
+                try {
+                    await updateDoc(doc(getSectionsCollection(), sectionId), {
+                        title: newTitle.trim()
+                    });
+                } catch (error) {
+                    console.error("Error updating section title: ", error);
+                }
+            }
+        }
+        // END: Add function to edit section title
+
         async function deleteSection(sectionId) {
             if (!confirm('هل أنت متأكد من حذف هذا القسم وكل الكتب الموجودة فيه؟')) return;
             try {
@@ -523,12 +586,28 @@
                 snapshot.forEach(doc => {
                     const li = document.createElement('li');
                     li.className = 'list-group-item list-group-item-dark d-flex justify-content-between align-items-center';
-                    li.textContent = doc.data().title;
+                    
+                    // START: Modify section list item to include an edit button
+                    const titleSpan = document.createElement('span');
+                    titleSpan.textContent = doc.data().title;
+                    li.appendChild(titleSpan);
+
+                    const buttonsDiv = document.createElement('div');
+
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'btn btn-sm btn-outline-info me-2';
+                    editBtn.innerHTML = '<i class="bi bi-pencil"></i>';
+                    editBtn.onclick = () => editSection(doc.id, doc.data().title);
+                    buttonsDiv.appendChild(editBtn);
+
                     const delBtn = document.createElement('button');
                     delBtn.className = 'btn btn-sm btn-outline-danger';
                     delBtn.innerHTML = '<i class="bi bi-trash"></i>';
                     delBtn.onclick = () => deleteSection(doc.id);
-                    li.appendChild(delBtn);
+                    buttonsDiv.appendChild(delBtn);
+                    
+                    li.appendChild(buttonsDiv);
+                    // END: Modify section list item
                     list.appendChild(li);
                 });
             });
@@ -644,6 +723,47 @@
             } catch (error) { console.error("Error moving book:", error); }
         });
         
+        // START: Add function to open and populate the edit book modal
+        async function openEditBookModal(bookId) {
+            try {
+                const bookRef = doc(getBooksCollection(), bookId);
+                const bookSnap = await getDoc(bookRef);
+                if (bookSnap.exists()) {
+                    const book = bookSnap.data();
+                    document.getElementById('edit-book-id').value = bookId;
+                    document.getElementById('edit-book-title').value = book.title;
+                    document.getElementById('edit-book-description').value = book.description || '';
+                    editBookModalInstance.show();
+                } else {
+                    console.error("No such book document!");
+                }
+            } catch (error) {
+                console.error("Error opening edit book modal: ", error);
+            }
+        }
+        // END: Add function to open and populate the edit book modal
+
+        // START: Add listener for edit book form submission
+        editBookForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const bookId = document.getElementById('edit-book-id').value;
+            const newTitle = document.getElementById('edit-book-title').value;
+            const newDescription = document.getElementById('edit-book-description').value;
+
+            if (!bookId || !newTitle.trim()) return;
+
+            try {
+                await updateDoc(doc(getBooksCollection(), bookId), {
+                    title: newTitle.trim(),
+                    description: newDescription.trim()
+                });
+                editBookModalInstance.hide();
+            } catch (error) {
+                console.error("Error updating book: ", error);
+            }
+        });
+        // END: Add listener for edit book form submission
+
         function setupPdfPanning() {
             const viewer = document.getElementById('pdf-viewer-container');
             let isPanning = false;
@@ -808,4 +928,3 @@
     </script>
 </body>
 </html>
-
