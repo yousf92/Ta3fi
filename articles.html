@@ -179,8 +179,10 @@
         const uploadStatus = document.getElementById('upload-status');
         const articleModalEl = document.getElementById('articleModal');
         const articleModal = new bootstrap.Modal(articleModalEl);
-        const CLOUDINARY_CLOUD_NAME = "dbkzk1oe2";
-        const CLOUDINARY_UPLOAD_PRESET = "my-articles";
+        // --- MODIFICATION START HERE ---
+        const CLOUDINARY_CLOUD_NAME = "dbfqdmczw";
+        const CLOUDINARY_UPLOAD_PRESET = "artical";
+        // --- MODIFICATION END HERE ---
         const askGeminiProButton = document.getElementById('ask-gemini-pro-button');
         const geminiProPrompt = document.getElementById('gemini-pro-prompt');
         const geminiProResponseContainer = document.getElementById('gemini-pro-response-container');
@@ -255,9 +257,7 @@
             `;
 
             const fullPrompt = `${systemPrompt}\n\nالسؤال: ${userPrompt}`;
-            // --- START: The only change is here ---
             const response = await callGeminiAPI(fullPrompt, 'gemini-2.5-flash-preview-05-20');
-            // --- END: The only change is here ---
 
             geminiProResponse.textContent = response;
             geminiProResponseContainer.style.display = 'block';
@@ -382,4 +382,3 @@
     </script>
 </body>
 </html>
-
