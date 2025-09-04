@@ -341,7 +341,7 @@
 
         function fetchSectionsAndBooks() {
             if (unsubscribeSections) unsubscribeSections();
-            const sectionsQuery = query(collection(db, "sections"), orderBy("createdAt", "desc"));
+            const sectionsQuery = query(collection(db, "sections"), orderBy("createdAt", "asc"));
             
             unsubscribeSections = onSnapshot(sectionsQuery, (snapshot) => {
                 sectionsContainer.innerHTML = ''; 
@@ -768,4 +768,3 @@
     </script>
 </body>
 </html>
-
