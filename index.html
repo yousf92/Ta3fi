@@ -117,15 +117,34 @@
                 <label for="signin-password" class="form-label">كلمة المرور</label>
                 <input type="password" id="signin-password" class="form-control" required>
             </div>
+            <!-- START: Forgot Password Link -->
+            <div class="text-start mb-3">
+                <a href="#" id="forgot-password-link">نسيت كلمة المرور؟</a>
+            </div>
+            <!-- END: Forgot Password Link -->
             <button id="signin-button" class="btn btn-primary w-100 mt-3">تسجيل الدخول</button>
             <div id="auth-message" class="alert mt-3 d-none"></div>
             <p class="mt-4 text-muted"><a href="#" id="back-to-initial-view">&larr; العودة</a></p>
         </div>
+        
+        <!-- START: Password Reset View (Hidden by default) -->
+        <div id="reset-password-view" class="d-none">
+            <h2>إعادة تعيين كلمة المرور</h2>
+            <p class="text-muted mb-4">أدخل بريدك الإلكتروني المسجل لإرسال رابط إعادة التعيين.</p>
+            <div class="mb-3 text-end">
+                <label for="reset-email" class="form-label">البريد الإلكتروني</label>
+                <input type="email" id="reset-email" class="form-control" required placeholder="example@example.com">
+            </div>
+            <button id="reset-password-button" class="btn btn-primary w-100 mt-3">إرسال رابط إعادة التعيين</button>
+            <div id="reset-message" class="alert mt-3 d-none"></div>
+            <p class="mt-4 text-muted"><a href="#" id="back-to-login-view">&larr; العودة لتسجيل الدخول</a></p>
+        </div>
+        <!-- END: Password Reset View -->
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signInAnonymously, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -144,6 +163,14 @@
         const emailLoginView = document.getElementById('email-login-view');
         const showEmailLoginBtn = document.getElementById('show-email-login-btn');
         const backToInitialViewLink = document.getElementById('back-to-initial-view');
+        
+        // START: Reset Password Elements
+        const resetPasswordView = document.getElementById('reset-password-view');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const backToLoginViewLink = document.getElementById('back-to-login-view');
+        const resetPasswordButton = document.getElementById('reset-password-button');
+        const resetMessage = document.getElementById('reset-message');
+        // END: Reset Password Elements
 
         // Function to switch to email login view
         showEmailLoginBtn.addEventListener('click', () => {
@@ -158,17 +185,35 @@
             initialView.classList.remove('d-none');
         });
 
+        // START: View switching for password reset
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            emailLoginView.classList.add('d-none');
+            resetPasswordView.classList.remove('d-none');
+        });
+
+        backToLoginViewLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            resetPasswordView.classList.add('d-none');
+            emailLoginView.classList.remove('d-none');
+        });
+        // END: View switching for password reset
+
 
         function showAuthMessage(message, isError = true) {
             authMessage.textContent = message;
             authMessage.className = `alert mt-3 ${isError ? 'alert-danger' : 'alert-success'}`;
         }
+        
+        // START: Function to show reset password messages
+        function showResetMessage(message, isError = true) {
+            resetMessage.textContent = message;
+            resetMessage.className = `alert mt-3 ${isError ? 'alert-danger' : 'alert-success'}`;
+        }
+        // END: Function to show reset password messages
 
         onAuthStateChanged(auth, user => {
             if (user && (user.emailVerified || user.isAnonymous)) {
-                // Check which page the guest should be redirected to
-                // Based on the provided file, guests who sign in from `login.html` are sent to `chat.html`
-                // Regular users are sent to `main.html`
                 if(user.isAnonymous) {
                      window.location.href = 'main.html';
                 } else {
@@ -215,6 +260,28 @@
                 });
             // onAuthStateChanged will handle the redirect on success
         });
+
+        // START: Password Reset Logic
+        resetPasswordButton.addEventListener('click', () => {
+            const email = document.getElementById('reset-email').value.trim();
+            if (!email) {
+                return showResetMessage("الرجاء إدخال بريدك الإلكتروني.");
+            }
+            resetPasswordButton.disabled = true;
+            resetPasswordButton.textContent = 'جاري الإرسال...';
+            sendPasswordResetEmail(auth, email)
+                .then(() => {
+                    showResetMessage("تم إرسال رابط إعادة تعيين كلمة المرور بنجاح. يرجى مراجعة بريدك الإلكتروني (بما في ذلك مجلد الرسائل غير المرغوب فيها او بلانجلیزي spam).", false);
+                    resetPasswordButton.disabled = false;
+                    resetPasswordButton.textContent = 'إرسال رابط إعادة التعيين';
+                })
+                .catch((error) => {
+                    showResetMessage("حدث خطأ. يرجى التأكد من أن البريد الإلكتروني صحيح والمحاولة مرة أخرى.");
+                    resetPasswordButton.disabled = false;
+                    resetPasswordButton.textContent = 'إرسال رابط إعادة التعيين';
+                });
+        });
+        // END: Password Reset Logic
 
     </script>
 
