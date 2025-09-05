@@ -77,7 +77,7 @@
             display: flex; 
             align-items: flex-start; 
             justify-content: flex-start; 
-            padding: 2.5rem 10px; 
+            padding: 1rem; 
             cursor: grab;
         }
         #pdf-viewer-container:active {
@@ -87,7 +87,27 @@
         #pdf-canvas { border: 1px solid var(--border-color); direction: ltr; }
         #pdf-canvas.comfort-mode { filter: sepia(70%) contrast(95%) brightness(95%); }
         #pdf-canvas.night-mode { filter: invert(1) hue-rotate(180deg) brightness(95%) contrast(90%); }
-        #pdf-controls { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; padding: 8px; background-color: var(--card-background); border-top: 1px solid var(--border-color); gap: 10px; position: relative; z-index: 1052; }
+        
+        /* START: Updated PDF Controls Styles */
+        #pdf-controls { 
+            display: flex; 
+            flex-direction: column; /* Arrange rows vertically */
+            padding: 8px; 
+            background-color: var(--card-background); 
+            border-top: 1px solid var(--border-color); 
+            gap: 8px; /* Space between rows */
+            position: relative; 
+            z-index: 1052; 
+        }
+        .pdf-controls-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            gap: 10px; /* Space between items in a row */
+        }
+        /* END: Updated PDF Controls Styles */
+
         #zoom-controls { display: flex; align-items: center; gap: 5px; }
         #zoom-range { width: 80px; margin: 0 5px; }
         #current-zoom-percent { min-width: 40px; text-align: center; }
@@ -202,32 +222,32 @@
     
     <div id="pdf-reader-view" class="d-none">
         <div id="pdf-viewer-container"><canvas id="pdf-canvas"></canvas></div>
-        <!-- Floating buttons have been moved to the control bar below -->
+        
+        <!-- START: Updated Controls Layout -->
         <div id="pdf-controls">
-            <!-- New position for display mode button -->
-            <button class="btn btn-secondary btn-sm" id="display-mode-btn" title="تغيير وضع العرض"><i class="bi bi-moon-fill"></i></button>
-
-            <!-- Zoom Controls -->
-            <div id="zoom-controls">
-                <button class="btn btn-secondary btn-sm" id="zoom-out-btn"><i class="bi bi-dash"></i></button>
-                <input type="range" id="zoom-range" min="0.1" max="3.0" step="0.01" value="0.8" class="form-range">
-                <button class="btn btn-secondary btn-sm" id="zoom-in-btn"><i class="bi bi-plus"></i></button>
-                <span id="current-zoom-percent" class="text-white small">80%</span>
+            <!-- Top Row: Page Navigation -->
+            <div class="pdf-controls-row">
+                <button class="btn btn-primary btn-sm" id="prev-page"><i class="bi bi-arrow-right-short"></i> السابق</button>
+                <span id="page-num" class="fw-bold px-2"></span>
+                <button class="btn btn-primary btn-sm" id="next-page">التالي <i class="bi bi-arrow-left-short"></i></button>
             </div>
 
-            <!-- Page Navigation Controls -->
-            <button class="btn btn-primary btn-sm" id="prev-page"><i class="bi bi-arrow-right-short"></i> السابق</button>
-            <span id="page-num" class="fw-bold px-2"></span>
-            <button class="btn btn-primary btn-sm" id="next-page">التالي <i class="bi bi-arrow-left-short"></i></button>
-            
-            <!-- Go to Page Button -->
-            <button class="btn btn-secondary btn-sm" id="goto-page-btn" title="الانتقال إلى صفحة" data-bs-toggle="modal" data-bs-target="#goToPageModal">
-                <i class="bi bi-box-arrow-in-right"></i>
-            </button>
-            
-            <!-- New position for close reader button -->
-            <button class="btn btn-secondary btn-sm" id="close-reader-btn" title="الرجوع"><i class="bi bi-arrow-right"></i></button>
+            <!-- Bottom Row: Tools -->
+            <div class="pdf-controls-row">
+                 <button class="btn btn-secondary btn-sm" id="display-mode-btn" title="تغيير وضع العرض"><i class="bi bi-moon-fill"></i></button>
+                <div id="zoom-controls">
+                    <button class="btn btn-secondary btn-sm" id="zoom-out-btn"><i class="bi bi-dash"></i></button>
+                    <input type="range" id="zoom-range" min="0.1" max="3.0" step="0.01" value="0.8" class="form-range">
+                    <button class="btn btn-secondary btn-sm" id="zoom-in-btn"><i class="bi bi-plus"></i></button>
+                </div>
+                 <span id="current-zoom-percent" class="text-white small">80%</span>
+                <button class="btn btn-secondary btn-sm" id="goto-page-btn" title="الانتقال إلى صفحة" data-bs-toggle="modal" data-bs-target="#goToPageModal">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                </button>
+                <button class="btn btn-secondary btn-sm" id="close-reader-btn" title="الرجوع"><i class="bi bi-arrow-right"></i></button>
+            </div>
         </div>
+        <!-- END: Updated Controls Layout -->
     </div>
 
     <div class="modal fade" id="addSectionModal" tabindex="-1">
@@ -451,8 +471,8 @@
         const zoomInBtn = document.getElementById('zoom-in-btn');
         const zoomRange = document.getElementById('zoom-range');
         const currentZoomPercent = document.getElementById('current-zoom-percent');
-        const displayModeBtn = document.getElementById('display-mode-btn'); // Updated ID
-        const closeReaderBtn = document.getElementById('close-reader-btn'); // Updated ID
+        const displayModeBtn = document.getElementById('display-mode-btn'); 
+        const closeReaderBtn = document.getElementById('close-reader-btn'); 
         let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumIsPending = null;
         let currentBookId = null, currentScale = parseFloat(zoomRange.value);
         let currentUser = null;
