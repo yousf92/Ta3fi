@@ -349,10 +349,21 @@
         const bookUnsubscribers = {};
 
         let currentView = 'public'; // 'public' or 'private'
+        
+        // START: Add variables for Favorites
+        let userFavorites = new Set();
+        let unsubscribeFavorites = null;
+        // END: Add variables for Favorites
 
         // Helper functions to get current collection references
         const getSectionsCollection = () => collection(db, currentView === 'private' ? `users/${DEVELOPER_UID}/private_sections` : 'sections');
         const getBooksCollection = () => collection(db, currentView === 'private' ? `users/${DEVELOPER_UID}/private_books` : 'books');
+        // START: Add helper for favorites collection
+        const getFavoritesCollection = () => {
+            if (!currentUser) return null;
+            return collection(db, 'user_profiles', currentUser.uid, 'favorites');
+        }
+        // END: Add helper for favorites collection
 
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -398,10 +409,27 @@
                     }
                 });
             }
-
+            
+            // START: Add listener for favorites
+            listenToFavorites();
+            // END: Add listener for favorites
             await fetchAndApplyUserPreferences();
             fetchSectionsAndBooks(); 
         });
+
+        // START: Add delegated event listener for favorite buttons
+        sectionsContainer.addEventListener('click', (e) => {
+            const favoriteBtn = e.target.closest('.favorite-btn');
+            if (favoriteBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const bookId = favoriteBtn.dataset.bookId;
+                if (bookId) {
+                    toggleFavorite(bookId);
+                }
+            }
+        });
+        // END: Add delegated event listener
 
         function switchView(view) {
             currentView = view;
@@ -423,17 +451,32 @@
             const sectionsQuery = query(getSectionsCollection(), orderBy("createdAt", "asc"));
             
             unsubscribeSections = onSnapshot(sectionsQuery, (snapshot) => {
-                sectionsContainer.innerHTML = ''; 
-                if (snapshot.empty) {
+                // Keep track of existing sections to remove old ones
+                const existingSectionIds = new Set();
+                snapshot.forEach(doc => existingSectionIds.add(doc.id));
+                
+                // Remove sections that no longer exist
+                const sectionElements = sectionsContainer.querySelectorAll('.section-container:not(#favorites-section-container)');
+                sectionElements.forEach(el => {
+                    const sectionId = el.id.replace('section-', '');
+                    if (!existingSectionIds.has(sectionId)) {
+                        el.remove();
+                    }
+                });
+
+
+                if (snapshot.empty && userFavorites.size === 0) {
                     noBooksPlaceholder.style.display = 'block';
-                    return;
+                } else {
+                     noBooksPlaceholder.style.display = 'none';
                 }
-                noBooksPlaceholder.style.display = 'none';
 
                 snapshot.forEach(sectionDoc => {
                     const section = sectionDoc.data();
                     const sectionId = sectionDoc.id;
-                    renderSection(sectionId, section.title);
+                    if (!document.getElementById(`section-${sectionId}`)) {
+                       renderSection(sectionId, section.title);
+                    }
                     fetchBooksForSection(sectionId);
                 });
 
@@ -461,6 +504,72 @@
             });
         }
         
+        // START: Add reusable function to create book card element
+        function createBookCardElement(bookId, book) {
+            const el = document.createElement('div');
+            el.className = 'book-card';
+            el.dataset.bookId = bookId; // For easy selection later
+
+            const isDeveloper = currentUser && currentUser.uid === DEVELOPER_UID;
+            const isFavorite = userFavorites.has(bookId);
+
+            let menuItems = `<li><a class="dropdown-item favorite-btn" href="#" data-book-id="${bookId}">
+                <i class="bi ${isFavorite ? 'bi-heart-fill text-danger' : 'bi-heart'}"></i>
+                <span style="margin-right: 8px;">${isFavorite ? 'إزالة من المفضلة' : 'إضافة للمفضلة'}</span>
+            </a></li>`;
+
+            if (isDeveloper) {
+                menuItems += `
+                   <li><a class="dropdown-item edit-btn" href="#" data-book-id="${bookId}">تعديل</a></li>
+                   <li><a class="dropdown-item move-btn" href="#" data-book-id="${bookId}" data-book-title="${book.title}">نقل...</a></li>
+                   <li><hr class="dropdown-divider"></li>
+                   <li><a class="dropdown-item text-danger delete-btn" href="#" data-book-id="${bookId}">حذف</a></li>
+                `;
+            } else {
+                menuItems += `<li><a class="dropdown-item download-btn" href="${book.pdfUrl}" download="${book.title}.pdf">تنزيل</a></li>`;
+            }
+
+            el.innerHTML = `
+                <img src="${book.coverImageUrl || 'https://placehold.co/280x360/1e1e1e/FAFAFA?text=غلاف'}" alt="غلاف">
+                <h6 class="card-title text-center">${book.title}</h6>
+                <div class="book-actions dropdown">
+                    <button class="btn btn-sm text-white bg-dark bg-opacity-50 rounded-circle" type="button" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                        ${menuItems}
+                    </ul>
+                </div>
+            `;
+
+            el.addEventListener('click', (e) => {
+                if (!e.target.closest('.book-actions')) {
+                     openPdfReader(bookId, book.pdfUrl, book.title);
+                }
+            });
+
+            if(isDeveloper) {
+                el.querySelector('.delete-btn')?.addEventListener('click', (e) => {
+                   e.preventDefault(); e.stopPropagation();
+                   if (confirm('هل أنت متأكد من حذف هذا الكتاب؟')) {
+                       deleteBook(e.target.dataset.bookId);
+                   }
+                });
+                el.querySelector('.move-btn')?.addEventListener('click', (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    openMoveBookModal(
+                        e.currentTarget.dataset.bookId, 
+                        e.currentTarget.dataset.bookTitle, 
+                        book.sectionId // Use the book's own sectionId
+                    );
+                });
+                el.querySelector('.edit-btn')?.addEventListener('click', (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    openEditBookModal(e.target.dataset.bookId);
+                });
+            }
+            return el;
+        }
+        // END: Add reusable function
+
         function fetchBooksForSection(sectionId) {
             if (bookUnsubscribers[sectionId]) bookUnsubscribers[sectionId]();
 
@@ -475,7 +584,6 @@
                 booksRow.innerHTML = '';
 
                 if (snapshot.empty) {
-                     // Do not hide the section if it's empty, just show no books.
                      return;
                 }
                 sectionEl.style.display = 'block';
@@ -487,63 +595,118 @@
                 sortedDocs.forEach((doc, index) => {
                     const book = doc.data();
                     const bookId = doc.id;
-                    const el = document.createElement('div');
-                    el.className = 'book-card';
+                    // START: Replace inline HTML with reusable function
+                    const el = createBookCardElement(bookId, book);
+                    // END: Replace inline HTML
+                    
                     if (index >= 10) el.classList.add('d-none');
-
-                    const isDeveloper = currentUser && currentUser.uid === DEVELOPER_UID;
-                    // START: Add "Edit" option to dropdown
-                    const developerOptions = isDeveloper
-                        ? `<li><a class="dropdown-item edit-btn" href="#" data-book-id="${bookId}">تعديل</a></li>
-                           <li><a class="dropdown-item move-btn" href="#" data-book-id="${bookId}" data-book-title="${book.title}" data-current-section-id="${sectionId}">نقل...</a></li>
-                           <li><hr class="dropdown-divider"></li>
-                           <li><a class="dropdown-item text-danger delete-btn" href="#" data-book-id="${bookId}">حذف</a></li>`
-                        : `<li><a class="dropdown-item download-btn" href="${book.pdfUrl}" download="${book.title}.pdf">تنزيل</a></li>`;
-                    // END: Add "Edit" option to dropdown
-                    
-                    el.innerHTML = `
-                        <img src="${book.coverImageUrl || 'https://placehold.co/280x360/1e1e1e/FAFAFA?text=غلاف'}" alt="غلاف">
-                        <h6 class="card-title text-center">${book.title}</h6>
-                        <div class="book-actions dropdown">
-                            <button class="btn btn-sm text-white bg-dark bg-opacity-50 rounded-circle" type="button" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
-                            <ul class="dropdown-menu dropdown-menu-dark">
-                                ${developerOptions}
-                            </ul>
-                        </div>
-                    `;
-                    
-                    el.addEventListener('click', (e) => {
-                        if (!e.target.closest('.book-actions')) {
-                             openPdfReader(bookId, book.pdfUrl, book.title);
-                        }
-                    });
-
-                    if(isDeveloper) {
-                        el.querySelector('.delete-btn')?.addEventListener('click', (e) => {
-                           e.preventDefault(); e.stopPropagation();
-                           if (confirm('هل أنت متأكد من حذف هذا الكتاب؟')) {
-                               deleteBook(e.target.dataset.bookId);
-                           }
-                        });
-                        el.querySelector('.move-btn')?.addEventListener('click', (e) => {
-                            e.preventDefault(); e.stopPropagation();
-                            openMoveBookModal(
-                                e.currentTarget.dataset.bookId, 
-                                e.currentTarget.dataset.bookTitle, 
-                                e.currentTarget.dataset.currentSectionId
-                            );
-                        });
-                        // START: Add listener for edit button
-                        el.querySelector('.edit-btn')?.addEventListener('click', (e) => {
-                            e.preventDefault(); e.stopPropagation();
-                            openEditBookModal(e.target.dataset.bookId);
-                        });
-                        // END: Add listener for edit button
-                    }
                     booksRow.appendChild(el);
                 });
             }, (error) => console.error(`Error fetching books for section ${sectionId}:`, error));
         }
+
+        // START: Add functions for favorites
+        function listenToFavorites() {
+            if (unsubscribeFavorites) unsubscribeFavorites();
+            const favoritesCollection = getFavoritesCollection();
+            if (!favoritesCollection) {
+                userFavorites.clear();
+                renderFavoritesSection();
+                return;
+            }
+
+            unsubscribeFavorites = onSnapshot(favoritesCollection, (snapshot) => {
+                const newFavorites = new Set();
+                snapshot.forEach(doc => newFavorites.add(doc.id));
+                userFavorites = newFavorites;
+                renderFavoritesSection();
+                updateAllFavoriteIcons();
+            });
+        }
+
+        async function renderFavoritesSection() {
+            let sectionEl = document.getElementById('favorites-section-container');
+
+            if (userFavorites.size === 0) {
+                if (sectionEl) sectionEl.remove();
+                if (document.querySelectorAll('.section-container').length === 0) {
+                    noBooksPlaceholder.style.display = 'block';
+                }
+                return;
+            } else {
+                 noBooksPlaceholder.style.display = 'none';
+            }
+
+            if (!sectionEl) {
+                sectionEl = document.createElement('div');
+                sectionEl.className = 'section-container';
+                sectionEl.id = 'favorites-section-container';
+                sectionEl.innerHTML = `
+                    <div class="section-header">
+                        <h5><i class="bi bi-heart-fill" style="color: var(--danger-color);"></i> المفضلة</h5>
+                    </div>
+                    <div class="books-row"></div>
+                `;
+                sectionsContainer.prepend(sectionEl);
+            }
+
+            const booksRow = sectionEl.querySelector('.books-row');
+            booksRow.innerHTML = '';
+
+            for (const bookId of userFavorites) {
+                try {
+                    let bookRef = doc(db, 'books', bookId);
+                    let bookDoc = await getDoc(bookRef);
+                    if (!bookDoc.exists() && currentUser?.uid === DEVELOPER_UID) {
+                        bookRef = doc(db, `users/${DEVELOPER_UID}/private_books`, bookId);
+                        bookDoc = await getDoc(bookRef);
+                    }
+
+                    if (bookDoc.exists()) {
+                        const bookData = bookDoc.data();
+                        const cardEl = createBookCardElement(bookId, bookData);
+                        booksRow.appendChild(cardEl);
+                    } else {
+                         await deleteDoc(doc(getFavoritesCollection(), bookId));
+                    }
+                } catch (error) {
+                    console.error(`Error fetching favorite book ${bookId}:`, error);
+                }
+            }
+        }
+        
+        async function toggleFavorite(bookId) {
+            if (!currentUser) return;
+            const favoritesCollection = getFavoritesCollection();
+            if (!favoritesCollection) return;
+            const bookRef = doc(favoritesCollection, bookId);
+
+            try {
+                if (userFavorites.has(bookId)) {
+                    await deleteDoc(bookRef);
+                } else {
+                    await setDoc(bookRef, { createdAt: serverTimestamp() });
+                }
+            } catch (error) {
+                console.error("Error toggling favorite:", error);
+            }
+        }
+
+        function updateAllFavoriteIcons() {
+            document.querySelectorAll('.book-card').forEach(card => {
+                const bookId = card.dataset.bookId;
+                const favoriteBtn = card.querySelector('.favorite-btn');
+                if (bookId && favoriteBtn) {
+                    const isFavorite = userFavorites.has(bookId);
+                    const icon = favoriteBtn.querySelector('i');
+                    const text = favoriteBtn.querySelector('span');
+
+                    icon.className = `bi ${isFavorite ? 'bi-heart-fill text-danger' : 'bi-heart'}`;
+                    text.textContent = isFavorite ? 'إزالة من المفضلة' : 'إضافة للمفضلة';
+                }
+            });
+        }
+        // END: Add functions for favorites
         
         async function deleteBook(bookId) {
              if (!bookId) return;
@@ -552,7 +715,6 @@
              } catch(error) { console.error("Error deleting book:", error); }
         }
         
-        // START: Add function to edit section title
         async function editSection(sectionId, currentTitle) {
             const newTitle = prompt("أدخل العنوان الجديد للقسم:", currentTitle);
             if (newTitle && newTitle.trim() !== '' && newTitle.trim() !== currentTitle) {
@@ -565,7 +727,6 @@
                 }
             }
         }
-        // END: Add function to edit section title
 
         async function deleteSection(sectionId) {
             if (!confirm('هل أنت متأكد من حذف هذا القسم وكل الكتب الموجودة فيه؟')) return;
@@ -587,7 +748,6 @@
                     const li = document.createElement('li');
                     li.className = 'list-group-item list-group-item-dark d-flex justify-content-between align-items-center';
                     
-                    // START: Modify section list item to include an edit button
                     const titleSpan = document.createElement('span');
                     titleSpan.textContent = doc.data().title;
                     li.appendChild(titleSpan);
@@ -607,7 +767,6 @@
                     buttonsDiv.appendChild(delBtn);
                     
                     li.appendChild(buttonsDiv);
-                    // END: Modify section list item
                     list.appendChild(li);
                 });
             });
@@ -723,7 +882,6 @@
             } catch (error) { console.error("Error moving book:", error); }
         });
         
-        // START: Add function to open and populate the edit book modal
         async function openEditBookModal(bookId) {
             try {
                 const bookRef = doc(getBooksCollection(), bookId);
@@ -741,9 +899,7 @@
                 console.error("Error opening edit book modal: ", error);
             }
         }
-        // END: Add function to open and populate the edit book modal
 
-        // START: Add listener for edit book form submission
         editBookForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const bookId = document.getElementById('edit-book-id').value;
@@ -762,7 +918,6 @@
                 console.error("Error updating book: ", error);
             }
         });
-        // END: Add listener for edit book form submission
 
         function setupPdfPanning() {
             const viewer = document.getElementById('pdf-viewer-container');
