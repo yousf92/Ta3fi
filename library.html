@@ -34,9 +34,29 @@
         .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary-color); }
         
-        .nav-item.special-item { transform: translateY(-20px); }
+        .nav-item.special-item { transform: translateY(-20px); position: relative; } /* إضافة جديدة */
         .nav-item.special-item .icon-background { width: 60px; height: 60px; background: linear-gradient(135deg, #00a884, #00c896); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 168, 132, 0.4); }
         .special-item .icon-background i { color: white; font-size: 2rem; margin: 0; }
+
+        /* --- إضافة جديدة: تنسيق عداد الإشعارات --- */
+        .chat-notification-badge {
+            position: absolute;
+            top: -8px; 
+            right: 25px; 
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 13px;
+            font-weight: bold;
+            display: none; /* مخفي بشكل افتراضي */
+            justify-content: center;
+            align-items: center;
+            border: 2px solid var(--card-background);
+            z-index: 1;
+        }
+        /* --- نهاية الإضافة --- */
        
         .card, .modal-content { background-color: var(--card-background); border: 1px solid var(--border-color); color: var(--text-color); }
         .card-title { font-weight: 700; color: #FFFFFF; font-size: 0.9rem; }
@@ -248,7 +268,6 @@
       </div>
     </div>
 
-    <!-- START: Add Edit Book Modal -->
     <div class="modal fade" id="editBookModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -276,13 +295,17 @@
         </div>
       </div>
     </div>
-    <!-- END: Add Edit Book Modal -->
 
     <nav class="bottom-nav">
         <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
         <a href="diaries.html" class="nav-item"><i class="bi bi-book-fill"></i><span>اليوميات</span></a>
         <a href="articles.html" class="nav-item"><i class="bi bi-award-fill"></i><span>المقالات</span></a>
-        <a href="chat.html" class="nav-item special-item"><div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div><span>دردشة</span></a>
+        <a href="chat.html" class="nav-item special-item">
+            <div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div>
+            <span>دردشة</span>
+            <!-- إضافة جديدة: هذا العنصر سيظهر كعداد للإشعارات -->
+            <span class="chat-notification-badge"></span>
+        </a>
         <a href="follow-up.html" class="nav-item"><i class="bi bi-signpost-split-fill"></i><span>المتابعة</span></a>
         <a href="library.html" class="nav-item active"><i class="bi bi-collection-fill"></i><span>المكتبة</span></a>
         <a href="settings.html" class="nav-item"><i class="bi bi-gear-fill"></i><span>الاعدادات</span></a>
@@ -290,9 +313,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
+        // --- إضافة جديدة: استيراد الأوامر اللازمة من Firestore ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc, getDoc, setDoc, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc, getDoc, setDoc, where, orderBy, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
         const DEVELOPER_UID = "sytCf4Ru91ZplxTeXYfvqGhDnn12";
         const firebaseConfig = {
@@ -310,6 +334,34 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // --- إضافة جديدة: دالة للاستماع للرسائل الجديدة ---
+        function listenForUnreadMessages(userId) {
+            const chatBadge = document.querySelector('.chat-notification-badge');
+            if (!chatBadge) return;
+
+            const lastReadTimestamp = parseInt(localStorage.getItem('lastReadTimestamp') || '0');
+            const messagesRef = collection(db, "messages");
+            
+            const q = query(messagesRef, where("createdAt", ">", Timestamp.fromMillis(lastReadTimestamp)));
+
+            onSnapshot(q, (snapshot) => {
+                let unreadCount = 0;
+                snapshot.forEach(doc => {
+                    if (doc.data().senderId !== userId) {
+                        unreadCount++;
+                    }
+                });
+
+                if (unreadCount > 0) {
+                    chatBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    chatBadge.style.display = 'flex';
+                } else {
+                    chatBadge.style.display = 'none';
+                }
+            });
+        }
+        // --- نهاية الإضافة ---
 
         const libraryView = document.getElementById('library-view');
         const pdfReaderView = document.getElementById('pdf-reader-view');
@@ -340,41 +392,29 @@
         const moveBookTitleEl = document.getElementById('move-book-title');
         const moveBookSectionSelect = document.getElementById('move-book-section');
 
-        // START: Add variables for Edit Book Modal
         let editBookModalInstance = null;
         const editBookModalEl = document.getElementById('editBookModal');
         const editBookForm = document.getElementById('edit-book-form');
-        // END: Add variables for Edit Book Modal
-
         let unsubscribeSections = null;
         const bookUnsubscribers = {};
 
-        let currentView = 'public'; // 'public' or 'private'
-        
-        // START: Add variables for Favorites
+        let currentView = 'public';
+
         let userFavorites = new Set();
         let unsubscribeFavorites = null;
-        // END: Add variables for Favorites
 
-        // Helper functions to get current collection references
         const getSectionsCollection = () => collection(db, currentView === 'private' ? `users/${DEVELOPER_UID}/private_sections` : 'sections');
         const getBooksCollection = () => collection(db, currentView === 'private' ? `users/${DEVELOPER_UID}/private_books` : 'books');
-        // START: Add helper for favorites collection
         const getFavoritesCollection = () => {
             if (!currentUser) return null;
             return collection(db, 'user_profiles', currentUser.uid, 'favorites');
         }
-        // END: Add helper for favorites collection
-
 
         document.addEventListener('DOMContentLoaded', () => {
              addBookModalInstance = new bootstrap.Modal(addBookModalEl);
              new bootstrap.Modal(addSectionModalEl);
              moveBookModalInstance = new bootstrap.Modal(moveBookModalEl);
-             // START: Initialize Edit Book Modal
              editBookModalInstance = new bootstrap.Modal(editBookModalEl);
-             // END: Initialize Edit Book Modal
-             // تم تحديث هذا السطر أيضًا ليطابق إصدار المكتبة الجديد
              pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
              updateZoomDisplay();
              setupPdfPanning();
@@ -394,6 +434,10 @@
                  currentUser = user; 
             }
             
+            // --- إضافة جديدة: استدعاء دالة الإشعارات ---
+            listenForUnreadMessages(currentUser.uid);
+            // --- نهاية الإضافة ---
+            
             const isDeveloper = currentUser.uid === DEVELOPER_UID;
             document.querySelector('.fab').style.display = isDeveloper ? 'flex' : 'none';
             document.getElementById('add-section-btn').style.display = isDeveloper ? 'block' : 'none';
@@ -412,14 +456,11 @@
                 });
             }
             
-            // START: Add listener for favorites
             listenToFavorites();
-            // END: Add listener for favorites
             await fetchAndApplyUserPreferences();
             fetchSectionsAndBooks(); 
         });
 
-        // START: Add delegated event listener for favorite buttons
         sectionsContainer.addEventListener('click', (e) => {
             const favoriteBtn = e.target.closest('.favorite-btn');
             if (favoriteBtn) {
@@ -431,7 +472,6 @@
                 }
             }
         });
-        // END: Add delegated event listener
 
         function switchView(view) {
             currentView = view;
@@ -453,11 +493,9 @@
             const sectionsQuery = query(getSectionsCollection(), orderBy("createdAt", "asc"));
             
             unsubscribeSections = onSnapshot(sectionsQuery, (snapshot) => {
-                // Keep track of existing sections to remove old ones
                 const existingSectionIds = new Set();
                 snapshot.forEach(doc => existingSectionIds.add(doc.id));
                 
-                // Remove sections that no longer exist
                 const sectionElements = sectionsContainer.querySelectorAll('.section-container:not(#favorites-section-container)');
                 sectionElements.forEach(el => {
                     const sectionId = el.id.replace('section-', '');
@@ -465,7 +503,6 @@
                         el.remove();
                     }
                 });
-
 
                 if (snapshot.empty && userFavorites.size === 0) {
                     noBooksPlaceholder.style.display = 'block';
@@ -506,11 +543,10 @@
             });
         }
         
-        // START: Add reusable function to create book card element
         function createBookCardElement(bookId, book) {
             const el = document.createElement('div');
             el.className = 'book-card';
-            el.dataset.bookId = bookId; // For easy selection later
+            el.dataset.bookId = bookId;
 
             const isDeveloper = currentUser && currentUser.uid === DEVELOPER_UID;
             const isFavorite = userFavorites.has(bookId);
@@ -560,7 +596,7 @@
                     openMoveBookModal(
                         e.currentTarget.dataset.bookId, 
                         e.currentTarget.dataset.bookTitle, 
-                        book.sectionId // Use the book's own sectionId
+                        book.sectionId
                     );
                 });
                 el.querySelector('.edit-btn')?.addEventListener('click', (e) => {
@@ -570,7 +606,6 @@
             }
             return el;
         }
-        // END: Add reusable function
 
         function fetchBooksForSection(sectionId) {
             if (bookUnsubscribers[sectionId]) bookUnsubscribers[sectionId]();
@@ -597,9 +632,7 @@
                 sortedDocs.forEach((doc, index) => {
                     const book = doc.data();
                     const bookId = doc.id;
-                    // START: Replace inline HTML with reusable function
                     const el = createBookCardElement(bookId, book);
-                    // END: Replace inline HTML
                     
                     if (index >= 15) el.classList.add('d-none');
                     booksRow.appendChild(el);
@@ -607,7 +640,6 @@
             }, (error) => console.error(`Error fetching books for section ${sectionId}:`, error));
         }
 
-        // START: Add functions for favorites
         function listenToFavorites() {
             if (unsubscribeFavorites) unsubscribeFavorites();
             const favoritesCollection = getFavoritesCollection();
@@ -629,7 +661,6 @@
         async function renderFavoritesSection() {
             let sectionEl = document.getElementById('favorites-section-container');
         
-            //  Handle empty state
             if (userFavorites.size === 0) {
                 if (sectionEl) sectionEl.remove();
                 if (document.querySelectorAll('.section-container').length === 0) {
@@ -640,7 +671,6 @@
                  noBooksPlaceholder.style.display = 'none';
             }
         
-            // Create section container if it doesn't exist
             if (!sectionEl) {
                 sectionEl = document.createElement('div');
                 sectionEl.className = 'section-container';
@@ -656,7 +686,6 @@
         
             const booksRow = sectionEl.querySelector('.books-row');
             
-            // Fetch all book data and create card elements in parallel
             const bookPromises = Array.from(userFavorites).map(async (bookId) => {
                 try {
                     let bookRef = doc(db, 'books', bookId);
@@ -669,7 +698,6 @@
                     if (bookDoc.exists()) {
                         return createBookCardElement(bookDoc.id, bookDoc.data());
                     } else {
-                        // Clean up stale favorite from database
                         await deleteDoc(doc(getFavoritesCollection(), bookId));
                         return null;
                     }
@@ -679,10 +707,8 @@
                 }
             });
         
-            // Wait for all promises to resolve and filter out any null results
             const bookCards = (await Promise.all(bookPromises)).filter(Boolean);
         
-            // Clear the row and append all the new cards at once
             booksRow.innerHTML = '';
             bookCards.forEach(card => booksRow.appendChild(card));
         }
@@ -718,7 +744,6 @@
                 }
             });
         }
-        // END: Add functions for favorites
         
         async function deleteBook(bookId) {
              if (!bookId) return;

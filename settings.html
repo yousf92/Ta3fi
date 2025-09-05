@@ -30,9 +30,30 @@
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--secondary-text-color); text-decoration: none; font-size: 0.75rem; cursor: pointer; width: 14%; height: 50px; justify-content: center; }
         .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary-color); }
-        .nav-item.special-item { transform: translateY(-20px); }
+        .nav-item.special-item { transform: translateY(-20px); position: relative; } /* إضافة جديدة */
         .special-item .icon-background { background: linear-gradient(135deg, #00a884, #00c896); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 168, 132, 0.4); }
         .special-item i { color: white; font-size: 2rem; margin: 0; }
+
+        /* --- إضافة جديدة: تنسيق عداد الإشعارات --- */
+        .chat-notification-badge {
+            position: absolute;
+            top: -8px; 
+            right: 25px; 
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 13px;
+            font-weight: bold;
+            display: none; /* مخفي بشكل افتراضي */
+            justify-content: center;
+            align-items: center;
+            border: 2px solid var(--card-background);
+            z-index: 1;
+        }
+        /* --- نهاية الإضافة --- */
+
         .settings-card {
             background-color: var(--card-background);
             border-radius: 12px;
@@ -100,7 +121,6 @@
             color: var(--text-color);
             box-shadow: 0 0 0 0.25rem rgba(0, 168, 132, 0.25);
         }
-        /* --- APP LOCK STYLES START --- */
         #app-lock-overlay {
             position: fixed;
             top: 0;
@@ -153,12 +173,10 @@
             font-size: 1.2rem;
             letter-spacing: 0.5rem;
         }
-        /* --- APP LOCK STYLES END --- */
     </style>
 </head>
 <body>
 
-    <!-- --- APP LOCK OVERLAY START --- -->
     <div id="app-lock-overlay">
         <div class="lock-container">
             <i class="bi bi-shield-lock-fill icon"></i>
@@ -169,7 +187,6 @@
             <button id="unlock-btn" class="btn btn-primary mt-2">فتح القفل</button>
         </div>
     </div>
-    <!-- --- APP LOCK OVERLAY END --- -->
 
     <div class="page" style="display: flex;">
         <header class="top-header">
@@ -197,14 +214,12 @@
                 <div class="card-header">عام</div>
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush">
-                        <!-- --- APP LOCK OPTION START --- -->
                         <li class="list-group-item">
                             <div><i class="bi bi-shield-lock-fill fs-5"></i><span>قفل التطبيق</span></div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch" id="app-lock-switch">
                             </div>
                         </li>
-                        <!-- --- APP LOCK OPTION END --- -->
                          <li class="list-group-item actionable" id="logout-btn" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal">
                             <div><i class="bi bi-box-arrow-right fs-5"></i><span>تسجيل الخروج</span></div>
                             <i class="bi bi-chevron-left"></i>
@@ -218,7 +233,12 @@
             <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
             <a href="diaries.html" class="nav-item"><i class="bi bi-book-fill"></i><span>اليوميات</span></a>
             <a href="articles.html" class="nav-item"><i class="bi bi-award-fill"></i><span>المقالات</span></a>
-            <a href="chat.html" class="nav-item special-item"><div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div><span>دردشة</span></a>
+            <a href="chat.html" class="nav-item special-item">
+                <div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div>
+                <span>دردشة</span>
+                <!-- إضافة جديدة: هذا العنصر سيظهر كعداد للإشعارات -->
+                <span class="chat-notification-badge"></span>
+            </a>
             <a href="follow-up.html" class="nav-item"><i class="bi bi-signpost-split-fill"></i><span>المتابعة</span></a>
             <a href="library.html" class="nav-item"><i class="bi bi-collection-fill"></i><span>المكتبة</span></a>
             <a href="settings.html" class="nav-item active"><i class="bi bi-gear-fill"></i><span>الاعدادات</span></a>
@@ -279,7 +299,6 @@
       </div>
     </div>
 
-    <!-- --- SET PASSCODE MODAL START --- -->
     <div class="modal fade" id="setPasscodeModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -303,14 +322,14 @@
         </div>
       </div>
     </div>
-    <!-- --- SET PASSCODE MODAL END --- -->
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
+        // --- إضافة جديدة: استيراد الأوامر اللازمة من Firestore ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -324,6 +343,35 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // --- إضافة جديدة: دالة للاستماع للرسائل الجديدة ---
+        function listenForUnreadMessages(userId) {
+            const chatBadge = document.querySelector('.chat-notification-badge');
+            if (!chatBadge) return;
+
+            const lastReadTimestamp = parseInt(localStorage.getItem('lastReadTimestamp') || '0');
+            const messagesRef = collection(db, "messages");
+            
+            const q = query(messagesRef, where("createdAt", ">", Timestamp.fromMillis(lastReadTimestamp)));
+
+            onSnapshot(q, (snapshot) => {
+                let unreadCount = 0;
+                snapshot.forEach(doc => {
+                    if (doc.data().senderId !== userId) {
+                        unreadCount++;
+                    }
+                });
+
+                if (unreadCount > 0) {
+                    chatBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    chatBadge.style.display = 'flex';
+                } else {
+                    chatBadge.style.display = 'none';
+                }
+            });
+        }
+        // --- نهاية الإضافة ---
+
         let currentUser = null;
         let currentUserData = {};
         let isVisitor = true;
@@ -341,32 +389,35 @@
         const logoutModalMessage = document.getElementById('logoutModalMessage');
         let selectedFile = null;
 
-        // --- MODIFICATION START HERE ---
         const CLOUDINARY_CLOUD_NAME = "du78yafrn";
         const CLOUDINARY_UPLOAD_PRESET = "profile_photo";
-        // --- MODIFICATION END HERE ---
 
         onAuthStateChanged(auth, async (user) => {
-            if (user && !user.isAnonymous) {
-                isVisitor = false;
-                currentUser = user;
-                const userDocRef = doc(db, "users", currentUser.uid);
-                const userDoc = await getDoc(userDocRef);
-                if (userDoc.exists()) { currentUserData = userDoc.data(); }
-                logoutModalMessage.textContent = "هل أنت متأكد من رغبتك في تسجيل الخروج؟";
-                confirmLogoutBtn.textContent = "تسجيل الخروج";
-                loadUserProfile();
-                checkNameChangeStatus();
+            if (user) {
+                // --- إضافة جديدة: استدعاء دالة الإشعارات ---
+                 listenForUnreadMessages(user.uid);
+                // --- نهاية الإضافة ---
+                if (!user.isAnonymous) {
+                    isVisitor = false;
+                    currentUser = user;
+                    const userDocRef = doc(db, "users", currentUser.uid);
+                    const userDoc = await getDoc(userDocRef);
+                    if (userDoc.exists()) { currentUserData = userDoc.data(); }
+                    logoutModalMessage.textContent = "هل أنت متأكد من رغبتك في تسجيل الخروج؟";
+                    confirmLogoutBtn.textContent = "تسجيل الخروج";
+                    loadUserProfile();
+                    checkNameChangeStatus();
+                } else {
+                    isVisitor = true;
+                    currentUser = user; // still assign to handle logout for visitor
+                    logoutModalMessage.textContent = "هل أنت متأكد من رغبتك في العودة إلى صفحة تسجيل الدخول؟";
+                    confirmLogoutBtn.textContent = "العودة";
+                    loadVisitorProfile();
+                    checkVisitorNameChangeStatus();
+                }
             } else {
-                isVisitor = true;
-                currentUser = user;
-                logoutModalMessage.textContent = "هل أنت متأكد من رغبتك في العودة إلى صفحة تسجيل الدخول؟";
-                confirmLogoutBtn.textContent = "العودة";
-                loadVisitorProfile();
-                checkVisitorNameChangeStatus();
+                 window.location.href = './login.html'; // Redirect if no user
             }
-            // --- APP LOCK FEATURE ---
-            // Run app lock check after user state is determined
             initializeAppLock();
         });
 
@@ -515,7 +566,6 @@
         
         confirmLogoutBtn.addEventListener('click', () => {
             signOut(auth).then(() => {
-                // --- APP LOCK --- Before logging out, set an unlock timestamp to prevent locking the login screen
                 localStorage.setItem('app_last_unlock', Date.now());
                 window.location.href = './login.html';
             }).catch((error) => {
@@ -524,8 +574,6 @@
             });
         });
 
-        // --- APP LOCK FEATURE SCRIPT - START ---
-        
         const appLockSwitch = document.getElementById('app-lock-switch');
         const setPasscodeModalEl = document.getElementById('setPasscodeModal');
         const setPasscodeModal = new bootstrap.Modal(setPasscodeModalEl);
@@ -540,9 +588,9 @@
         const unlockBtn = document.getElementById('unlock-btn');
         const passcodeInput = document.getElementById('passcode-input');
         
-        const mainPageLockIcon = document.getElementById('main-page-lock-icon'); // For main page
+        const mainPageLockIcon = document.getElementById('main-page-lock-icon');
 
-        const RELOCK_TIME = 2 * 60 * 1000; // 2 minutes
+        const RELOCK_TIME = 2 * 60 * 1000;
 
         function getLockData() {
             try {
@@ -554,14 +602,12 @@
 
         function saveLockData(data) {
             localStorage.setItem('app_lock_config', JSON.stringify(data));
-            window.dispatchEvent(new Event('storage')); // Notify other tabs/pages
+            window.dispatchEvent(new Event('storage'));
         }
         
         function syncLockState() {
             const lockData = getLockData();
             appLockSwitch.checked = lockData.enabled;
-
-            // Sync main page icon if it exists
             if (mainPageLockIcon) {
                 mainPageLockIcon.style.display = lockData.enabled ? 'inline-block' : 'none';
             }
@@ -586,7 +632,6 @@
         appLockSwitch.addEventListener('change', () => {
             const lockData = getLockData();
             if (appLockSwitch.checked) {
-                // Turning lock on
                 if (!lockData.passcode) {
                     setPasscodeModal.show();
                 } else {
@@ -594,7 +639,6 @@
                     saveLockData(lockData);
                 }
             } else {
-                // Turning lock off
                 lockData.enabled = false;
                 saveLockData(lockData);
             }
@@ -657,20 +701,17 @@
             }
         });
         
-        // Event listener for the main page icon
         if (mainPageLockIcon) {
             mainPageLockIcon.addEventListener('click', () => {
-                localStorage.removeItem('app_last_unlock'); // Force lock immediately
+                localStorage.removeItem('app_last_unlock');
                 initializeAppLock();
             });
         }
         
-        // Sync across tabs/pages
         window.addEventListener('storage', () => {
             syncLockState();
         });
 
-        // --- APP LOCK FEATURE SCRIPT - END ---
     </script>
 </body>
 </html>

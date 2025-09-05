@@ -191,7 +191,11 @@
         let replyToMessage = null;
         const userProfiles = {};
         let isVisitor = true;
-
+        
+        let unreadCount = 0;
+        let originalFavicon = document.querySelector("link[rel*='icon']")?.href || '/favicon.ico';
+        const originalTitle = document.title;
+        
         const userDisplayName = document.getElementById('user-display-name');
         const messagesBox = document.getElementById('messages-box');
         const messageInput = document.getElementById('message-input');
@@ -204,6 +208,84 @@
         const pinnedMessageText = document.getElementById('pinned-message-text');
         const unpinButton = document.getElementById('unpin-button');
         const pinnedMessageClickableArea = document.getElementById('pinned-message-clickable-area');
+
+        function setFavicon(href) {
+            let favicon = document.querySelector("link[rel*='icon']");
+            if (!favicon) {
+                favicon = document.createElement('link');
+                favicon.rel = 'shortcut icon';
+                document.head.appendChild(favicon);
+            }
+            favicon.href = href;
+        }
+
+        function updateFavicon() {
+            if (unreadCount === 0) {
+                setFavicon(originalFavicon);
+                document.title = originalTitle;
+                return;
+            }
+            
+            document.title = `(${unreadCount}) ${originalTitle}`;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 32;
+            canvas.height = 32;
+            const ctx = canvas.getContext('2d');
+
+            ctx.beginPath();
+            ctx.arc(16, 16, 16, 0, 2 * Math.PI);
+            ctx.fillStyle = '#00a884';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(24, 24, 8, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ff5c5c';
+            ctx.fill();
+            ctx.strokeStyle = '#121212';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = 'bold 15px Tajawal';
+            ctx.fillText(unreadCount > 9 ? '9+' : unreadCount, 24, 25);
+
+            setFavicon(canvas.toDataURL('image/png'));
+        }
+        
+        window.addEventListener('focus', () => {
+            unreadCount = 0;
+            updateFavicon();
+            // --- إضافة جديدة: تسجيل آخر وقت لقراءة الرسائل ---
+            // عندما يعود المستخدم للنافذة، نسجل وقت آخر رسالة موجودة
+            const lastMessage = messagesBox.lastElementChild;
+            if (lastMessage) {
+                 const lastMessageId = lastMessage.id.replace('message-', '');
+                 getDoc(doc(db, 'messages', lastMessageId)).then(docSnap => {
+                     if(docSnap.exists() && docSnap.data().createdAt) {
+                        localStorage.setItem('lastReadTimestamp', docSnap.data().createdAt.toMillis());
+                     }
+                 });
+            }
+            // --- نهاية الإضافة ---
+        });
+
+        window.scrollToMessage = (messageId) => {
+            if (!messageId) return;
+            const messageElement = document.getElementById(`message-${messageId}`);
+            if (messageElement) {
+                messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                messageElement.style.transition = 'background-color 0.5s';
+                messageElement.style.backgroundColor = 'rgba(83, 189, 235, 0.3)';
+                setTimeout(() => {
+                    messageElement.style.backgroundColor = '';
+                }, 2500);
+            } else {
+                alert('لا يمكن العثور على الرسالة الأصلية، ربما تم حذفها.');
+            }
+        };
 
         function getVisitorProfile() {
             try {
@@ -314,6 +396,8 @@
             onSnapshot(q, (snapshot) => {
                 const wasScrolledToBottom = messagesBox.scrollHeight - messagesBox.clientHeight <= messagesBox.scrollTop + 150;
                 messagesBox.innerHTML = "";
+                let lastMessageTimestamp = null; // لتخزين وقت آخر رسالة
+
                 snapshot.forEach(messageDoc => {
                     const msg = messageDoc.data(); const msgId = messageDoc.id; const isOwn = msg.senderId === auth.currentUser?.uid;
                     const msgDiv = document.createElement('div'); 
@@ -322,6 +406,12 @@
                     msgDiv.dataset.senderName = msg.senderName;
                     msgDiv.dataset.senderId = msg.senderId;
                     msgDiv.dataset.text = msg.text;
+
+                    // --- تحديث: حفظ وقت آخر رسالة ---
+                    if (msg.createdAt) {
+                        lastMessageTimestamp = msg.createdAt.toMillis();
+                    }
+                    // --- نهاية التحديث ---
 
                     const senderProfile = userProfiles[msg.senderId] || {};
                     const photoURL = senderProfile.photoURL || 'https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png';
@@ -373,7 +463,17 @@
                     const senderNameDisplay = `${msg.senderName} ${roleBadge}`;
                     
                     let repliedToHtml = '';
-                    if (msg.replyTo) { repliedToHtml = `<div class="replied-to-box"><div class="replied-to-sender">${msg.replyTo.senderName}</div><div class="replied-to-text">${msg.replyTo.text}</div></div>`; }
+                    if (msg.replyTo && msg.replyTo.messageId) {
+                         repliedToHtml = `<div class="replied-to-box" onclick="window.scrollToMessage('${msg.replyTo.messageId}')" style="cursor: pointer;" title="الانتقال إلى الرسالة الأصلية">
+                            <div class="replied-to-sender">${msg.replyTo.senderName}</div>
+                            <div class="replied-to-text">${msg.replyTo.text}</div>
+                        </div>`;
+                    } else if (msg.replyTo) {
+                        repliedToHtml = `<div class="replied-to-box">
+                            <div class="replied-to-sender">${msg.replyTo.senderName}</div>
+                            <div class="replied-to-text">${msg.replyTo.text}</div>
+                        </div>`;
+                    }
                     
                     const availableReactions = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
                     let reactionsContainerHtml = '<div class="reactions-container">';
@@ -407,11 +507,24 @@
                     msgDiv.appendChild(messageBubble);
                     messagesBox.appendChild(msgDiv);
                 });
+
+                // --- تحديث: حفظ وقت آخر رسالة في localStorage ---
+                if (document.hasFocus() && lastMessageTimestamp) {
+                    localStorage.setItem('lastReadTimestamp', lastMessageTimestamp);
+                }
+                // --- نهاية التحديث ---
                 
                 snapshot.docChanges().forEach(change => {
                     if (change.type === "added") {
                         const msg = change.doc.data();
-                        if (auth.currentUser && msg.replyTo && msg.replyTo.senderId === auth.currentUser.uid && msg.senderId !== auth.currentUser.uid) {
+                        const isOwn = msg.senderId === auth.currentUser?.uid;
+
+                        if (!document.hasFocus() && !isOwn) {
+                            unreadCount++;
+                            updateFavicon();
+                        }
+
+                        if (auth.currentUser && msg.replyTo && msg.replyTo.senderId === auth.currentUser.uid && !isOwn) {
                             if (!document.hasFocus() || !wasScrolledToBottom) {
                                 mentionNotification.style.display = 'flex';
                                 mentionNotification.dataset.messageId = change.doc.id;

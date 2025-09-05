@@ -60,9 +60,28 @@
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--secondary-text-color); text-decoration: none; font-size: 0.75rem; cursor: pointer; width: 14%; height: 50px; justify-content: center; }
         .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary-color); }
-        .nav-item.special-item { transform: translateY(-20px); }
+        .nav-item.special-item { transform: translateY(-20px); position: relative; } /* إضافة جديدة */
         .special-item .icon-background { background: linear-gradient(135deg, #00a884, #00c896); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 168, 132, 0.4); }
         .special-item i { color: white; font-size: 2rem; margin: 0; }
+        /* --- إضافة جديدة: تنسيق عداد الإشعارات --- */
+        .chat-notification-badge {
+            position: absolute;
+            top: -8px; 
+            right: 25px; 
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 13px;
+            font-weight: bold;
+            display: none; /* مخفي بشكل افتراضي */
+            justify-content: center;
+            align-items: center;
+            border: 2px solid var(--card-background);
+            z-index: 1;
+        }
+        /* --- نهاية الإضافة --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1050; opacity: 0; transition: opacity 0.3s ease; }
         .modal-overlay.show { display: flex; opacity: 1; }
         .modal-content-custom { background-color: var(--card-background); border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); transform: scale(0.9); transition: transform 0.3s ease; width: 90%; max-width: 400px; }
@@ -144,7 +163,6 @@
         .fire-alarm-base { width: 28px; height: 5px; background: linear-gradient(to top, #c00000, #e02020); position: absolute; bottom: 0; left: 0; border-radius: 0 0 4px 4px; z-index: 1; box-shadow: 0 2px 3px rgba(0,0,0,0.5); }
         @keyframes beacon-flash { 0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.5); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
         
-        /* --- APP LOCK STYLES START --- */
         #app-lock-overlay {
             position: fixed;
             top: 0;
@@ -192,11 +210,9 @@
             font-size: 0.9rem;
             margin-top: 1rem;
         }
-        /* --- APP LOCK STYLES END --- */
     </style>
 </head>
 <body>
-    <!-- --- APP LOCK OVERLAY START --- -->
     <div id="app-lock-overlay">
         <div class="lock-container">
             <i class="bi bi-shield-lock-fill icon"></i>
@@ -207,7 +223,6 @@
             <button id="unlock-btn" class="btn btn-primary mt-2">فتح القفل</button>
         </div>
     </div>
-    <!-- --- APP LOCK OVERLAY END --- -->
 
     <div id="home-page" class="page active">
         <div class="home-container">
@@ -292,7 +307,12 @@
                 <a href="main.html" class="nav-item active"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
                 <a href="diaries.html" class="nav-item"><i class="bi bi-book-fill"></i><span>اليوميات</span></a>
                 <a href="articles.html" class="nav-item"><i class="bi bi-award-fill"></i><span>المقالات</span></a>
-                <a href="chat.html" class="nav-item special-item"><div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div><span>دردشة</span></a>
+                <a href="chat.html" class="nav-item special-item">
+                    <div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div>
+                    <span>دردشة</span>
+                    <!-- إضافة جديدة: هذا العنصر سيظهر كعداد للإشعارات -->
+                    <span class="chat-notification-badge"></span>
+                </a>
                 <a href="follow-up.html" class="nav-item"><i class="bi bi-signpost-split-fill"></i><span>المتابعة</span></a>
                 <a href="library.html" class="nav-item"><i class="bi bi-collection-fill"></i><span>المكتبة</span></a>
                 <a href="settings.html" class="nav-item"><i class="bi bi-gear-fill"></i><span>الاعدادات</span></a>
@@ -378,7 +398,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, arrayUnion, updateDoc, deleteDoc, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // --- إضافة جديدة: استيراد الأوامر اللازمة من Firestore ---
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, getDocs, arrayUnion, updateDoc, deleteDoc, limit, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -393,6 +414,37 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
+        // --- إضافة جديدة: دالة للاستماع للرسائل الجديدة ---
+        function listenForUnreadMessages(userId) {
+            const chatBadge = document.querySelector('.chat-notification-badge');
+            if (!chatBadge) return;
+
+            // الحصول على وقت آخر رسالة تمت قراءتها من التخزين المحلي
+            const lastReadTimestamp = parseInt(localStorage.getItem('lastReadTimestamp') || '0');
+            const messagesRef = collection(db, "messages");
+            
+            // إنشاء استعلام لجلب الرسائل الأحدث من آخر رسالة مقروءة
+            const q = query(messagesRef, where("createdAt", ">", Timestamp.fromMillis(lastReadTimestamp)));
+
+            onSnapshot(q, (snapshot) => {
+                let unreadCount = 0;
+                snapshot.forEach(doc => {
+                    // زيادة العداد فقط إذا لم تكن الرسالة من المستخدم الحالي
+                    if (doc.data().senderId !== userId) {
+                        unreadCount++;
+                    }
+                });
+
+                if (unreadCount > 0) {
+                    chatBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    chatBadge.style.display = 'flex';
+                } else {
+                    chatBadge.style.display = 'none';
+                }
+            });
+        }
+        // --- نهاية الإضافة ---
+
         document.addEventListener('DOMContentLoaded', () => {
             let startTime = null;
             let timerInterval = null;
@@ -413,12 +465,11 @@
 
             const apiKey = "AIzaSyDB_0f4D2ugw-r6jajigBmhZepR0ZXU_c0";
 
-            // --- APP LOCK FEATURE SCRIPT - START ---
             const appLockOverlay = document.getElementById('app-lock-overlay');
             const passcodeError = document.getElementById('passcode-error');
             const unlockBtn = document.getElementById('unlock-btn');
             const passcodeInput = document.getElementById('passcode-input');
-            const RELOCK_TIME = 2 * 60 * 1000; // 2 minutes
+            const RELOCK_TIME = 2 * 60 * 1000;
 
             function getLockData() {
                 try {
@@ -429,7 +480,6 @@
             }
             
             function syncLockState() {
-                // This function is kept for potential future use with storage events.
             }
 
             function initializeAppLock() {
@@ -465,8 +515,6 @@
                 if (event.key === 'Enter') handleUnlock();
             });
             window.addEventListener('storage', syncLockState);
-            // --- APP LOCK FEATURE SCRIPT - END ---
-
 
             async function callGeminiAPI(prompt) {
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
@@ -542,8 +590,7 @@
 
             onAuthStateChanged(auth, async (user) => {
                 if (user && (user.emailVerified || user.isAnonymous)) {
-                    // --- APP LOCK ---
-                    initializeAppLock(); // Run lock check after user is confirmed
+                    initializeAppLock();
 
                     if (user.isAnonymous) {
                         welcomeUserEl.textContent = `مرحبا ٲيها الزائر`;
@@ -562,6 +609,7 @@
                             updateTimerDisplay(0, 0, 0, 0);
                         }
                         loadNotifications(null);
+                        listenForUnreadMessages(user.uid); // --- إضافة جديدة ---
                     } else {
                         welcomeUserEl.textContent = `مرحبا ${user.displayName || 'المستخدم'}`;
                         const userDocRef = doc(db, "users", user.uid);
@@ -588,14 +636,13 @@
                             updateTimerDisplay(0,0,0,0);
                         }
                         loadNotifications(user.uid);
+                        listenForUnreadMessages(user.uid); // --- إضافة جديدة ---
                     }
                 } else {
-                    // --- APP LOCK --- Before redirecting, set an unlock timestamp to prevent locking the login screen
                     localStorage.setItem('app_last_unlock', Date.now());
                     window.location.href = 'index.html';
                 }
             });
-
 
             startTimerBtn.addEventListener('click', async () => {
                 const user = auth.currentUser;
@@ -873,10 +920,8 @@
                 showQuotePage();
             });
 
-            // Finally, setup the Gemini features
             setupGeminiFeatures();
         });
     </script>
 </body>
 </html>
-

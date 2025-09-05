@@ -70,9 +70,29 @@
 
         .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary-color); }
-        .nav-item.special-item { transform: translateY(-20px); }
+        .nav-item.special-item { transform: translateY(-20px); position: relative; } /* إضافة جديدة */
         .special-item .icon-background { background: linear-gradient(135deg, #00a884, #00c896); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 168, 132, 0.4); }
         .special-item i { color: white; font-size: 2rem; margin: 0; }
+
+        /* --- إضافة جديدة: تنسيق عداد الإشعارات --- */
+        .chat-notification-badge {
+            position: absolute;
+            top: -8px; 
+            right: 25px; 
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 13px;
+            font-weight: bold;
+            display: none; /* مخفي بشكل افتراضي */
+            justify-content: center;
+            align-items: center;
+            border: 2px solid var(--card-background);
+            z-index: 1;
+        }
+        /* --- نهاية الإضافة --- */
 
         .note-card { 
             background-color: var(--card-background); 
@@ -146,7 +166,12 @@
             <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
             <a href="diaries.html" class="nav-item active"><i class="bi bi-book-fill"></i><span>اليوميات</span></a>
             <a href="articles.html" class="nav-item"><i class="bi bi-award-fill"></i><span>المقالات</span></a>
-            <a href="chat.html" class="nav-item special-item"><div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div><span>دردشة</span></a>
+            <a href="chat.html" class="nav-item special-item">
+                <div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div>
+                <span>دردشة</span>
+                <!-- إضافة جديدة: هذا العنصر سيظهر كعداد للإشعارات -->
+                <span class="chat-notification-badge"></span>
+            </a>
             <a href="follow-up.html" class="nav-item"><i class="bi bi-signpost-split-fill"></i><span>المتابعة</span></a>
             <a href="library.html" class="nav-item"><i class="bi bi-collection-fill"></i><span>المكتبة</span></a>
             <a href="settings.html" class="nav-item"><i class="bi bi-gear-fill"></i><span>الاعدادات</span></a>
@@ -161,9 +186,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script type="module">
+        // --- إضافة جديدة: استيراد الأوامر اللازمة من Firestore ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, where, onSnapshot, orderBy, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, orderBy, deleteDoc, doc, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -178,6 +204,34 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // --- إضافة جديدة: دالة للاستماع للرسائل الجديدة ---
+        function listenForUnreadMessages(userId) {
+            const chatBadge = document.querySelector('.chat-notification-badge');
+            if (!chatBadge) return;
+
+            const lastReadTimestamp = parseInt(localStorage.getItem('lastReadTimestamp') || '0');
+            const messagesRef = collection(db, "messages");
+            
+            const q = query(messagesRef, where("createdAt", ">", Timestamp.fromMillis(lastReadTimestamp)));
+
+            onSnapshot(q, (snapshot) => {
+                let unreadCount = 0;
+                snapshot.forEach(doc => {
+                    if (doc.data().senderId !== userId) {
+                        unreadCount++;
+                    }
+                });
+
+                if (unreadCount > 0) {
+                    chatBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    chatBadge.style.display = 'flex';
+                } else {
+                    chatBadge.style.display = 'none';
+                }
+            });
+        }
+        // --- نهاية الإضافة ---
+
         const notesContainer = document.getElementById('notes-container');
         const addNoteBtn = document.querySelector('.add-note-btn');
         const loadingSpinner = document.getElementById('loading-spinner');
@@ -185,9 +239,18 @@
 
         onAuthStateChanged(auth, user => {
             addNoteBtn.style.display = 'flex';
-            if (user && user.emailVerified) {
-                currentUserId = user.uid;
-                loadNotesFromFirestore(currentUserId);
+            if (user) {
+                // --- إضافة جديدة: استدعاء دالة الإشعارات ---
+                listenForUnreadMessages(user.uid);
+                // --- نهاية الإضافة ---
+                if (user.emailVerified) {
+                    currentUserId = user.uid;
+                    loadNotesFromFirestore(currentUserId);
+                } else {
+                    // This handles anonymous users if you choose to support them.
+                    currentUserId = null;
+                    loadNotesFromLocalStorage();
+                }
             } else {
                 currentUserId = null;
                 loadNotesFromLocalStorage();
@@ -400,4 +463,3 @@
 
 </body>
 </html>
-
