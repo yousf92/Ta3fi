@@ -640,6 +640,7 @@
                 }
             } else {
                 lockData.enabled = false;
+                lockData.passcode = null; // --- هذا هو السطر الجديد الذي تمت إضافته ---
                 saveLockData(lockData);
             }
             syncLockState();
