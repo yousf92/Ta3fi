@@ -143,9 +143,72 @@
         .fire-alarm-dome::after { content: ''; position: absolute; top: 50%; left: 50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,220,150,0.9) 0%, rgba(255,100,100,0) 35%); border-radius: 50%; transform: translate(-50%, -50%); animation: beacon-flash 1.2s infinite ease-in-out; z-index: 4; }
         .fire-alarm-base { width: 28px; height: 5px; background: linear-gradient(to top, #c00000, #e02020); position: absolute; bottom: 0; left: 0; border-radius: 0 0 4px 4px; z-index: 1; box-shadow: 0 2px 3px rgba(0,0,0,0.5); }
         @keyframes beacon-flash { 0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.5); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+        
+        /* --- APP LOCK STYLES START --- */
+        #app-lock-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(18, 18, 18, 0.95);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .lock-container {
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--card-background);
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+        .lock-container .icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        #passcode-input {
+            max-width: 200px;
+            margin: 1.5rem auto;
+            letter-spacing: 1.5rem;
+            font-size: 1.5rem;
+            text-align: center;
+            direction: ltr;
+        }
+        #passcode-input::placeholder {
+            letter-spacing: normal;
+        }
+        #unlock-btn {
+            width: 100%;
+            max-width: 200px;
+        }
+        #passcode-error {
+            display: none;
+            color: var(--danger-color);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        /* --- APP LOCK STYLES END --- */
     </style>
 </head>
 <body>
+    <!-- --- APP LOCK OVERLAY START --- -->
+    <div id="app-lock-overlay">
+        <div class="lock-container">
+            <i class="bi bi-shield-lock-fill icon"></i>
+            <h5>التطبيق مقفل</h5>
+            <p class="text-secondary small">أدخل رمز المرور للمتابعة</p>
+            <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" class="form-control" id="passcode-input" placeholder="----">
+            <div id="passcode-error">رمز المرور غير صحيح</div>
+            <button id="unlock-btn" class="btn btn-primary mt-2">فتح القفل</button>
+        </div>
+    </div>
+    <!-- --- APP LOCK OVERLAY END --- -->
+
     <div id="home-page" class="page active">
         <div class="home-container">
             <header class="top-header">
@@ -350,6 +413,61 @@
 
             const apiKey = "AIzaSyDB_0f4D2ugw-r6jajigBmhZepR0ZXU_c0";
 
+            // --- APP LOCK FEATURE SCRIPT - START ---
+            const appLockOverlay = document.getElementById('app-lock-overlay');
+            const passcodeError = document.getElementById('passcode-error');
+            const unlockBtn = document.getElementById('unlock-btn');
+            const passcodeInput = document.getElementById('passcode-input');
+            const RELOCK_TIME = 2 * 60 * 1000; // 2 minutes
+
+            function getLockData() {
+                try {
+                    return JSON.parse(localStorage.getItem('app_lock_config')) || { enabled: false, passcode: null };
+                } catch (e) {
+                    return { enabled: false, passcode: null };
+                }
+            }
+            
+            function syncLockState() {
+                // This function is kept for potential future use with storage events.
+            }
+
+            function initializeAppLock() {
+                syncLockState();
+                const lockData = getLockData();
+                if (!lockData.enabled) return;
+                
+                const lastUnlock = localStorage.getItem('app_last_unlock') || 0;
+                const timeSinceUnlock = Date.now() - lastUnlock;
+
+                if (timeSinceUnlock >= RELOCK_TIME) {
+                    appLockOverlay.style.display = 'flex';
+                }
+            }
+
+            function handleUnlock() {
+                const enteredPasscode = passcodeInput.value;
+                const lockData = getLockData();
+                passcodeError.style.display = 'none';
+                if (enteredPasscode === lockData.passcode) {
+                    localStorage.setItem('app_last_unlock', Date.now());
+                    appLockOverlay.style.display = 'none';
+                    passcodeInput.value = '';
+                } else {
+                    passcodeError.style.display = 'block';
+                    passcodeInput.classList.add('is-invalid');
+                    setTimeout(() => passcodeInput.classList.remove('is-invalid'), 1000);
+                }
+            }
+
+            unlockBtn.addEventListener('click', handleUnlock);
+            passcodeInput.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') handleUnlock();
+            });
+            window.addEventListener('storage', syncLockState);
+            // --- APP LOCK FEATURE SCRIPT - END ---
+
+
             async function callGeminiAPI(prompt) {
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
                 const payload = { contents: [{ parts: [{ text: prompt }] }], };
@@ -424,7 +542,9 @@
 
             onAuthStateChanged(auth, async (user) => {
                 if (user && (user.emailVerified || user.isAnonymous)) {
-                    
+                    // --- APP LOCK ---
+                    initializeAppLock(); // Run lock check after user is confirmed
+
                     if (user.isAnonymous) {
                         welcomeUserEl.textContent = `مرحبا ٲيها الزائر`;
                         openSendModalBtn.classList.add('d-none');
@@ -470,6 +590,8 @@
                         loadNotifications(user.uid);
                     }
                 } else {
+                    // --- APP LOCK --- Before redirecting, set an unlock timestamp to prevent locking the login screen
+                    localStorage.setItem('app_last_unlock', Date.now());
                     window.location.href = 'index.html';
                 }
             });
