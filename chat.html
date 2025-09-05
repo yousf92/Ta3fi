@@ -153,6 +153,21 @@
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // This script runs before the main module script below.
+        // It checks if this is the first page load within the current browser session.
+        if (!sessionStorage.getItem('sessionStarted')) {
+            // If it's the first load, set a flag in sessionStorage.
+            // This flag persists only for the session. Closing the tab/browser clears it.
+            sessionStorage.setItem('sessionStarted', 'true');
+            
+            // Immediately redirect the user to the main page.
+            // `window.location.replace` is used so the user can't click "back" to get to this redirecting page.
+            window.location.replace('main.html');
+        }
+    </script>
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
