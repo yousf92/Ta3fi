@@ -419,6 +419,22 @@
                  window.location.href = './login.html'; // Redirect if no user
             }
             initializeAppLock();
+            
+            // --- تعديل جديد: ربط أوامر القفل مع الملف الرئيسي ---
+            // القاعدة أ: لا تقفل التطبيق طالما أن المستخدم نشط بداخله.
+            setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    localStorage.setItem('app_last_unlock', Date.now());
+                }
+            }, 60 * 1000);
+
+            // القاعدة ب: اقفل التطبيق بعد 3 دقائق من الخروج منه.
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    initializeAppLock();
+                }
+            });
+            // --- نهاية التعديل ---
         });
 
         function getVisitorData() { try { return JSON.parse(localStorage.getItem('visitorProfile')) || {}; } catch(e) { return {}; } }
@@ -590,7 +606,8 @@
         
         const mainPageLockIcon = document.getElementById('main-page-lock-icon');
 
-        const RELOCK_TIME = 2 * 60 * 1000;
+        // --- تعديل جديد: توحيد مدة القفل مع الملف الرئيسي ---
+        const RELOCK_TIME = 3 * 60 * 1000;
 
         function getLockData() {
             try {

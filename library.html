@@ -91,24 +91,6 @@
         #zoom-controls { display: flex; align-items: center; gap: 5px; }
         #zoom-range { width: 80px; margin: 0 5px; }
         #current-zoom-percent { min-width: 40px; text-align: center; }
-        
-        .floating-btn { 
-            position: fixed; 
-            bottom: 75px;
-            z-index: 1051; 
-            width: 50px; 
-            height: 50px; 
-            border-radius: 50%; 
-            background-color: rgba(30, 30, 30, 0.8); 
-            border: 1px solid var(--border-color); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            color: white; 
-        }
-
-        #floating-back-btn { right: 20px; }
-        #floating-display-mode-btn { left: 20px; }
 
         .section-container { margin-bottom: 2rem; }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
@@ -136,10 +118,67 @@
         .book-actions { position: absolute; top: 5px; left: 5px; }
         .dropdown-menu { min-width: auto; }
         .view-toggle .btn { font-size: 0.8rem; padding: 0.25rem 0.5rem; }
+
+        #app-lock-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(18, 18, 18, 0.95);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .lock-container {
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--card-background);
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+        .lock-container .icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        #passcode-input {
+            max-width: 200px;
+            margin: 1.5rem auto;
+            letter-spacing: 1.5rem;
+            font-size: 1.5rem;
+            text-align: center;
+            direction: ltr;
+        }
+        #passcode-input::placeholder {
+            letter-spacing: normal;
+        }
+        #unlock-btn {
+            width: 100%;
+            max-width: 200px;
+        }
+        #passcode-error {
+            display: none;
+            color: var(--danger-color);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body>
-
+    <div id="app-lock-overlay">
+        <div class="lock-container">
+            <i class="bi bi-shield-lock-fill icon"></i>
+            <h5>التطبيق مقفل</h5>
+            <p class="text-secondary small">أدخل رمز المرور للمتابعة</p>
+            <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" class="form-control" id="passcode-input" placeholder="----">
+            <div id="passcode-error">رمز المرور غير صحيح</div>
+            <button id="unlock-btn" class="btn btn-primary mt-2">فتح القفل</button>
+        </div>
+    </div>
     <div class="page" id="library-view">
         <header class="top-header">
             <div id="developer-view-toggle" class="btn-group btn-group-sm d-none" role="group">
@@ -163,18 +202,31 @@
     
     <div id="pdf-reader-view" class="d-none">
         <div id="pdf-viewer-container"><canvas id="pdf-canvas"></canvas></div>
-        <button class="btn floating-btn" id="floating-display-mode-btn" title="تغيير وضع العرض"><i class="bi bi-moon-fill fs-5"></i></button>
-        <button class="btn floating-btn" id="floating-back-btn" title="الرجوع"><i class="bi bi-arrow-right fs-5"></i></button>
+        <!-- Floating buttons have been moved to the control bar below -->
         <div id="pdf-controls">
-            <button class="btn btn-primary btn-sm" id="prev-page"><i class="bi bi-arrow-right-short"></i> السابق</button>
-            <span id="page-num" class="fw-bold"></span>
-            <button class="btn btn-primary btn-sm" id="next-page">التالي <i class="bi bi-arrow-left-short"></i></button>
+            <!-- New position for display mode button -->
+            <button class="btn btn-secondary btn-sm" id="display-mode-btn" title="تغيير وضع العرض"><i class="bi bi-moon-fill"></i></button>
+
+            <!-- Zoom Controls -->
             <div id="zoom-controls">
                 <button class="btn btn-secondary btn-sm" id="zoom-out-btn"><i class="bi bi-dash"></i></button>
                 <input type="range" id="zoom-range" min="0.1" max="3.0" step="0.01" value="0.8" class="form-range">
                 <button class="btn btn-secondary btn-sm" id="zoom-in-btn"><i class="bi bi-plus"></i></button>
                 <span id="current-zoom-percent" class="text-white small">80%</span>
             </div>
+
+            <!-- Page Navigation Controls -->
+            <button class="btn btn-primary btn-sm" id="prev-page"><i class="bi bi-arrow-right-short"></i> السابق</button>
+            <span id="page-num" class="fw-bold px-2"></span>
+            <button class="btn btn-primary btn-sm" id="next-page">التالي <i class="bi bi-arrow-left-short"></i></button>
+            
+            <!-- Go to Page Button -->
+            <button class="btn btn-secondary btn-sm" id="goto-page-btn" title="الانتقال إلى صفحة" data-bs-toggle="modal" data-bs-target="#goToPageModal">
+                <i class="bi bi-box-arrow-in-right"></i>
+            </button>
+            
+            <!-- New position for close reader button -->
+            <button class="btn btn-secondary btn-sm" id="close-reader-btn" title="الرجوع"><i class="bi bi-arrow-right"></i></button>
         </div>
     </div>
 
@@ -296,6 +348,32 @@
       </div>
     </div>
 
+    <!-- START: Go to Page Modal -->
+    <div class="modal fade" id="goToPageModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">الانتقال إلى صفحة</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="go-to-page-modal-form">
+              <div class="mb-3">
+                <label for="go-to-page-modal-input" class="form-label">أدخل رقم الصفحة</label>
+                <input type="number" class="form-control" id="go-to-page-modal-input" required>
+                <div class="form-text" id="page-range-info"></div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+            <button type="submit" form="go-to-page-modal-form" class="btn btn-primary">اذهب</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END: Go to Page Modal -->
+
     <nav class="bottom-nav">
         <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
         <a href="diaries.html" class="nav-item"><i class="bi bi-book-fill"></i><span>اليوميات</span></a>
@@ -373,8 +451,8 @@
         const zoomInBtn = document.getElementById('zoom-in-btn');
         const zoomRange = document.getElementById('zoom-range');
         const currentZoomPercent = document.getElementById('current-zoom-percent');
-        const displayModeBtn = document.getElementById('floating-display-mode-btn');
-        const closeReaderBtn = document.getElementById('floating-back-btn');
+        const displayModeBtn = document.getElementById('display-mode-btn'); // Updated ID
+        const closeReaderBtn = document.getElementById('close-reader-btn'); // Updated ID
         let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumIsPending = null;
         let currentBookId = null, currentScale = parseFloat(zoomRange.value);
         let currentUser = null;
@@ -403,6 +481,62 @@
         let userFavorites = new Set();
         let unsubscribeFavorites = null;
 
+        // --- START: Go to Page Modal Variables ---
+        let goToPageModalInstance = null;
+        const goToPageModalEl = document.getElementById('goToPageModal');
+        const goToPageModalForm = document.getElementById('go-to-page-modal-form');
+        const goToPageModalInput = document.getElementById('go-to-page-modal-input');
+        const pageRangeInfo = document.getElementById('page-range-info');
+        // --- END: Go to Page Modal Variables ---
+
+        // --- إضافة جديدة: متغيرات وأوامر القفل ---
+        const appLockOverlay = document.getElementById('app-lock-overlay');
+        const passcodeError = document.getElementById('passcode-error');
+        const unlockBtn = document.getElementById('unlock-btn');
+        const passcodeInput = document.getElementById('passcode-input');
+        const RELOCK_TIME = 3 * 60 * 1000; // 3 دقائق
+
+        function getLockData() {
+            try {
+                return JSON.parse(localStorage.getItem('app_lock_config')) || { enabled: false, passcode: null };
+            } catch (e) {
+                return { enabled: false, passcode: null };
+            }
+        }
+
+        function initializeAppLock() {
+            const lockData = getLockData();
+            if (!lockData.enabled) return;
+            
+            const lastUnlock = localStorage.getItem('app_last_unlock') || 0;
+            const timeSinceUnlock = Date.now() - lastUnlock;
+
+            if (timeSinceUnlock >= RELOCK_TIME) {
+                appLockOverlay.style.display = 'flex';
+            }
+        }
+
+        function handleUnlock() {
+            const enteredPasscode = passcodeInput.value;
+            const lockData = getLockData();
+            passcodeError.style.display = 'none';
+            if (enteredPasscode === lockData.passcode) {
+                localStorage.setItem('app_last_unlock', Date.now());
+                appLockOverlay.style.display = 'none';
+                passcodeInput.value = '';
+            } else {
+                passcodeError.style.display = 'block';
+                passcodeInput.classList.add('is-invalid');
+                setTimeout(() => passcodeInput.classList.remove('is-invalid'), 1000);
+            }
+        }
+
+        unlockBtn.addEventListener('click', handleUnlock);
+        passcodeInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') handleUnlock();
+        });
+        // --- نهاية الإضافة ---
+
         const getSectionsCollection = () => collection(db, currentView === 'private' ? `users/${DEVELOPER_UID}/private_sections` : 'sections');
         const getBooksCollection = () => collection(db, currentView === 'private' ? `users/${DEVELOPER_UID}/private_books` : 'books');
         const getFavoritesCollection = () => {
@@ -415,6 +549,7 @@
              new bootstrap.Modal(addSectionModalEl);
              moveBookModalInstance = new bootstrap.Modal(moveBookModalEl);
              editBookModalInstance = new bootstrap.Modal(editBookModalEl);
+             goToPageModalInstance = new bootstrap.Modal(goToPageModalEl); // Initialize Go to Page Modal
              pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
              updateZoomDisplay();
              setupPdfPanning();
@@ -426,6 +561,19 @@
         });
 
         onAuthStateChanged(auth, async (user) => {
+            // --- إضافة جديدة: تفعيل أوامر القفل ---
+            initializeAppLock();
+            setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    localStorage.setItem('app_last_unlock', Date.now());
+                }
+            }, 60 * 1000);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    initializeAppLock();
+                }
+            });
+            // --- نهاية الإضافة ---
             if (!user) {
                 try {
                     currentUser = (await signInAnonymously(auth)).user;
@@ -1117,6 +1265,38 @@
         prevPageBtn.addEventListener('click', showPrevPage);
         nextPageBtn.addEventListener('click', showNextPage);
 
+        // --- START: Go to Page Modal Logic ---
+        goToPageModalEl.addEventListener('show.bs.modal', () => {
+            if (pdfDoc) {
+                pageRangeInfo.textContent = `أدخل رقمًا بين 1 و ${pdfDoc.numPages}.`;
+                goToPageModalInput.max = pdfDoc.numPages;
+                goToPageModalInput.min = 1;
+                goToPageModalInput.value = pageNum;
+            }
+        });
+
+        goToPageModalEl.addEventListener('shown.bs.modal', () => {
+            goToPageModalInput.focus();
+            goToPageModalInput.select();
+        });
+
+        goToPageModalForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const targetPage = parseInt(goToPageModalInput.value, 10);
+
+            if (isNaN(targetPage) || !pdfDoc || targetPage < 1 || targetPage > pdfDoc.numPages) {
+                return; // Input is invalid, do nothing.
+            }
+            
+            if (targetPage !== pageNum) {
+                pageNum = targetPage;
+                queueRenderPage(pageNum);
+            }
+            goToPageModalInstance.hide();
+        });
+        // --- END: Go to Page Modal Logic ---
+
     </script>
 </body>
 </html>
+

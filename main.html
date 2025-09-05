@@ -469,7 +469,8 @@
             const passcodeError = document.getElementById('passcode-error');
             const unlockBtn = document.getElementById('unlock-btn');
             const passcodeInput = document.getElementById('passcode-input');
-            const RELOCK_TIME = 2 * 60 * 1000;
+            // --- التعديل الأول: تغيير مدة القفل إلى ثلاث دقائق ---
+            const RELOCK_TIME = 3 * 60 * 1000;
 
             function getLockData() {
                 try {
@@ -591,6 +592,25 @@
             onAuthStateChanged(auth, async (user) => {
                 if (user && (user.emailVerified || user.isAnonymous)) {
                     initializeAppLock();
+
+                    // --- التعديل الثاني: تطبيق قواعد القفل الجديدة ---
+                    // القاعدة أ: لا تقفل التطبيق طالما أن المستخدم نشط بداخله.
+                    // يتم تحقيق ذلك عن طريق تحديث الطابع الزمني بشكل دوري، والذي يستخدمه فحص القفل.
+                    setInterval(() => {
+                        // نتأكد من أن التطبيق مرئي للمستخدم قبل تحديث الطابع الزمني.
+                        if (document.visibilityState === 'visible') {
+                            localStorage.setItem('app_last_unlock', Date.now());
+                        }
+                    }, 60 * 1000); // يتم التحديث كل دقيقة، مما يمنع القفل التلقائي أثناء الاستخدام.
+
+                    // القاعدة ب: اقفل التطبيق بعد 3 دقائق من الخروج منه.
+                    // يتم ذلك عن طريق إضافة مستمع يعيد تشغيل فحص القفل في كل مرة يعود فيها المستخدم للتطبيق.
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'visible') {
+                            initializeAppLock();
+                        }
+                    });
+                    // --- نهاية التعديل ---
 
                     if (user.isAnonymous) {
                         welcomeUserEl.textContent = `مرحبا ٲيها الزائر`;

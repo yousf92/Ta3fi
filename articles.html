@@ -108,9 +108,66 @@
         .btn-read-more { background-color: var(--primary-color); border: none; font-weight: 700; border-radius: 10px; }
         .btn-read-more:hover { background-color: #008a6e; }
 
+        #app-lock-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(18, 18, 18, 0.95);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .lock-container {
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--card-background);
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+        .lock-container .icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        #passcode-input {
+            max-width: 200px;
+            margin: 1.5rem auto;
+            letter-spacing: 1.5rem;
+            font-size: 1.5rem;
+            text-align: center;
+            direction: ltr;
+        }
+        #passcode-input::placeholder {
+            letter-spacing: normal;
+        }
+        #unlock-btn {
+            width: 100%;
+            max-width: 200px;
+        }
+        #passcode-error {
+            display: none;
+            color: var(--danger-color);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body>
+    <div id="app-lock-overlay">
+        <div class="lock-container">
+            <i class="bi bi-shield-lock-fill icon"></i>
+            <h5>التطبيق مقفل</h5>
+            <p class="text-secondary small">أدخل رمز المرور للمتابعة</p>
+            <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" class="form-control" id="passcode-input" placeholder="----">
+            <div id="passcode-error">رمز المرور غير صحيح</div>
+            <button id="unlock-btn" class="btn btn-primary mt-2">فتح القفل</button>
+        </div>
+    </div>
 
     <div id="articles-page" class="page">
         <header class="articles-header"><h5 class="m-0">المقالات</h5></header>
@@ -243,7 +300,69 @@
 
         let currentUserRole = 'user';
 
+        // --- إضافة جديدة: متغيرات وأوامر القفل ---
+        const appLockOverlay = document.getElementById('app-lock-overlay');
+        const passcodeError = document.getElementById('passcode-error');
+        const unlockBtn = document.getElementById('unlock-btn');
+        const passcodeInput = document.getElementById('passcode-input');
+        const RELOCK_TIME = 3 * 60 * 1000; // 3 دقائق
+
+        function getLockData() {
+            try {
+                return JSON.parse(localStorage.getItem('app_lock_config')) || { enabled: false, passcode: null };
+            } catch (e) {
+                return { enabled: false, passcode: null };
+            }
+        }
+
+        function initializeAppLock() {
+            const lockData = getLockData();
+            if (!lockData.enabled) return;
+            
+            const lastUnlock = localStorage.getItem('app_last_unlock') || 0;
+            const timeSinceUnlock = Date.now() - lastUnlock;
+
+            if (timeSinceUnlock >= RELOCK_TIME) {
+                appLockOverlay.style.display = 'flex';
+            }
+        }
+
+        function handleUnlock() {
+            const enteredPasscode = passcodeInput.value;
+            const lockData = getLockData();
+            passcodeError.style.display = 'none';
+            if (enteredPasscode === lockData.passcode) {
+                localStorage.setItem('app_last_unlock', Date.now());
+                appLockOverlay.style.display = 'none';
+                passcodeInput.value = '';
+            } else {
+                passcodeError.style.display = 'block';
+                passcodeInput.classList.add('is-invalid');
+                setTimeout(() => passcodeInput.classList.remove('is-invalid'), 1000);
+            }
+        }
+
+        unlockBtn.addEventListener('click', handleUnlock);
+        passcodeInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') handleUnlock();
+        });
+        // --- نهاية الإضافة ---
+
         onAuthStateChanged(auth, async (user) => {
+            // --- إضافة جديدة: تفعيل أوامر القفل ---
+            initializeAppLock();
+            setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    localStorage.setItem('app_last_unlock', Date.now());
+                }
+            }, 60 * 1000);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    initializeAppLock();
+                }
+            });
+            // --- نهاية الإضافة ---
+
             if (user) {
                  // --- إضافة جديدة: استدعاء دالة الإشعارات ---
                  listenForUnreadMessages(user.uid);
