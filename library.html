@@ -626,7 +626,8 @@
 
         async function renderFavoritesSection() {
             let sectionEl = document.getElementById('favorites-section-container');
-
+        
+            //  Handle empty state
             if (userFavorites.size === 0) {
                 if (sectionEl) sectionEl.remove();
                 if (document.querySelectorAll('.section-container').length === 0) {
@@ -636,7 +637,8 @@
             } else {
                  noBooksPlaceholder.style.display = 'none';
             }
-
+        
+            // Create section container if it doesn't exist
             if (!sectionEl) {
                 sectionEl = document.createElement('div');
                 sectionEl.className = 'section-container';
@@ -649,11 +651,11 @@
                 `;
                 sectionsContainer.prepend(sectionEl);
             }
-
+        
             const booksRow = sectionEl.querySelector('.books-row');
-            booksRow.innerHTML = '';
-
-            for (const bookId of userFavorites) {
+            
+            // Fetch all book data and create card elements in parallel
+            const bookPromises = Array.from(userFavorites).map(async (bookId) => {
                 try {
                     let bookRef = doc(db, 'books', bookId);
                     let bookDoc = await getDoc(bookRef);
@@ -661,18 +663,26 @@
                         bookRef = doc(db, `users/${DEVELOPER_UID}/private_books`, bookId);
                         bookDoc = await getDoc(bookRef);
                     }
-
+        
                     if (bookDoc.exists()) {
-                        const bookData = bookDoc.data();
-                        const cardEl = createBookCardElement(bookId, bookData);
-                        booksRow.appendChild(cardEl);
+                        return createBookCardElement(bookDoc.id, bookDoc.data());
                     } else {
-                         await deleteDoc(doc(getFavoritesCollection(), bookId));
+                        // Clean up stale favorite from database
+                        await deleteDoc(doc(getFavoritesCollection(), bookId));
+                        return null;
                     }
                 } catch (error) {
                     console.error(`Error fetching favorite book ${bookId}:`, error);
+                    return null;
                 }
-            }
+            });
+        
+            // Wait for all promises to resolve and filter out any null results
+            const bookCards = (await Promise.all(bookPromises)).filter(Boolean);
+        
+            // Clear the row and append all the new cards at once
+            booksRow.innerHTML = '';
+            bookCards.forEach(card => booksRow.appendChild(card));
         }
         
         async function toggleFavorite(bookId) {
