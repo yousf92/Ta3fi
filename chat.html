@@ -74,7 +74,7 @@
         .message-actions a { cursor: pointer; color: var(--text-color); text-decoration: none; position: relative; }
         .message-actions a:hover { color: #fff; }
         .reply-preview { background-color: #2a3942; padding: 8px 12px; border-bottom: 1px solid #3a4a55; font-size: 0.9rem; display: none; position: relative; flex-shrink: 0; color: var(--text-color); }
-        #reply-preview-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #reply-preview-text, #private-reply-preview-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .replied-to-box { background-color: rgba(0,0,0,0.2); padding: 8px; margin-bottom: 8px; border-radius: 10px; border-left: 3px solid #53bdeb; font-size: 0.9rem; }
         .reactions-container { position: absolute; top: -35px; background-color: #202c33; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; padding: 5px; opacity: 0; visibility: hidden; transition: all 0.2s; z-index: 10; left: 50%; transform: translateX(-50%); }
         .message-content:hover .reactions-container { opacity: 1; visibility: visible; }
@@ -909,11 +909,12 @@
             const senderName = el.dataset.senderName;
             const senderId = el.dataset.senderId;
             const text = el.dataset.text;
+            const firstLine = text.split('\n')[0];
 
             if (senderName && senderId && text) {
-                privateReplyToMessage = { messageId: msgId, senderName, senderId, text };
+                privateReplyToMessage = { messageId: msgId, senderName, senderId, text: firstLine };
                 document.getElementById('private-reply-preview-sender').textContent = `الرد على ${senderName}`;
-                document.getElementById('private-reply-preview-text').textContent = text.split('\n')[0];
+                document.getElementById('private-reply-preview-text').textContent = firstLine;
                 document.getElementById('private-reply-preview').style.display = 'block';
                 privateMessageInput.focus();
             }
@@ -1453,7 +1454,7 @@
         window.onclick = (e) => { if (!e.target.matches('.bi-bell-slash-fill')) { document.querySelectorAll(".mute-dropdown.show-dropdown").forEach(d => d.classList.remove('show-dropdown')); } }
         window.muteUser = async (uid, name, min) => { if (!['developer', 'admin'].includes(currentUserRole)) return; await setDoc(doc(db, "users", uid), { mutedUntil: new Date(Date.now() + min * 60000) }, { merge: true }); alert(`تم كتم ${name} لمدة ${min} دقيقة.`); };
         window.unmuteUser = async (uid, name) => { if (!['developer', 'admin'].includes(currentUserRole)) return; await setDoc(doc(db, "users", uid), { mutedUntil: null }, { merge: true }); alert(`تم إلغاء كتم ${name}.`); };
-        function setReplyFromElement(el) { const msgId = el.id.replace('message-', ''); const senderName = el.dataset.senderName; const senderId = el.dataset.senderId; const text = el.dataset.text; if(senderName && senderId && text){ replyToMessage = { messageId: msgId, senderName, senderId, text }; document.getElementById('reply-preview-sender').textContent = `الرد على ${senderName}`; document.getElementById('reply-preview-text').textContent = text; replyPreview.style.display = 'block'; messageInput.focus(); } }
+        function setReplyFromElement(el) { const msgId = el.id.replace('message-', ''); const senderName = el.dataset.senderName; const senderId = el.dataset.senderId; const text = el.dataset.text; const firstLine = text.split('\n')[0]; if(senderName && senderId && text){ replyToMessage = { messageId: msgId, senderName, senderId, text: firstLine }; document.getElementById('reply-preview-sender').textContent = `الرد على ${senderName}`; document.getElementById('reply-preview-text').textContent = firstLine; replyPreview.style.display = 'block'; messageInput.focus(); } }
         window.setReplyWrapper = (msgId) => { event.stopPropagation(); const el = document.getElementById(`message-${msgId}`); if (el) setReplyFromElement(el); };
         window.copyMessageText = async (msgId) => { const textElement = document.querySelector(`#message-${msgId} .message-text`); if (textElement) { try { await navigator.clipboard.writeText(textElement.innerText); alert("تم نسخ النص!"); } catch (err) { console.error('Failed to copy text: ', err); alert("فشل نسخ النص."); } } };
         function showEditModal(id, currentText) { const backdrop = document.createElement('div'); backdrop.className = 'edit-modal-backdrop'; backdrop.innerHTML = `<div class="edit-modal-content"><h6>قم بتعديل رسالتك:</h6><textarea id="edit-textarea">${currentText}</textarea><div class="edit-modal-buttons"><button class="btn btn-secondary btn-cancel">إلغاء</button><button class="btn btn-primary btn-ok">حفظ</button></div></div>`; document.body.appendChild(backdrop); const textarea = document.getElementById('edit-textarea'); textarea.focus(); textarea.setSelectionRange(textarea.value.length, textarea.value.length); backdrop.querySelector('.btn-ok').onclick = () => { const newText = textarea.value; if (newText.trim() && newText !== currentText) { updateDoc(doc(db, "messages", id), { text: newText, isEdited: true, lastEditedAt: serverTimestamp() }); } document.body.removeChild(backdrop); }; backdrop.querySelector('.btn-cancel').onclick = () => document.body.removeChild(backdrop); backdrop.onclick = (e) => { if (e.target === backdrop) document.body.removeChild(backdrop); }; }
