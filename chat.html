@@ -56,7 +56,7 @@
             display: flex; flex-direction: column;
         }
         .message-content { user-select: text; -webkit-user-select: text; }
-        .message { margin-bottom: 15px; display: flex; align-items: flex-start; position: relative; padding-bottom: 35px; max-width: 95%; transition: transform 0.3s ease; }
+        .message { margin-bottom: 15px; display: flex; align-items: flex-start; position: relative; padding-bottom: 40px; max-width: 95%; }
         .message.own { align-self: flex-end; flex-direction: row-reverse; }
         .message.other { align-self: flex-start; }
         .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-left: 10px; flex-shrink: 0; }
@@ -69,18 +69,14 @@
         .timestamp-wrapper { align-self: flex-end; display: flex; align-items: center; margin-top: 4px; margin-left: 15px; }
         .timestamp { font-size: 0.75rem; color: #a0a0a0; }
         .edited-badge { font-size: 0.7rem; color: #a0a0a0; margin-right: 5px; }
-        .message-actions { position: absolute; bottom: 0; z-index: 10; background-color: var(--card-background); padding: 5px 10px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); font-size: 1rem; display: none; align-items: center; gap: 12px; white-space: nowrap; }
-        .message.own .message-actions { right: 50px; }
-        .message.other .message-actions { left: 50px; }
+        .message-actions { position: absolute; bottom: 5px; z-index: 10; background-color: var(--card-background); padding: 5px 10px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); font-size: 1rem; display: none; align-items: center; gap: 12px; white-space: nowrap; left: 50%; transform: translateX(-50%); }
         .message:hover .message-actions { display: flex; }
         .message-actions a { cursor: pointer; color: var(--text-color); text-decoration: none; position: relative; }
         .message-actions a:hover { color: #fff; }
         .reply-preview { background-color: #2a3942; padding: 8px 12px; border-bottom: 1px solid #3a4a55; font-size: 0.9rem; display: none; position: relative; flex-shrink: 0; color: var(--text-color); }
         #reply-preview-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .replied-to-box { background-color: rgba(0,0,0,0.2); padding: 8px; margin-bottom: 8px; border-radius: 10px; border-left: 3px solid #53bdeb; font-size: 0.9rem; }
-        .reactions-container { position: absolute; top: -35px; background-color: #202c33; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; padding: 5px; opacity: 0; visibility: hidden; transition: all 0.2s; z-index: 10; }
-        .message.own .reactions-container { left: 0; }
-        .message.other .reactions-container { right: 0; }
+        .reactions-container { position: absolute; top: -35px; background-color: #202c33; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: flex; padding: 5px; opacity: 0; visibility: hidden; transition: all 0.2s; z-index: 10; left: 50%; transform: translateX(-50%); }
         .message-content:hover .reactions-container { opacity: 1; visibility: visible; }
         .reaction-emoji { cursor: pointer; font-size: 1.2rem; margin: 0 4px; transition: transform 0.1s; }
         .reaction-emoji:hover { transform: scale(1.3); }
@@ -151,6 +147,334 @@
             font-size: 0.9rem;
             margin-top: 1rem;
         }
+
+        .chat-view {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+        .chat-view.active {
+            display: flex;
+        }
+        
+        #private-messages-box {
+             flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .tab-content {
+            flex-grow: 1;
+            position: relative;
+        }
+        .tab-pane {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+        }
+        #users-list-tab {
+             background-image: url('https://images.unsplash.com/photo-1500964757637-c85e8a162699?q=80&w=2103&auto=format&fit=crop');
+        }
+        
+        .conversation-list-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: background-color 0.2s;
+            position: relative;
+        }
+        .conversation-list-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .delete-chat-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--danger-color);
+            font-size: 1.2rem;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .conversation-list-item:hover .delete-chat-btn {
+            visibility: visible;
+            opacity: 0.8;
+        }
+        
+        .avatar-container {
+            position: relative;
+            display: inline-block;
+        }
+        .conversation-list-item img {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-left: 12px;
+            border: 2px solid var(--primary-color);
+        }
+        .notification-dot {
+            position: absolute;
+            top: 2px;
+            right: -2px;
+            width: 15px;
+            height: 15px;
+            background-color: var(--danger-color);
+            border-radius: 50%;
+            border: 2px solid var(--card-background);
+        }
+        .unread-badge {
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.2em 0.5em;
+            border-radius: 50rem;
+            margin-inline-start: auto;
+        }
+        .read-receipt {
+            font-size: 1.1rem;
+            margin-left: 5px;
+        }
+        .read-receipt.sent { color: #a0a0a0; }
+        .read-receipt.seen { color: #53bdeb; }
+
+        .conversation-info .user-name {
+            font-weight: 500;
+            font-size: 1rem;
+            color: white;
+        }
+        .conversation-info .last-message {
+            font-size: 0.85rem;
+            color: white; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px; 
+        }
+
+        #user-search-container {
+            padding: 10px;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(18,18,18,0.3);
+        }
+        #user-search-input {
+            background-color: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 20px;
+            padding: 10px 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            width: 100%;
+        }
+        #user-search-input::placeholder { color: var(--secondary-text-color); }
+
+        #users-list-container {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .user-list-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+            background-color: rgba(18, 18, 18, 0.6);
+             backdrop-filter: blur(5px);
+        }
+        .user-list-item:hover {
+            background-color: rgba(40, 40, 40, 0.8);
+        }
+        .user-list-item img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-left: 15px;
+        }
+        .user-list-item .user-name {
+            font-weight: 500;
+        }
+        #private-chat-header {
+            padding: 1rem;
+            background-color: var(--card-background);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        #private-chat-header img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        #private-chat-header h5 {
+            margin: 0;
+            font-weight: 700;
+        }
+         #private-messages-box {
+            background-image: url('https://images.unsplash.com/photo-1500964757637-c85e8a162699?q=80&w=2103&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+        .private-message-wrapper {
+            margin-bottom: 15px; display: flex; align-items: flex-start; max-width: 95%; position: relative;
+        }
+        .private-message-wrapper.own { align-self: flex-end; flex-direction: row-reverse; }
+        .private-message-wrapper.other { align-self: flex-start; }
+        .private-message-wrapper .message-content {
+             padding: 8px 12px; border-radius: 18px; max-width: 100%; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1); word-wrap: break-word; display: flex; flex-direction: column;
+        }
+        .private-message-wrapper.own .message-content { background-color: #005c4b; color: white; border-bottom-right-radius: 5px; }
+        .private-message-wrapper.other .message-content { background-color: #2a3942; color: white; border-bottom-left-radius: 5px; }
+        
+        .private-message-wrapper .message-actions {
+            position: absolute;
+            bottom: -20px;
+            z-index: 10;
+            background-color: var(--card-background);
+            padding: 5px 10px;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-size: 1rem;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            white-space: nowrap;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .private-message-wrapper:hover .message-actions {
+            display: flex;
+        }
+        
+        .private-message-wrapper .message-content:hover .reactions-container {
+            opacity: 1;
+            visibility: visible;
+        }
+        .private-message-wrapper .reaction-chip {
+             background-color: #2a3942;
+        }
+        .private-message-wrapper.own .reaction-chip {
+            background-color: #004a3c;
+        }
+        
+        #messages-box, #private-messages-box {
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .swipe-reply-icon-class {
+            position: absolute;
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: white;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.1s ease, transform 0.1s ease;
+            pointer-events: none;
+        }
+
+        .message, .private-message-wrapper {
+            position: relative; 
+            z-index: 2;
+            background: transparent; 
+            transition: transform 0.2s ease;
+            touch-action: pan-y;
+        }
+
+        /* START: Custom Confirm Modal Styles */
+        .confirm-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1060;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+        .confirm-modal-backdrop.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .confirm-modal-content {
+            background-color: var(--card-background);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .confirm-modal-backdrop.show .confirm-modal-content {
+            transform: scale(1);
+        }
+        .confirm-modal-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: var(--danger-color);
+        }
+        .confirm-modal-message {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            color: var(--text-color);
+        }
+        .confirm-modal-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        .confirm-modal-btn {
+            flex: 1;
+            padding: 0.8rem;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .confirm-modal-btn:hover {
+            opacity: 0.9;
+        }
+        .btn-confirm-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        .btn-confirm-secondary {
+            background-color: #4a4a4a;
+            color: var(--text-color);
+        }
+        /* END: Custom Confirm Modal Styles */
+
+
     </style>
 </head>
 <body>
@@ -164,71 +488,114 @@
             <button id="unlock-btn" class="btn btn-primary mt-2">فتح القفل</button>
         </div>
     </div>
+
     <div class="chat-wrapper">
         <div class="chat-container">
-            <div class="chat-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-0">المجموعة لا أبرح حتى أبلغ</h5>
-                        <small id="user-display-name" class="text-muted"></small>
+
+            <!-- START: Main View (Tabs) -->
+            <div id="main-view" class="chat-view active">
+                 <div class="chat-header">
+                    <div class="d-flex justify-content-between align-items: center w-100">
+                        <div>
+                            <h5 class="mb-0">الدردشة</h5>
+                            <small id="user-display-name" class="text-muted"></small>
+                        </div>
+                        <a href="./main.html" class="btn text-white fs-4"><i class="bi bi-arrow-right"></i></a>
                     </div>
-                    <a href="main.html" class="btn" style="color: white; font-size: 1.5rem; background-color: rgba(255, 255, 255, 0.1); border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='rgba(255, 255, 255, 0.2)'" onmouseout="this.style.backgroundColor='rgba(255, 255, 255, 0.1)'" aria-label="العودة للصفحة الرئيسية">
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
-                    </div>
-                <ul class="nav nav-pills nav-fill mt-3" style="display: none;">
-                    <li class="nav-item"><a class="nav-link active" href="#">الدردشة</a></li>
+                </div>
+                <ul class="nav nav-pills nav-fill mt-3 p-2">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="pill" href="#group-chat-tab">الدردشة الجماعية</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" data-bs-toggle="pill" href="#users-list-tab" id="users-tab-link">
+                            المستخدمون
+                            <span id="private-chat-notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+                            </span>
+                        </a>
+                    </li>
                 </ul>
-            </div>
-            <div id="pinned-message-container">
-                <i id="unpin-button" class="bi bi-x-circle-fill"></i>
-                <div id="pinned-message-clickable-area">
-                    <span id="pinned-by-text"></span>
-                    <span id="pinned-message-text"></span>
-                </div>
-            </div>
-            <div class="main-content">
-                <div id="chat-section">
-                    <div id="messages-box"></div>
-                    <div id="mention-notification" title="لديك رد جديد">@</div>
-                </div>
-            </div>
-            <div id="chat-footer">
-                <div id="reply-preview" class="reply-preview">
-                    <div id="cancel-reply" class="cancel-reply">&times;</div>
-                    <div class="reply-preview-sender" id="reply-preview-sender"></div>
-                    <div id="reply-preview-text" class="reply-preview-text"></div>
-                </div>
-                <div class="card-footer p-3">
-                    <div class="input-group">
-                        <textarea id="message-input" class="form-control" placeholder="اكتب رسالتك..." rows="1"></textarea>
-                        <button id="send-button" class="btn"><i class="bi bi-send-fill"></i></button>
+                <div class="tab-content flex-grow-1">
+                    <div class="tab-pane fade show active h-100" id="group-chat-tab" style="display: flex; flex-direction: column;">
+                         <!-- Group chat content is built by JS -->
+                    </div>
+                    <div class="tab-pane fade h-100" id="users-list-tab">
+                         <!-- User list content is built by JS -->
                     </div>
                 </div>
             </div>
+            <!-- END: Main View (Tabs) -->
+
+            <!-- START: Private Chat View -->
+            <div id="private-chat-view" class="chat-view">
+                <div id="private-chat-header">
+                     <button id="back-to-main-view" class="btn text-white fs-4"><i class="bi bi-arrow-right"></i></button>
+                     <img id="recipient-avatar" src="https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png" alt="Avatar">
+                    <div class="flex-grow-1">
+                        <h5 id="recipient-name">...</h5>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn text-white fs-5" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#" id="block-unblock-btn"></a></li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="main-content">
+                    <div id="private-swipe-reply-icon" class="swipe-reply-icon-class"><i class="bi bi-reply-fill"></i></div>
+                    <div id="private-messages-box" class="flex-grow-1"></div>
+                 </div>
+                <div id="private-chat-footer">
+                     <div id="private-reply-preview" class="reply-preview">
+                        <div id="cancel-private-reply" style="position: absolute; top: 5px; right: 10px; cursor: pointer; font-size: 1.5rem; line-height: 1;">&times;</div>
+                        <div class="reply-preview-sender" id="private-reply-preview-sender"></div>
+                        <div id="private-reply-preview-text" class="reply-preview-text"></div>
+                    </div>
+                     <div id="block-notification" class="text-center p-3" style="display: none; background-color: #2a3942; color: var(--secondary-text-color);">
+                     </div>
+                     <div class="card-footer p-3" id="private-input-area" style="background-color: #1e1e1e; border-top: 1px solid var(--border-color);">
+                        <div class="input-group" style="background-color: #2a3942; border-radius: 25px; padding: 5px;">
+                            <textarea id="private-message-input" class="form-control" placeholder="اكتب رسالتك..." rows="1" style="background-color: transparent; color: white; border: none; box-shadow: none;"></textarea>
+                            <button id="private-send-button" class="btn" style="background-color: #009688; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;"><i class="bi bi-send-fill"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END: Private Chat View -->
         </div>
     </div>
     
+    <!-- START: Custom Confirm Modal HTML -->
+    <div class="confirm-modal-backdrop" id="custom-confirm-modal">
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            <p class="confirm-modal-message" id="custom-confirm-message"></p>
+            <div class="confirm-modal-buttons">
+                <button class="confirm-modal-btn btn-confirm-secondary" id="custom-confirm-cancel">إلغاء</button>
+                <button class="confirm-modal-btn btn-confirm-danger" id="custom-confirm-ok">تأكيد</button>
+            </div>
+        </div>
+    </div>
+    <!-- END: Custom Confirm Modal HTML -->
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
         // This script runs before the main module script below.
-        // It checks if this is the first page load within the current browser session.
         if (!sessionStorage.getItem('sessionStarted')) {
-            // If it's the first load, set a flag in sessionStorage.
-            // This flag persists only for the session. Closing the tab/browser clears it.
             sessionStorage.setItem('sessionStarted', 'true');
-            
-            // Immediately redirect the user to the main page.
-            // `window.location.replace` is used so the user can't click "back" to get to this redirecting page.
-            window.location.replace('main.html');
+            if (window.location.pathname.includes('chat.html')) {
+                 window.location.replace('./main.html');
+            }
         }
     </script>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDoc, getDocs, deleteDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDoc, getDocs, deleteDoc, setDoc, updateDoc, arrayUnion, arrayRemove, where, limit, increment, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -243,17 +610,59 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUserRole = 'user';
-        let currentDisplayName = 'زائر';
-        let replyToMessage = null;
-        const userProfiles = {};
-        let isVisitor = true;
-        
-        let unreadCount = 0;
-        let originalFavicon = document.querySelector("link[rel*='icon']")?.href || '/favicon.ico';
-        const originalTitle = document.title;
-        
+        const mainView = document.getElementById('main-view');
+        const privateChatView = document.getElementById('private-chat-view');
         const userDisplayName = document.getElementById('user-display-name');
+        
+        const groupChatTab = document.getElementById('group-chat-tab');
+        const originalChatStructure = document.createElement('div');
+        originalChatStructure.style.display = 'flex';
+        originalChatStructure.style.flexDirection = 'column';
+        originalChatStructure.style.height = '100%';
+        originalChatStructure.innerHTML = `
+            <div id="pinned-message-container" style="padding: 8px 15px; background-color: rgba(255, 251, 230, 0.1); border-bottom: 1px solid #ffe58f; display: none; font-size: 0.9rem; flex-shrink: 0; position: relative;">
+                 <i id="unpin-button" class="bi bi-x-circle-fill" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer; font-size: 1.2rem; color: #ffe58f; z-index: 2;"></i>
+                <div id="pinned-message-clickable-area" style="cursor: pointer; padding-right: 25px;">
+                    <span id="pinned-by-text" style="font-weight: bold; color: #ffe58f; display: block; font-size: 0.8rem;"></span>
+                    <span id="pinned-message-text" style="color: #ffe58f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;"></span>
+                </div>
+            </div>
+            <div class="main-content">
+                <div id="chat-section">
+                    <div id="swipe-reply-icon" class="swipe-reply-icon-class"><i class="bi bi-reply-fill"></i></div>
+                    <div id="messages-box"></div>
+                    <div id="mention-notification">@</div>
+                </div>
+            </div>
+            <div id="chat-footer">
+                <div id="reply-preview" class="reply-preview">
+                    <div id="cancel-reply" style="position: absolute; top: 5px; right: 10px; cursor: pointer; font-size: 1.5rem; line-height: 1;">&times;</div>
+                    <div class="reply-preview-sender" id="reply-preview-sender"></div>
+                    <div id="reply-preview-text" class="reply-preview-text"></div>
+                </div>
+                <div class="card-footer p-3">
+                    <div class="input-group">
+                        <textarea id="message-input" class="form-control" placeholder="اكتب رسالتك..." rows="1"></textarea>
+                        <button id="send-button" class="btn"><i class="bi bi-send-fill"></i></button>
+                    </div>
+                </div>
+            </div>
+        `;
+        groupChatTab.appendChild(originalChatStructure);
+
+        const usersListTab = document.getElementById('users-list-tab');
+        usersListTab.innerHTML = `
+            <div style="display: flex; flex-direction: column; height: 100%;">
+                <div id="user-search-container">
+                    <input type="search" id="user-search-input" class="form-control" placeholder="ابحث عن مستخدم...">
+                </div>
+                <h6 class="text-muted p-2 mt-2" id="conversation-list-title">المحادثات</h6>
+                <div id="users-list-container" class="flex-grow-1" style="overflow-y: auto;">
+                    <p class="text-center text-muted p-3">لا توجد محادثات خاصة بعد</p>
+                </div>
+            </div>
+        `;
+        
         const messagesBox = document.getElementById('messages-box');
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
@@ -265,518 +674,562 @@
         const pinnedMessageText = document.getElementById('pinned-message-text');
         const unpinButton = document.getElementById('unpin-button');
         const pinnedMessageClickableArea = document.getElementById('pinned-message-clickable-area');
+        
+        const usersListContainer = document.getElementById('users-list-container');
+        const userSearchInput = document.getElementById('user-search-input');
+        const backToMainViewBtn = document.getElementById('back-to-main-view');
+        const recipientNameEl = document.getElementById('recipient-name');
+        const recipientAvatarEl = document.getElementById('recipient-avatar');
+        const privateMessagesBox = document.getElementById('private-messages-box');
+        const privateMessageInput = document.getElementById('private-message-input');
+        const privateSendButton = document.getElementById('private-send-button');
+        const blockUnblockBtn = document.getElementById('block-unblock-btn');
 
-        // --- إضافة جديدة: متغيرات وأوامر القفل ---
         const appLockOverlay = document.getElementById('app-lock-overlay');
         const passcodeError = document.getElementById('passcode-error');
         const unlockBtn = document.getElementById('unlock-btn');
         const passcodeInput = document.getElementById('passcode-input');
-        const RELOCK_TIME = 3 * 60 * 1000; // 3 دقائق
 
-        function getLockData() {
-            try {
-                return JSON.parse(localStorage.getItem('app_lock_config')) || { enabled: false, passcode: null };
-            } catch (e) {
-                return { enabled: false, passcode: null };
-            }
-        }
-
-        function initializeAppLock() {
-            const lockData = getLockData();
-            if (!lockData.enabled) return;
-            
-            const lastUnlock = localStorage.getItem('app_last_unlock') || 0;
-            const timeSinceUnlock = Date.now() - lastUnlock;
-
-            if (timeSinceUnlock >= RELOCK_TIME) {
-                appLockOverlay.style.display = 'flex';
-            }
-        }
-
-        function handleUnlock() {
-            const enteredPasscode = passcodeInput.value;
-            const lockData = getLockData();
-            passcodeError.style.display = 'none';
-            if (enteredPasscode === lockData.passcode) {
-                localStorage.setItem('app_last_unlock', Date.now());
-                appLockOverlay.style.display = 'none';
-                passcodeInput.value = '';
-            } else {
-                passcodeError.style.display = 'block';
-                passcodeInput.classList.add('is-invalid');
-                setTimeout(() => passcodeInput.classList.remove('is-invalid'), 1000);
-            }
-        }
-
-        unlockBtn.addEventListener('click', handleUnlock);
-        passcodeInput.addEventListener('keyup', (event) => {
-            if (event.key === 'Enter') handleUnlock();
-        });
-        // --- نهاية الإضافة ---
-
-        function setFavicon(href) {
-            let favicon = document.querySelector("link[rel*='icon']");
-            if (!favicon) {
-                favicon = document.createElement('link');
-                favicon.rel = 'shortcut icon';
-                document.head.appendChild(favicon);
-            }
-            favicon.href = href;
-        }
-
-        function updateFavicon() {
-            if (unreadCount === 0) {
-                setFavicon(originalFavicon);
-                document.title = originalTitle;
-                return;
-            }
-            
-            document.title = `(${unreadCount}) ${originalTitle}`;
-
-            const canvas = document.createElement('canvas');
-            canvas.width = 32;
-            canvas.height = 32;
-            const ctx = canvas.getContext('2d');
-
-            ctx.beginPath();
-            ctx.arc(16, 16, 16, 0, 2 * Math.PI);
-            ctx.fillStyle = '#00a884';
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.arc(24, 24, 8, 0, 2 * Math.PI);
-            ctx.fillStyle = '#ff5c5c';
-            ctx.fill();
-            ctx.strokeStyle = '#121212';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.font = 'bold 15px Tajawal';
-            ctx.fillText(unreadCount > 9 ? '9+' : unreadCount, 24, 25);
-
-            setFavicon(canvas.toDataURL('image/png'));
-        }
+        let currentUserRole = 'user';
+        let currentDisplayName = 'زائر';
+        let replyToMessage = null;
+        let privateReplyToMessage = null; 
+        const userProfiles = {};
+        let isVisitor = true;
+        let unreadCount = 0;
+        let originalFavicon = document.querySelector("link[rel*='icon']")?.href || '/favicon.ico';
+        const originalTitle = document.title;
+        let currentUserId = null;
+        let recipientId = null;
+        let privateChatRoomId = null;
+        let unsubscribePrivateChat = null;
+        let unsubscribeConversations = null;
+        let unsubscribeUserProfiles = null; 
+        let unsubscribeUserDoc = null; 
+        let unsubscribeRecipientDoc = null;
+        const RELOCK_TIME = 3 * 60 * 1000;
         
-        window.addEventListener('focus', () => {
-            unreadCount = 0;
-            updateFavicon();
-            // --- إضافة جديدة: تسجيل آخر وقت لقراءة الرسائل ---
-            // عندما يعود المستخدم للنافذة، نسجل وقت آخر رسالة موجودة
-            const lastMessage = messagesBox.lastElementChild;
-            if (lastMessage) {
-                 const lastMessageId = lastMessage.id.replace('message-', '');
-                 getDoc(doc(db, 'messages', lastMessageId)).then(docSnap => {
-                     if(docSnap.exists() && docSnap.data().createdAt) {
-                        localStorage.setItem('lastReadTimestamp', docSnap.data().createdAt.toMillis());
-                     }
-                 });
-            }
-            // --- نهاية الإضافة ---
+        // --- START: Custom Confirm Modal Logic ---
+        const confirmModal = document.getElementById('custom-confirm-modal');
+        const confirmMessageEl = document.getElementById('custom-confirm-message');
+        const confirmIconEl = confirmModal.querySelector('.confirm-modal-icon i');
+        const confirmOkBtn = document.getElementById('custom-confirm-ok');
+        const confirmCancelBtn = document.getElementById('custom-confirm-cancel');
+        let confirmCallback = null;
+
+        function showCustomConfirm(message, iconClass, onConfirm) {
+            confirmMessageEl.textContent = message;
+            confirmIconEl.className = iconClass;
+            confirmCallback = onConfirm;
+            confirmModal.classList.add('show');
+        }
+
+        confirmCancelBtn.addEventListener('click', () => {
+            confirmModal.classList.remove('show');
+            confirmCallback = null;
         });
 
-        window.scrollToMessage = (messageId) => {
-            if (!messageId) return;
-            const messageElement = document.getElementById(`message-${messageId}`);
-            if (messageElement) {
-                messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                messageElement.style.transition = 'background-color 0.5s';
-                messageElement.style.backgroundColor = 'rgba(83, 189, 235, 0.3)';
-                setTimeout(() => {
-                    messageElement.style.backgroundColor = '';
-                }, 2500);
-            } else {
-                alert('لا يمكن العثور على الرسالة الأصلية، ربما تم حذفها.');
+        confirmOkBtn.addEventListener('click', () => {
+            if (confirmCallback) {
+                confirmCallback();
             }
-        };
+            confirmModal.classList.remove('show');
+            confirmCallback = null;
+        });
+        // --- END: Custom Confirm Modal Logic ---
 
-        function getVisitorProfile() {
-            try {
-                return JSON.parse(localStorage.getItem('visitorProfile')) || {};
-            } catch (e) {
-                return {};
-            }
-        }
-        
-        async function loadUserProfiles() {
-            const usersCol = collection(db, "users");
-            const userSnapshot = await getDocs(usersCol);
-            userSnapshot.forEach((doc) => {
-                userProfiles[doc.id] = doc.data();
-            });
+        function showMainView() {
+            mainView.classList.add('active');
+            privateChatView.classList.remove('active');
+            recipientId = null;
+            privateChatRoomId = null;
+            if (unsubscribePrivateChat) { unsubscribePrivateChat(); unsubscribePrivateChat = null; }
+            if (unsubscribeUserDoc) { unsubscribeUserDoc(); unsubscribeUserDoc = null; }
+            if (unsubscribeRecipientDoc) { unsubscribeRecipientDoc(); unsubscribeRecipientDoc = null; }
         }
 
-        async function checkUserStatus(userId) {
-            const userDocRef = doc(db, "users", userId);
-            const userDoc = await getDoc(userDocRef);
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                if (userData.isBanned) {
-                    return 'banned';
+        async function showPrivateChatView(targetUserId, targetUserName, targetUserAvatar) {
+            recipientId = targetUserId;
+            if (!currentUserId || !recipientId) return;
+
+            privateChatRoomId = [currentUserId, recipientId].sort().join('_');
+
+            const chatRoomRefForUnread = doc(db, "private_chats", privateChatRoomId);
+            await updateDoc(chatRoomRefForUnread, { [`unread_count_${currentUserId}`]: 0 }).catch(console.error);
+            
+            if (unsubscribeUserDoc) unsubscribeUserDoc();
+            if (unsubscribeRecipientDoc) unsubscribeRecipientDoc();
+
+            const updateBlockStatusUI = async () => {
+                const userDocSnap = await getDoc(doc(db, "users", currentUserId));
+                const recipientDocSnap = await getDoc(doc(db, "users", recipientId));
+
+                if (!userDocSnap.exists()) return;
+                const currentUserData = userDocSnap.data();
+                const recipientData = recipientDocSnap.exists() ? recipientDocSnap.data() : {};
+                
+                const iAmBlocked = recipientData.blockedUsers?.includes(currentUserId);
+                const iHaveBlocked = currentUserData.blockedUsers?.includes(recipientId);
+
+                const privateInputArea = document.getElementById('private-input-area');
+                const blockNotification = document.getElementById('block-notification');
+
+                if (iAmBlocked) {
+                    blockNotification.textContent = 'لا يمكنك إرسال رسالة إلى هذا المستخدم لأنه قام بحظرك.';
+                    blockNotification.style.display = 'block';
+                    privateInputArea.style.display = 'none';
+                } else if (iHaveBlocked) {
+                    blockNotification.textContent = `لقد قمت بحظر هذا المستخدم.`;
+                    blockNotification.style.display = 'block';
+                    privateInputArea.style.display = 'none';
+                } else {
+                    blockNotification.style.display = 'none';
+                    privateInputArea.style.display = 'block';
                 }
-                if (userData.mutedUntil && userData.mutedUntil.toDate() > new Date()) {
-                    return 'muted';
+
+                if(iHaveBlocked) {
+                    blockUnblockBtn.innerHTML = `<i class="bi bi-unlock-fill text-success me-2"></i> إلغاء الحظر`;
+                    blockUnblockBtn.onclick = () => toggleBlockUser(false);
+                } else {
+                    blockUnblockBtn.innerHTML = `<i class="bi bi-slash-circle-fill text-danger me-2"></i> حظر المستخدم`;
+                    blockUnblockBtn.onclick = () => toggleBlockUser(true);
                 }
-                currentUserRole = userData.role || 'user';
-            } else {
-                await setDoc(userDocRef, { role: 'user' }, { merge: true });
-                currentUserRole = 'user';
+            };
+            
+            unsubscribeUserDoc = onSnapshot(doc(db, "users", currentUserId), updateBlockStatusUI);
+            unsubscribeRecipientDoc = onSnapshot(doc(db, "users", recipientId), updateBlockStatusUI);
+            
+            const chatRoomRef = doc(db, "private_chats", privateChatRoomId);
+            const chatRoomSnap = await getDoc(chatRoomRef);
+            if (!chatRoomSnap.exists()) {
+                await setDoc(chatRoomRef, {
+                    participants: [currentUserId, recipientId],
+                    lastMessageTimestamp: serverTimestamp(),
+                    [`unread_count_${currentUserId}`]: 0,
+                    [`unread_count_${recipientId}`]: 0,
+                    [`hidden_for_${currentUserId}`]: false,
+                    [`hidden_for_${recipientId}`]: false
+                }, { merge: true });
             }
-            return 'active';
+
+            recipientNameEl.textContent = targetUserName;
+            recipientAvatarEl.src = targetUserAvatar || 'https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png';
+            mainView.classList.remove('active');
+            privateChatView.classList.add('active');
+            loadPrivateMessages();
         }
+
+        backToMainViewBtn.addEventListener('click', showMainView);
 
         onAuthStateChanged(auth, async user => {
-            // --- إضافة جديدة: تفعيل أوامر القفل ---
             initializeAppLock();
-            setInterval(() => {
-                if (document.visibilityState === 'visible') {
-                    localStorage.setItem('app_last_unlock', Date.now());
-                }
-            }, 60 * 1000);
-            document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') {
-                    initializeAppLock();
-                }
-            });
-            // --- نهاية الإضافة ---
+            setInterval(() => { if (document.visibilityState === 'visible') localStorage.setItem('app_last_unlock', Date.now()); }, 60 * 1000);
+            document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') initializeAppLock(); });
+
             if (user) {
+                localStorage.setItem('lastReadTimestamp', Date.now().toString());
+
+                currentUserId = user.uid;
                 isVisitor = user.isAnonymous;
                 
-                let roleText = '';
+                const userDocRef = doc(db, "users", user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+                const existingData = userDocSnap.exists() ? userDocSnap.data() : {};
+                let dataToSet = {};
+
                 if (isVisitor) {
                     const visitorData = getVisitorProfile();
                     currentDisplayName = visitorData.displayName || `زائر-${user.uid.substring(0, 5)}`;
-                    userProfiles[user.uid] = { photoURL: visitorData.photoURL };
                     currentUserRole = 'user';
-                } else {
-                    if (!user.emailVerified) {
-                        window.location.href = 'index.html';
-                        return;
-                    }
-                    const status = await checkUserStatus(user.uid);
-                    if (status === 'banned') {
-                        messagesBox.innerHTML = '<div class="text-center p-5 h-100 d-flex justify-content-center align-items-center"><h1>لقد تم حظرك</h1></div>';
-                        document.getElementById('chat-footer').style.display = 'none';
-                        signOut(auth);
-                        return;
-                    }
+                    dataToSet = { displayName: currentDisplayName, isVisitor: true, role: existingData.role || 'user' };
+                } else { 
+                    if (!user.emailVerified) { window.location.href = './index.html'; return; }
                     currentDisplayName = user.displayName || user.email;
-                    if (currentUserRole === 'developer') roleText = '⭐ (مطور)';
-                    else if (currentUserRole === 'admin') roleText = '🛡️ (مشرف)';
+                    currentUserRole = existingData.role || 'user';
+                    const status = await checkUserStatus(user.uid);
+                    if (status === 'banned') { messagesBox.innerHTML = '<div class="text-center p-5 h-100 d-flex justify-content-center align-items-center"><h1>لقد تم حظرك</h1></div>'; document.getElementById('chat-footer').style.display = 'none'; signOut(auth); return; }
+                    dataToSet = { displayName: currentDisplayName, isVisitor: false, role: currentUserRole };
                 }
-
-                userDisplayName.textContent = `مرحبا، ${currentDisplayName} ${roleText}`;
                 
-                await loadUserProfiles();
+                if (existingData.displayName !== dataToSet.displayName || existingData.isVisitor !== dataToSet.isVisitor) {
+                    await setDoc(userDocRef, dataToSet, { merge: true });
+                }
+                userProfiles[user.uid] = dataToSet;
+                
+                listenForUserProfiles(); 
                 loadMessages();
                 loadPinnedMessage();
+                initializeSwipeToReply('messages-box', '.message', setReplyFromElement);
+                initializeSwipeToReply('private-messages-box', '.private-message-wrapper', setPrivateReplyFromElement);
+
             } else {
-                signInAnonymously(auth).catch((error) => {
-                    console.error("Anonymous sign-in failed:", error);
-                    messagesBox.innerHTML = '<div class="text-center p-5">فشل الاتصال بالدردشة.</div>';
-                });
+                signInAnonymously(auth).catch((error) => { console.error("Anonymous sign-in failed:", error); messagesBox.innerHTML = '<div class="text-center p-5">فشل الاتصال بالدردشة.</div>'; });
             }
         });
-        
-        async function sendMessage() {
-            const text = messageInput.value.trim();
-            if (!text || !auth.currentUser) return;
 
-            if (!isVisitor) {
-                 const userStatus = await checkUserStatus(auth.currentUser.uid);
-                 if (userStatus === 'muted') { alert("أنت مكتوم حاليا ولا يمكنك إرسال رسائل."); return; }
-            }
-           
-            const messageData = { text, senderName: currentDisplayName, senderId: auth.currentUser.uid, senderRole: currentUserRole, createdAt: serverTimestamp() };
-            if (replyToMessage) { messageData.replyTo = replyToMessage; }
-            await addDoc(collection(db, "messages"), messageData);
-            messageInput.value = ""; 
-            cancelReply();
-            messageInput.style.height = 'auto';
+        function initializeSwipeToReply(containerId, messageSelector, replyFunction) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const swipeIcon = container.parentElement.querySelector('.swipe-reply-icon-class');
+            if (!swipeIcon) return;
+            let startX = 0, startY = 0, currentX = 0, swipedElement = null, isScrolling = false, isSwipeGesture = false;
+            const SWIPE_THRESHOLD = 80, DIRECTION_LOCK_THRESHOLD = 10;
+            container.addEventListener('touchstart', (e) => {
+                if (e.target.closest('a, button, .message-actions, .reactions-container') || container.isScrolling) { swipedElement = null; return; }
+                const targetMessage = e.target.closest(messageSelector); if (!targetMessage) return;
+                swipedElement = targetMessage; startX = e.touches[0].clientX; startY = e.touches[0].clientY; currentX = startX;
+                isScrolling = false; isSwipeGesture = false; swipedElement.style.transition = 'none';
+            }, { passive: true });
+            let scrollTimeout;
+            container.addEventListener('scroll', () => { container.isScrolling = true; clearTimeout(scrollTimeout); scrollTimeout = setTimeout(() => { container.isScrolling = false; }, 150); });
+            container.addEventListener('touchmove', (e) => {
+                if (!swipedElement || isScrolling) return;
+                currentX = e.touches[0].clientX; const currentY = e.touches[0].clientY; const deltaX = currentX - startX; const deltaY = currentY - startY;
+                if (!isSwipeGesture) {
+                    if (Math.abs(deltaY) > DIRECTION_LOCK_THRESHOLD && Math.abs(deltaY) > Math.abs(deltaX)) { isScrolling = true; swipedElement = null; return; } 
+                    else if (Math.abs(deltaX) > DIRECTION_LOCK_THRESHOLD) { isSwipeGesture = true; swipeIcon.style.top = `${swipedElement.offsetTop + (swipedElement.offsetHeight / 2) - 20}px`; swipeIcon.style.left = '20px'; swipeIcon.style.display = 'flex'; swipeIcon.style.opacity = '0'; }
+                }
+                if (isSwipeGesture) {
+                    e.preventDefault(); const swipeDistance = Math.max(0, deltaX); const constrainedDistance = Math.min(swipeDistance, 120);
+                    swipedElement.style.transform = `translateX(${constrainedDistance}px)`; const iconOpacity = Math.min(constrainedDistance / SWIPE_THRESHOLD, 1);
+                    swipeIcon.style.opacity = iconOpacity; swipeIcon.style.transform = `scale(${0.8 + iconOpacity * 0.2})`;
+                }
+            }, { passive: false });
+            container.addEventListener('touchend', (e) => {
+                if (!swipedElement) return;
+                if (isSwipeGesture) { const deltaX = currentX - startX; if (deltaX > SWIPE_THRESHOLD) { replyFunction(swipedElement); } }
+                swipedElement.style.transition = 'transform 0.2s ease'; swipedElement.style.transform = 'translateX(0px)';
+                if (swipeIcon) { swipeIcon.style.opacity = '0'; setTimeout(() => { if (swipeIcon.style.opacity === '0') swipeIcon.style.display = 'none'; }, 200); }
+                swipedElement = null; isSwipeGesture = false;
+            });
         }
-        sendButton.addEventListener('click', sendMessage);
-        
-        messageInput.addEventListener('keypress', (e) => { 
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-        });
-        messageInput.addEventListener('input', () => {
-            messageInput.style.height = 'auto';
-            messageInput.style.height = (messageInput.scrollHeight) + 'px';
-        });
-        
-        function cancelReply() { replyToMessage = null; replyPreview.style.display = 'none'; }
-        cancelReplyButton.addEventListener('click', cancelReply);
 
-        function loadMessages() {
-            const q = query(collection(db, "messages"), orderBy("createdAt"));
-            onSnapshot(q, (snapshot) => {
-                const wasScrolledToBottom = messagesBox.scrollHeight - messagesBox.clientHeight <= messagesBox.scrollTop + 150;
-                messagesBox.innerHTML = "";
-                let lastMessageTimestamp = null; // لتخزين وقت آخر رسالة
+        function setPrivateReplyFromElement(el) {
+            const msgId = el.id.replace('private-message-', '');
+            const senderName = el.dataset.senderName;
+            const senderId = el.dataset.senderId;
+            const text = el.dataset.text;
 
-                snapshot.forEach(messageDoc => {
-                    const msg = messageDoc.data(); const msgId = messageDoc.id; const isOwn = msg.senderId === auth.currentUser?.uid;
-                    const msgDiv = document.createElement('div'); 
-                    msgDiv.className = `message ${isOwn ? 'own' : 'other'}`;
-                    msgDiv.id = `message-${msgId}`;
-                    msgDiv.dataset.senderName = msg.senderName;
-                    msgDiv.dataset.senderId = msg.senderId;
-                    msgDiv.dataset.text = msg.text;
+            if (senderName && senderId && text) {
+                privateReplyToMessage = { messageId: msgId, senderName, senderId, text };
+                document.getElementById('private-reply-preview-sender').textContent = `الرد على ${senderName}`;
+                document.getElementById('private-reply-preview-text').textContent = text;
+                document.getElementById('private-reply-preview').style.display = 'block';
+                privateMessageInput.focus();
+            }
+        }
 
-                    // --- تحديث: حفظ وقت آخر رسالة ---
-                    if (msg.createdAt) {
-                        lastMessageTimestamp = msg.createdAt.toMillis();
-                    }
-                    // --- نهاية التحديث ---
+        function cancelPrivateReply() {
+            privateReplyToMessage = null;
+            document.getElementById('private-reply-preview').style.display = 'none';
+        }
+        document.getElementById('cancel-private-reply').addEventListener('click', cancelPrivateReply);
 
-                    const senderProfile = userProfiles[msg.senderId] || {};
-                    const photoURL = senderProfile.photoURL || 'https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png';
-                    const avatarHtml = `<img src="${photoURL}" alt="${msg.senderName}" class="avatar">`;
+        async function sendPrivateMessage() {
+            const text = privateMessageInput.value.trim();
+            if (!text || !currentUserId || !privateChatRoomId || !recipientId) return;
+            
+            const messagesRef = collection(db, "private_chats", privateChatRoomId, "messages");
+            const messageData = {
+                text,
+                senderId: currentUserId,
+                recipientId: recipientId,
+                createdAt: serverTimestamp(),
+                status: 'sent'
+            };
+            
+            if (privateReplyToMessage) {
+                messageData.replyTo = privateReplyToMessage;
+            }
 
-                    const messageBubble = document.createElement('div');
-                    messageBubble.className = 'message-bubble';
+            await addDoc(messagesRef, messageData);
+            
+            const chatRoomRef = doc(db, "private_chats", privateChatRoomId);
+            await updateDoc(chatRoomRef, {
+                lastMessage: text,
+                lastMessageTimestamp: serverTimestamp(),
+                [`unread_count_${recipientId}`]: increment(1),
+                [`hidden_for_${currentUserId}`]: false,
+                [`hidden_for_${recipientId}`]: false
+            });
+
+            privateMessageInput.value = "";
+            cancelPrivateReply();
+        }
+
+        function loadPrivateMessages() {
+            if (unsubscribePrivateChat) unsubscribePrivateChat();
+            const messagesRef = collection(db, "private_chats", privateChatRoomId, "messages");
+            const q = query(messagesRef, orderBy("createdAt"));
+            unsubscribePrivateChat = onSnapshot(q, (snapshot) => {
+                privateMessagesBox.innerHTML = '';
+                snapshot.forEach(docSnap => {
+                    const msg = docSnap.data();
+                    const msgId = docSnap.id;
                     
+                    if (msg.senderId === recipientId && msg.status !== 'seen') {
+                        const msgRef = doc(db, "private_chats", privateChatRoomId, "messages", msgId);
+                        updateDoc(msgRef, { status: 'seen' });
+                    }
+
+                    const isOwn = msg.senderId === currentUserId;
+                    const msgWrapper = document.createElement('div');
+                    msgWrapper.className = `private-message-wrapper ${isOwn ? 'own' : 'other'}`;
                     const time = msg.createdAt ? new Date(msg.createdAt.toDate()).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '';
-                    const canModerate = !isVisitor && (currentUserRole === 'developer' || currentUserRole === 'admin');
                     
-                    let controls = '';
-                    const pinButton = canModerate ? `<a onclick="window.pinMessage('${msgId}')" title="تثبيت"><i class="bi bi-pin-angle-fill"></i></a>` : '';
-                    const replyButton = `<a onclick="window.setReplyWrapper('${msgId}')" title="رد"><i class="bi bi-reply-fill"></i></a>`;
-                    const copyButton = `<a onclick="window.copyMessageText('${msgId}')" title="نسخ"><i class="bi bi-clipboard"></i></a>`;
-                    
-                    if (isOwn) {
-                        controls = `<div class="message-actions">${copyButton}${replyButton}<a onclick="window.editMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a><a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`;
-                    } else if (canModerate) {
-                        const isTargetDeveloper = msg.senderRole === 'developer';
-                        const isTargetAdmin = msg.senderRole === 'admin';
-                        let actionButtons = `${copyButton}${replyButton}<a onclick="window.deleteOtherMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>`;
-                        if (currentUserRole === 'developer' && !isTargetDeveloper) {
-                            actionButtons += `<a onclick="window.toggleAdminRole('${msg.senderId}', '${msg.senderName}')" title="تغيير دور المشرف"><i class="bi bi-shield-fill"></i></a>`;
-                        }
-                        actionButtons += pinButton;
-                        if (!isTargetAdmin && !isTargetDeveloper) {
-                            const muteDropdownId = `mute-dropdown-${msgId}`;
-                            const muteOptions = `<div id="${muteDropdownId}" class="mute-dropdown">
-                                <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 1)">دقيقة واحدة</a>
-                                <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 5)">5 دقائق</a>
-                                <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 15)">ربع ساعة</a>
-                                <a href="#" onclick="window.muteUser('${msg.senderId}', '${msg.senderName}', 1440)">يوم واحد</a>
-                                <a href="#" onclick="window.unmuteUser('${msg.senderId}', '${msg.senderName}')" style="color: #00a884;">إلغاء الكتم</a>
-                            </div>`;
-                            const muteButton = `<a onclick="event.stopPropagation(); window.toggleMuteDropdown('${muteDropdownId}')" title="كتم"><i class="bi bi-bell-slash-fill"></i></a>`;
-                            const banButton = `<a onclick="window.banUser('${msg.senderId}', '${msg.senderName}')" title="حظر"><i class="bi bi-slash-circle-fill"></i></a>`;
-                            actionButtons += `${muteButton}${banButton}${muteOptions}`;
-                        }
-                        controls = `<div class="message-actions">${actionButtons}</div>`;
-                    } else {
-                        controls = `<div class="message-actions">${copyButton}${replyButton}</div>`;
-                    }
+                    const senderProfile = userProfiles[msg.senderId] || {};
+                    const senderName = senderProfile.displayName || '...';
+                    msgWrapper.id = `private-message-${msgId}`;
+                    msgWrapper.dataset.senderId = msg.senderId;
+                    msgWrapper.dataset.senderName = senderName;
+                    msgWrapper.dataset.text = msg.text;
 
-                    const editedBadge = msg.isEdited ? `<span class="edited-badge">(تم التعديل)</span>` : '';
-                    let roleBadge = '';
-                    if (msg.senderRole === 'developer') roleBadge = '⭐ (مطور)';
-                    else if (msg.senderRole === 'admin') roleBadge = '🛡️ (مشرف)';
-                    const senderNameDisplay = `${msg.senderName} ${roleBadge}`;
+                    const availableReactions = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+                    let reactionsContainerHtml = '<div class="reactions-container">';
+                    availableReactions.forEach(emoji => {
+                        reactionsContainerHtml += `<span class="reaction-emoji" onclick="window.togglePrivateReaction('${msgId}', '${emoji}')">${emoji}</span>`;
+                    });
+                    reactionsContainerHtml += '</div>';
+
+                    let displayedReactionsHtml = '<div class="message-reactions">';
+                    if (msg.reactions && msg.reactions.length > 0) {
+                        const reactionGroups = msg.reactions.reduce((acc, r) => {
+                            acc[r.emoji] = (acc[r.emoji] || 0) + 1;
+                            return acc;
+                        }, {});
+                        for (const e in reactionGroups) {
+                            displayedReactionsHtml += `<div class="reaction-chip">${e} ${reactionGroups[e]}</div>`;
+                        }
+                    }
+                    displayedReactionsHtml += '</div>';
+
+                    let controls = '';
+                    if (isOwn) {
+                        controls = `
+                            <div class="message-actions">
+                                <a onclick="window.editPrivateMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a>
+                                <a onclick="window.deletePrivateMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>
+                            </div>
+                        `;
+                    }
                     
+                    let receiptIcon = '';
+                    if (isOwn) {
+                        receiptIcon = msg.status === 'seen' 
+                            ? `<i class="bi bi-check2-all read-receipt seen"></i>` 
+                            : `<i class="bi bi-check2 read-receipt sent"></i>`;
+                    }
+                    
+                    const editedBadge = msg.isEdited ? `<span class="edited-badge">(تم التعديل)</span>` : '';
+
                     let repliedToHtml = '';
-                    if (msg.replyTo && msg.replyTo.messageId) {
-                         repliedToHtml = `<div class="replied-to-box" onclick="window.scrollToMessage('${msg.replyTo.messageId}')" style="cursor: pointer;" title="الانتقال إلى الرسالة الأصلية">
-                            <div class="replied-to-sender">${msg.replyTo.senderName}</div>
-                            <div class="replied-to-text">${msg.replyTo.text}</div>
-                        </div>`;
-                    } else if (msg.replyTo) {
+                    if (msg.replyTo) {
                         repliedToHtml = `<div class="replied-to-box">
                             <div class="replied-to-sender">${msg.replyTo.senderName}</div>
                             <div class="replied-to-text">${msg.replyTo.text}</div>
                         </div>`;
                     }
                     
-                    const availableReactions = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
-                    let reactionsContainerHtml = '<div class="reactions-container">';
-                    availableReactions.forEach(emoji => { reactionsContainerHtml += `<span class="reaction-emoji" onclick="window.toggleReaction('${msgId}', '${emoji}')">${emoji}</span>`; });
-                    reactionsContainerHtml += '</div>';
-
-                    let displayedReactionsHtml = '<div class="message-reactions">';
-                    if (msg.reactions && msg.reactions.length > 0) { 
-                        const reactionGroups = msg.reactions.reduce((acc, r) => { acc[r.emoji] = (acc[r.emoji] || 0) + 1; return acc; }, {}); 
-                        for (const e in reactionGroups) { 
-                            displayedReactionsHtml += `<div class="reaction-chip">${e} ${reactionGroups[e]}</div>`; 
-                        } 
-                    }
-                    displayedReactionsHtml += '</div>';
-
-                    const messageContentHtml = `
+                    msgWrapper.innerHTML = `
                         <div class="message-content">
                             ${reactionsContainerHtml}
-                            ${!isOwn ? `<div class="sender">${senderNameDisplay}</div>` : ''}
                             ${repliedToHtml}
-                            <div class="message-text">${msg.text}</div>
-                            <div class="timestamp-wrapper">
+                            <div>${msg.text}</div>
+                            <div class="timestamp-wrapper" style="justify-content: flex-end;">
+                                ${receiptIcon}
                                 <span class="timestamp">${time}</span>
                                 ${editedBadge}
                             </div>
                             ${displayedReactionsHtml}
-                        </div>`;
-                    
-                    messageBubble.innerHTML = messageContentHtml + controls;
-                    msgDiv.innerHTML = avatarHtml;
-                    msgDiv.appendChild(messageBubble);
-                    messagesBox.appendChild(msgDiv);
+                        </div>
+                        ${controls}
+                    `;
+                    privateMessagesBox.appendChild(msgWrapper);
+                });
+                privateMessagesBox.scrollTop = privateMessagesBox.scrollHeight;
+            });
+        }
+        
+        window.deletePrivateMessage = async (messageId) => {
+            if (!privateChatRoomId || !messageId) return;
+            showCustomConfirm(
+                "هل أنت متأكد من حذف هذه الرسالة للجميع؟",
+                "bi bi-trash-fill",
+                async () => {
+                     const msgRef = doc(db, "private_chats", privateChatRoomId, "messages", messageId);
+                     await deleteDoc(msgRef);
+                }
+            );
+        }
+        
+        userSearchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.trim();
+            const listTitle = document.getElementById('conversation-list-title');
+            if (searchTerm.length > 0) {
+                if(listTitle) listTitle.textContent = 'نتائج البحث';
+                searchUsers(searchTerm);
+            } else {
+                if(listTitle) listTitle.textContent = 'المحادثات';
+                renderPrivateConversations();
+            }
+        });
+
+        async function searchUsers(name) {
+            const usersRef = collection(db, "users");
+            const q = query(usersRef, where("displayName", ">=", name), where("displayName", "<=", name + '\uf8ff'), limit(10));
+            const querySnapshot = await getDocs(q);
+            usersListContainer.innerHTML = '';
+            if(querySnapshot.empty){
+                 usersListContainer.innerHTML = '<p class="text-center text-muted p-3">لم يتم العثور على مستخدمين</p>';
+            }
+            querySnapshot.forEach((doc) => {
+                if (doc.id === currentUserId) return;
+                const userData = doc.data();
+                const userDiv = document.createElement('div');
+                userDiv.className = 'user-list-item';
+                userDiv.innerHTML = `
+                    <img src="${userData.photoURL || 'https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png'}" alt="Avatar">
+                    <span class="user-name">${userData.displayName || 'مستخدم'}</span>
+                `;
+                userDiv.addEventListener('click', () => {
+                    showPrivateChatView(doc.id, userData.displayName, userData.photoURL);
+                });
+                usersListContainer.appendChild(userDiv);
+            });
+        }
+        
+        function renderPrivateConversations(conversations = []) {
+             if (userSearchInput.value.trim() !== '') return;
+
+             if (conversations.length === 0) {
+                 usersListContainer.innerHTML = '<p class="text-center text-muted p-3">لا توجد محادثات خاصة بعد</p>';
+                 return;
+             }
+             
+             usersListContainer.innerHTML = '';
+             for (const conv of conversations) {
+                 const chatRoom = conv.data;
+                 const chatRoomId = conv.id;
+                 
+                 if (chatRoom[`hidden_for_${currentUserId}`]) continue;
+
+                 const otherUserId = chatRoom.participants.find(id => id !== currentUserId);
+                 if (!otherUserId) continue;
+                 
+                 const userData = userProfiles[otherUserId];
+                 if (userData) {
+                     const chatDiv = document.createElement('div');
+                     chatDiv.className = 'conversation-list-item';
+                     
+                     const unreadCount = chatRoom[`unread_count_${currentUserId}`] || 0;
+                     const unreadBadgeHTML = unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : '';
+                     const notificationDotHTML = unreadCount > 0 ? `<span class="notification-dot"></span>` : '';
+                     
+                     chatDiv.innerHTML = `
+                         <div class="avatar-container">
+                             <img src="${userData.photoURL || 'https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png'}" alt="Avatar">
+                             ${notificationDotHTML}
+                         </div>
+                         <div class="conversation-info flex-grow-1">
+                              <div class="user-name">${userData.displayName || 'مستخدم'}</div>
+                              <div class="last-message">${chatRoom.lastMessage || '...'}</div>
+                         </div>
+                         ${unreadBadgeHTML}
+                         <i class="bi bi-x-circle delete-chat-btn" data-chatroom-id="${chatRoomId}"></i>
+                     `;
+                     chatDiv.addEventListener('click', (e) => {
+                          if (!e.target.classList.contains('delete-chat-btn')) {
+                             showPrivateChatView(otherUserId, userData.displayName, userData.photoURL);
+                          }
+                     });
+                     usersListContainer.appendChild(chatDiv);
+                 }
+             }
+              document.querySelectorAll('.delete-chat-btn').forEach(btn => {
+                 btn.addEventListener('click', async (e) => {
+                     e.stopPropagation();
+                     const chatRoomId = e.target.dataset.chatroomId;
+                     showCustomConfirm(
+                         "هل أنت متأكد من حذف هذه المحادثة من قائمتك؟",
+                         "bi bi-trash-fill",
+                         async () => {
+                            const chatRoomRef = doc(db, "private_chats", chatRoomId);
+                            await updateDoc(chatRoomRef, { [`hidden_for_${currentUserId}`]: true });
+                         }
+                     );
+                 });
+             });
+        }
+
+        async function loadPrivateConversations() {
+            if (!currentUserId) return;
+
+            if (unsubscribeConversations) {
+                unsubscribeConversations();
+            }
+
+            const chatRoomsRef = collection(db, "private_chats");
+            const q = query(chatRoomsRef, where("participants", "array-contains", currentUserId));
+            
+            unsubscribeConversations = onSnapshot(q, async (snapshot) => {
+                const conversations = [];
+                let totalUnreadCount = 0; 
+                
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (!data[`hidden_for_${currentUserId}`]) {
+                        totalUnreadCount += (data[`unread_count_${currentUserId}`] || 0);
+                    }
+                    conversations.push({ id: docSnap.id, data: data });
                 });
 
-                // --- تحديث: حفظ وقت آخر رسالة في localStorage ---
-                if (document.hasFocus() && lastMessageTimestamp) {
-                    localStorage.setItem('lastReadTimestamp', lastMessageTimestamp);
-                }
-                // --- نهاية التحديث ---
-                
-                snapshot.docChanges().forEach(change => {
-                    if (change.type === "added") {
-                        const msg = change.doc.data();
-                        const isOwn = msg.senderId === auth.currentUser?.uid;
-
-                        if (!document.hasFocus() && !isOwn) {
-                            unreadCount++;
-                            updateFavicon();
-                        }
-
-                        if (auth.currentUser && msg.replyTo && msg.replyTo.senderId === auth.currentUser.uid && !isOwn) {
-                            if (!document.hasFocus() || !wasScrolledToBottom) {
-                                mentionNotification.style.display = 'flex';
-                                mentionNotification.dataset.messageId = change.doc.id;
-                            }
-                        }
-                    }
+                conversations.sort((a, b) => {
+                    const timeA = a.data.lastMessageTimestamp?.toDate() || 0;
+                    const timeB = b.data.lastMessageTimestamp?.toDate() || 0;
+                    return timeB - timeA;
                 });
                 
-                if (wasScrolledToBottom) {
-                    messagesBox.scrollTop = messagesBox.scrollHeight;
-                }
-            });
-        }
-        
-        const pinnedDocRef = doc(db, "chat_config", "pinned_message");
-        
-        window.pinMessage = async (messageId) => {
-            if (isVisitor) return;
-            const messageDoc = await getDoc(doc(db, "messages", messageId));
-            if (!messageDoc.exists()) return;
-            const messageData = messageDoc.data();
-            await setDoc(pinnedDocRef, { messageId: messageId, text: messageData.text, senderName: messageData.senderName, pinnedBy: currentDisplayName, pinnedAt: serverTimestamp() });
-        };
-
-        unpinButton.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            if(isVisitor) return;
-            await setDoc(pinnedDocRef, { messageId: null, text: null, senderName: null, pinnedBy: null });
-        });
-
-        function loadPinnedMessage() {
-            onSnapshot(pinnedDocRef, (doc) => {
-                if (doc.exists() && doc.data().text) {
-                    const data = doc.data();
-                    pinnedByText.textContent = `تم التثبيت بواسطة: ${data.pinnedBy}`;
-                    pinnedMessageText.textContent = `${data.senderName}: ${data.text}`;
-                    pinnedMessageContainer.style.display = 'block';
-                    pinnedMessageContainer.dataset.messageId = data.messageId;
-                    unpinButton.style.display = (!isVisitor && (currentUserRole === 'developer' || currentUserRole === 'admin')) ? 'block' : 'none';
-                } else {
-                    pinnedMessageContainer.style.display = 'none';
-                    pinnedMessageContainer.dataset.messageId = '';
-                }
-            });
-        }
-
-        pinnedMessageClickableArea.addEventListener('click', () => {
-            const messageId = pinnedMessageContainer.dataset.messageId;
-            if (!messageId) return;
-            const messageElement = document.getElementById(`message-${messageId}`);
-            if (messageElement) {
-                messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                messageElement.style.transition = 'background-color 0.5s';
-                messageElement.style.backgroundColor = 'rgba(255, 255, 0, 0.3)';
-                setTimeout(() => { messageElement.style.backgroundColor = ''; }, 2000);
-            }
-        });
-
-        mentionNotification.addEventListener('click', () => {
-            const messageId = mentionNotification.dataset.messageId;
-            if (!messageId) return;
-            const messageElement = document.getElementById(`message-${messageId}`);
-            if (messageElement) {
-                messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                messageElement.style.transition = 'background-color 0.5s';
-                messageElement.style.backgroundColor = 'rgba(83, 189, 235, 0.3)';
-                setTimeout(() => { messageElement.style.backgroundColor = ''; }, 2500);
-            }
-            mentionNotification.style.display = 'none';
-        });
-
-        messagesBox.addEventListener('scroll', () => {
-            if (mentionNotification.style.display !== 'none') {
-                const isNearBottom = messagesBox.scrollHeight - messagesBox.clientHeight <= messagesBox.scrollTop + 150;
-                if (isNearBottom) {
-                    mentionNotification.style.display = 'none';
-                }
-            }
-        });
-
-        window.toggleMuteDropdown = (id) => {
-            event.stopPropagation();
-            document.querySelectorAll(".mute-dropdown").forEach(d => {
-                if(d.id !== id) d.classList.remove('show-dropdown');
-            });
-            document.getElementById(id).classList.toggle("show-dropdown");
-        }
-        window.onclick = (e) => { 
-            if (!e.target.matches('.bi-bell-slash-fill')) { 
-                document.querySelectorAll(".mute-dropdown.show-dropdown").forEach(d => d.classList.remove('show-dropdown')); 
-            } 
-        }
-        
-        window.muteUser = async (uid, name, min) => { if (!['developer', 'admin'].includes(currentUserRole)) return; await setDoc(doc(db, "users", uid), { mutedUntil: new Date(Date.now() + min * 60000) }, { merge: true }); alert(`تم كتم ${name} لمدة ${min} دقيقة.`); };
-        window.unmuteUser = async (uid, name) => { if (!['developer', 'admin'].includes(currentUserRole)) return; await setDoc(doc(db, "users", uid), { mutedUntil: null }, { merge: true }); alert(`تم إلغاء كتم ${name}.`); };
-        
-        function setReplyFromElement(el) {
-            const msgId = el.id.replace('message-', '');
-            const senderName = el.dataset.senderName;
-            const senderId = el.dataset.senderId;
-            const text = el.dataset.text;
-
-            if(senderName && senderId && text){
-                replyToMessage = { messageId: msgId, senderName, senderId, text }; 
-                document.getElementById('reply-preview-sender').textContent = `الرد على ${senderName}`; 
-                document.getElementById('reply-preview-text').textContent = text; 
-                replyPreview.style.display = 'block'; 
-                messageInput.focus(); 
-            }
-        }
-        
-        window.setReplyWrapper = (msgId) => {
-            event.stopPropagation();
-            const el = document.getElementById(`message-${msgId}`);
-            if (el) setReplyFromElement(el);
-        };
-        
-        window.copyMessageText = async (msgId) => {
-            const messageElement = document.getElementById(`message-${msgId}`);
-            if (messageElement) {
-                const textElement = messageElement.querySelector('.message-text');
-                if (textElement) {
-                    try {
-                        await navigator.clipboard.writeText(textElement.innerText);
-                        alert("تم نسخ النص!"); 
-                    } catch (err) { 
-                        console.error('Failed to copy text: ', err); 
-                        alert("فشل نسخ النص.");
+                const notificationBadge = document.getElementById('private-chat-notification-badge');
+                if (notificationBadge) {
+                    if (totalUnreadCount > 0) {
+                        notificationBadge.textContent = totalUnreadCount > 99 ? '99+' : totalUnreadCount;
+                        notificationBadge.style.display = 'block';
+                    } else {
+                        notificationBadge.style.display = 'none';
                     }
                 }
-            }
-        };
+                
+                renderPrivateConversations(conversations);
+            });
+        }
+
+        privateSendButton.addEventListener('click', sendPrivateMessage);
+        privateMessageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendPrivateMessage(); } });
         
-        function showEditModal(id, currentText) {
+        async function toggleBlockUser(shouldBlock) {
+            if (!currentUserId || !recipientId) return;
+            
+            const confirmMessage = shouldBlock 
+                ? `هل أنت متأكد من حظر ${recipientNameEl.textContent}؟`
+                : `هل أنت متأكد من إلغاء حظر ${recipientNameEl.textContent}؟`;
+
+            showCustomConfirm(
+                confirmMessage,
+                "bi bi-slash-circle-fill",
+                async () => {
+                    const currentUserRef = doc(db, "users", currentUserId);
+                    const userUpdate = { blockedUsers: shouldBlock ? arrayUnion(recipientId) : arrayRemove(recipientId) };
+                    await updateDoc(currentUserRef, userUpdate);
+                    alert(shouldBlock ? "تم حظر المستخدم بنجاح." : "تم إلغاء حظر المستخدم بنجاح.");
+                }
+            );
+        }
+
+        window.editPrivateMessage = (id, text) => {
+            showPrivateEditModal(id, text);
+        };
+
+        function showPrivateEditModal(id, currentText) {
             const backdrop = document.createElement('div');
             backdrop.className = 'edit-modal-backdrop';
             backdrop.innerHTML = `
@@ -792,74 +1245,204 @@
             const textarea = document.getElementById('edit-textarea');
             textarea.focus();
             textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+            
             backdrop.querySelector('.btn-ok').onclick = () => {
                 const newText = textarea.value;
                 if (newText.trim() && newText !== currentText) {
-                    updateDoc(doc(db, "messages", id), { text: newText, isEdited: true, lastEditedAt: serverTimestamp() });
+                    const msgRef = doc(db, "private_chats", privateChatRoomId, "messages", id);
+                    updateDoc(msgRef, {
+                        text: newText,
+                        isEdited: true,
+                        lastEditedAt: serverTimestamp()
+                    });
                 }
                 document.body.removeChild(backdrop);
             };
+            
             backdrop.querySelector('.btn-cancel').onclick = () => document.body.removeChild(backdrop);
-            backdrop.onclick = (e) => { if (e.target === backdrop) document.body.removeChild(backdrop); };
+            backdrop.onclick = (e) => {
+                if (e.target === backdrop) document.body.removeChild(backdrop);
+            };
         }
-        window.editMessage = (id, text) => { showEditModal(id, text); };
+
+        window.togglePrivateReaction = async (msgId, emoji) => {
+            if (!currentUserId || !privateChatRoomId) return;
+            const msgRef = doc(db, "private_chats", privateChatRoomId, "messages", msgId);
+            const msgDoc = await getDoc(msgRef);
+            if (!msgDoc.exists()) return;
+
+            const msgData = msgDoc.data();
+            const reactions = msgData.reactions || [];
+            const existingReaction = reactions.find(r => r.userId === currentUserId);
+
+            if (existingReaction) {
+                const newReactions = reactions.filter(r => r.userId !== currentUserId);
+                if (existingReaction.emoji !== emoji) {
+                    newReactions.push({ userId: currentUserId, emoji });
+                }
+                await updateDoc(msgRef, { reactions: newReactions });
+            } else {
+                await updateDoc(msgRef, { reactions: arrayUnion({ userId: currentUserId, emoji }) });
+            }
+        };
+
+        function getVisitorProfile() { try { return JSON.parse(localStorage.getItem('visitorProfile')) || {}; } catch (e) { return {}; } }
         
-        let touchStartX = 0, touchStartY = 0, touchCurrentX = 0, isSwiping = false, isSwipeLocked = false, swipedElement = null;
-        const swipeThreshold = 60, swipeLockThreshold = 10;
-
-        messagesBox.addEventListener('touchstart', (e) => {
-            const targetMessage = e.target.closest('.message');
-            if (!targetMessage) return;
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-            swipedElement = targetMessage;
-        }, { passive: true });
-
-        messagesBox.addEventListener('touchmove', (e) => {
-            if (!swipedElement) return;
-            touchCurrentX = e.touches[0].clientX;
-            const diffX = touchCurrentX - touchStartX;
-            const diffY = e.touches[0].clientY - touchStartY;
-            if (!isSwipeLocked) {
-                if (Math.abs(diffX) > swipeLockThreshold) { isSwiping = true; isSwipeLocked = true; swipedElement.style.transition = 'none'; } 
-                else if (Math.abs(diffY) > swipeLockThreshold) { swipedElement = null; isSwipeLocked = true; }
+        function updateExistingDomNames() {
+            if(userProfiles[currentUserId]) {
+                currentDisplayName = userProfiles[currentUserId].displayName;
+                let roleText = '';
+                const userRole = userProfiles[currentUserId].role;
+                if (userRole === 'developer') roleText = '⭐ (مطور)';
+                else if (userRole === 'admin') roleText = '🛡️ (مشرف)';
+                userDisplayName.textContent = `مرحبا، ${currentDisplayName} ${roleText}`;
             }
-            if (isSwiping && diffX > 0) {
-                swipedElement.style.transform = `translateX(${Math.min(diffX, 100)}px)`;
-            }
-        }, { passive: true });
 
-        messagesBox.addEventListener('touchend', (e) => {
-            if (!swipedElement) return;
-            if (isSwiping) {
-                const diffX = touchCurrentX - touchStartX;
-                swipedElement.style.transition = 'transform 0.3s ease';
-                if (diffX > swipeThreshold) { setReplyFromElement(swipedElement); }
-                swipedElement.style.transform = 'translateX(0)';
-            }
-            isSwiping = false; isSwipeLocked = false; swipedElement = null;
-        });
+            document.querySelectorAll('#messages-box .message').forEach(msgEl => {
+                const senderId = msgEl.dataset.senderId;
+                const senderNameEl = msgEl.querySelector('.sender');
+                if (senderId && senderNameEl && userProfiles[senderId]) {
+                    let roleBadge = '';
+                    const profile = userProfiles[senderId];
+                    if (profile.role === 'developer') roleBadge = '⭐ (مطور)';
+                    else if (profile.role === 'admin') roleBadge = '🛡️ (مشرف)';
+                    senderNameEl.textContent = `${profile.displayName || 'مستخدم'} ${roleBadge}`;
+                }
+            });
+            
+            loadPrivateConversations();
 
+            if (privateChatView.classList.contains('active') && recipientId && userProfiles[recipientId]) {
+                recipientNameEl.textContent = userProfiles[recipientId].displayName;
+            }
+        }
+
+        function listenForUserProfiles() {
+            if (unsubscribeUserProfiles) {
+                unsubscribeUserProfiles();
+            }
+            const usersRef = collection(db, "users");
+            unsubscribeUserProfiles = onSnapshot(usersRef, (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    userProfiles[change.doc.id] = change.doc.data();
+                });
+                updateExistingDomNames(); 
+            });
+        }
+
+        async function checkUserStatus(userId) { const userDoc = await getDoc(doc(db, "users", userId)); if (userDoc.exists()) { const userData = userDoc.data(); if (userData.isBanned) return 'banned'; if (userData.mutedUntil && userData.mutedUntil.toDate() > new Date()) return 'muted'; currentUserRole = userData.role || 'user'; } else { await setDoc(doc(db, "users", userId), { role: 'user' }, { merge: true }); currentUserRole = 'user'; } return 'active'; }
+        
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text || !auth.currentUser) return;
+            if (!isVisitor) { const userStatus = await checkUserStatus(auth.currentUser.uid); if (userStatus === 'muted') { alert("أنت مكتوم حاليا ولا يمكنك إرسال رسائل."); return; } }
+            const messageData = { text, senderName: currentDisplayName, senderId: auth.currentUser.uid, senderRole: currentUserRole, createdAt: serverTimestamp() };
+            if (replyToMessage) { messageData.replyTo = replyToMessage; }
+            await addDoc(collection(db, "messages"), messageData);
+            messageInput.value = ""; cancelReply(); messageInput.style.height = 'auto';
+        }
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+        messageInput.addEventListener('input', () => { messageInput.style.height = 'auto'; messageInput.style.height = (messageInput.scrollHeight) + 'px'; });
+        function cancelReply() { replyToMessage = null; replyPreview.style.display = 'none'; }
+        cancelReplyButton.addEventListener('click', cancelReply);
+
+        function loadMessages() {
+            const q = query(collection(db, "messages"), orderBy("createdAt"));
+            onSnapshot(q, (snapshot) => {
+                const wasScrolledToBottom = messagesBox.scrollHeight - messagesBox.clientHeight <= messagesBox.scrollTop + 150;
+                messagesBox.innerHTML = "";
+                snapshot.forEach(messageDoc => {
+                    const msg = messageDoc.data(); const msgId = messageDoc.id; const isOwn = msg.senderId === auth.currentUser?.uid;
+                    const msgDiv = document.createElement('div'); 
+                    msgDiv.className = `message ${isOwn ? 'own' : 'other'}`;
+                    msgDiv.id = `message-${msgId}`;
+                    msgDiv.dataset.senderName = msg.senderName; 
+                    msgDiv.dataset.senderId = msg.senderId; 
+                    msgDiv.dataset.text = msg.text;
+                    
+                    const senderProfile = userProfiles[msg.senderId] || {};
+                    const displayName = senderProfile.displayName || msg.senderName;
+                    const photoURL = senderProfile.photoURL || 'https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png';
+                    const escapedDisplayName = displayName.replace(/'/g, "\\'");
+                    const startPrivateChatIcon = !isOwn ? `<a onclick="window.startPrivateChatFromGroup('${msg.senderId}', '${escapedDisplayName}', '${photoURL}')" title="بدء دردشة خاصة" style="cursor: pointer;"><i class="bi bi-send"></i></a>` : '';
+                    
+                    let roleBadge = '';
+                    if (senderProfile.role === 'developer') roleBadge = '⭐ (مطور)';
+                    else if (senderProfile.role === 'admin') roleBadge = '🛡️ (مشرف)';
+                    
+                    const senderNameDisplay = `${displayName} ${roleBadge}`;
+                    const avatarHtml = `<img src="${photoURL}" alt="${displayName}" class="avatar">`;
+
+                    const messageBubble = document.createElement('div');
+                    messageBubble.className = 'message-bubble';
+                    const time = msg.createdAt ? new Date(msg.createdAt.toDate()).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '';
+                    const canModerate = !isVisitor && (currentUserRole === 'developer' || currentUserRole === 'admin');
+                    let controls = '';
+                    const pinButton = canModerate ? `<a onclick="window.pinMessage('${msgId}')" title="تثبيت"><i class="bi bi-pin-angle-fill"></i></a>` : '';
+                    const replyButton = `<a onclick="window.setReplyWrapper('${msgId}')" title="رد"><i class="bi bi-reply-fill"></i></a>`;
+                    const copyButton = `<a onclick="window.copyMessageText('${msgId}')" title="نسخ"><i class="bi bi-clipboard"></i></a>`;
+                    if (isOwn) {
+                        controls = `<div class="message-actions">${copyButton}${replyButton}<a onclick="window.editMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a><a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`;
+                    } else {
+                        let actionButtons = `${startPrivateChatIcon}${copyButton}${replyButton}`;
+                        if(canModerate){
+                            actionButtons += `<a onclick="window.deleteOtherMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>`;
+                            const isTargetDeveloper = senderProfile.role === 'developer'; 
+                            const isTargetAdmin = senderProfile.role === 'admin';
+                            if (currentUserRole === 'developer' && !isTargetDeveloper) { actionButtons += `<a onclick="window.toggleAdminRole('${msg.senderId}', '${escapedDisplayName}')" title="تغيير دور المشرف"><i class="bi bi-shield-fill"></i></a>`; }
+                            actionButtons += pinButton;
+                            if (!isTargetAdmin && !isTargetDeveloper) {
+                                const muteDropdownId = `mute-dropdown-${msgId}`;
+                                const muteOptions = `<div id="${muteDropdownId}" class="mute-dropdown"><a href="#" onclick="window.muteUser('${msg.senderId}', '${escapedDisplayName}', 1)">دقيقة</a><a href="#" onclick="window.muteUser('${msg.senderId}', '${escapedDisplayName}', 5)">5 دقائق</a><a href="#" onclick="window.muteUser('${msg.senderId}', '${escapedDisplayName}', 15)">ربع ساعة</a><a href="#" onclick="window.muteUser('${msg.senderId}', '${escapedDisplayName}', 1440)">يوم</a><a href="#" onclick="window.unmuteUser('${msg.senderId}', '${escapedDisplayName}')" style="color: #00a884;">إلغاء الكتم</a></div>`;
+                                const muteButton = `<a onclick="event.stopPropagation(); window.toggleMuteDropdown('${muteDropdownId}')" title="كتم"><i class="bi bi-bell-slash-fill"></i></a>`;
+                                const banButton = `<a onclick="window.banUser('${msg.senderId}', '${escapedDisplayName}')" title="حظر"><i class="bi bi-slash-circle-fill"></i></a>`;
+                                actionButtons += `${muteButton}${banButton}${muteOptions}`;
+                            }
+                        }
+                        controls = `<div class="message-actions">${actionButtons}</div>`;
+                    }
+                    const editedBadge = msg.isEdited ? `<span class="edited-badge">(تم التعديل)</span>` : '';
+                    let repliedToHtml = '';
+                    if (msg.replyTo && msg.replyTo.messageId) { repliedToHtml = `<div class="replied-to-box" onclick="window.scrollToMessage('${msg.replyTo.messageId}')" style="cursor: pointer;" title="الانتقال إلى الرسالة الأصلية"><div class="replied-to-sender">${msg.replyTo.senderName}</div><div class="replied-to-text">${msg.replyTo.text}</div></div>`; } 
+                    else if (msg.replyTo) { repliedToHtml = `<div class="replied-to-box"><div class="replied-to-sender">${msg.replyTo.senderName}</div><div class="replied-to-text">${msg.replyTo.text}</div></div>`; }
+                    const availableReactions = ['👍', '❤️', '😂', '😮', '😢', '🙏']; let reactionsContainerHtml = '<div class="reactions-container">'; availableReactions.forEach(emoji => { reactionsContainerHtml += `<span class="reaction-emoji" onclick="window.toggleReaction('${msgId}', '${emoji}')">${emoji}</span>`; }); reactionsContainerHtml += '</div>';
+                    let displayedReactionsHtml = '<div class="message-reactions">'; if (msg.reactions && msg.reactions.length > 0) { const reactionGroups = msg.reactions.reduce((acc, r) => { acc[r.emoji] = (acc[r.emoji] || 0) + 1; return acc; }, {}); for (const e in reactionGroups) { displayedReactionsHtml += `<div class="reaction-chip">${e} ${reactionGroups[e]}</div>`; } } displayedReactionsHtml += '</div>';
+                    const messageContentHtml = `<div class="message-content">${reactionsContainerHtml}${!isOwn ? `<div class="sender">${senderNameDisplay}</div>` : ''}${repliedToHtml}<div class="message-text">${msg.text}</div><div class="timestamp-wrapper"><span class="timestamp">${time}</span>${editedBadge}</div>${displayedReactionsHtml}</div>`;
+                    messageBubble.innerHTML = messageContentHtml + controls;
+                    msgDiv.innerHTML = avatarHtml; msgDiv.appendChild(messageBubble); messagesBox.appendChild(msgDiv);
+                });
+                if (wasScrolledToBottom) { messagesBox.scrollTop = messagesBox.scrollHeight; }
+            });
+        }
+        window.startPrivateChatFromGroup = (targetUserId, targetUserName, targetUserAvatar) => { showPrivateChatView(targetUserId, targetUserName, targetUserAvatar); };
+        const pinnedDocRef = doc(db, "chat_config", "pinned_message");
+        window.pinMessage = async (messageId) => { if (isVisitor) return; const messageDoc = await getDoc(doc(db, "messages", messageId)); if (!messageDoc.exists()) return; const messageData = messageDoc.data(); await setDoc(pinnedDocRef, { messageId: messageId, text: messageData.text, senderName: messageData.senderName, pinnedBy: currentDisplayName, pinnedAt: serverTimestamp() }); };
+        unpinButton.addEventListener('click', async (e) => { e.stopPropagation(); if(isVisitor) return; await setDoc(pinnedDocRef, { messageId: null, text: null, senderName: null, pinnedBy: null }); });
+        function loadPinnedMessage() { onSnapshot(pinnedDocRef, (doc) => { if (doc.exists() && doc.data().text) { const data = doc.data(); pinnedByText.textContent = `تم التثبيت بواسطة: ${data.pinnedBy}`; pinnedMessageText.textContent = `${data.senderName}: ${data.text}`; pinnedMessageContainer.style.display = 'block'; pinnedMessageContainer.dataset.messageId = data.messageId; unpinButton.style.display = (!isVisitor && (currentUserRole === 'developer' || currentUserRole === 'admin')) ? 'block' : 'none'; } else { pinnedMessageContainer.style.display = 'none'; pinnedMessageContainer.dataset.messageId = ''; } }); }
+        pinnedMessageClickableArea.addEventListener('click', () => { const messageId = pinnedMessageContainer.dataset.messageId; if (!messageId) return; const messageElement = document.getElementById(`message-${messageId}`); if (messageElement) { messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); messageElement.style.transition = 'background-color 0.5s'; messageElement.style.backgroundColor = 'rgba(255, 255, 0, 0.3)'; setTimeout(() => { messageElement.style.backgroundColor = ''; }, 2000); } });
+        window.toggleMuteDropdown = (id) => { event.stopPropagation(); document.querySelectorAll(".mute-dropdown").forEach(d => { if(d.id !== id) d.classList.remove('show-dropdown'); }); document.getElementById(id).classList.toggle("show-dropdown"); }
+        window.onclick = (e) => { if (!e.target.matches('.bi-bell-slash-fill')) { document.querySelectorAll(".mute-dropdown.show-dropdown").forEach(d => d.classList.remove('show-dropdown')); } }
+        window.muteUser = async (uid, name, min) => { if (!['developer', 'admin'].includes(currentUserRole)) return; await setDoc(doc(db, "users", uid), { mutedUntil: new Date(Date.now() + min * 60000) }, { merge: true }); alert(`تم كتم ${name} لمدة ${min} دقيقة.`); };
+        window.unmuteUser = async (uid, name) => { if (!['developer', 'admin'].includes(currentUserRole)) return; await setDoc(doc(db, "users", uid), { mutedUntil: null }, { merge: true }); alert(`تم إلغاء كتم ${name}.`); };
+        function setReplyFromElement(el) { const msgId = el.id.replace('message-', ''); const senderName = el.dataset.senderName; const senderId = el.dataset.senderId; const text = el.dataset.text; if(senderName && senderId && text){ replyToMessage = { messageId: msgId, senderName, senderId, text }; document.getElementById('reply-preview-sender').textContent = `الرد على ${senderName}`; document.getElementById('reply-preview-text').textContent = text; replyPreview.style.display = 'block'; messageInput.focus(); } }
+        window.setReplyWrapper = (msgId) => { event.stopPropagation(); const el = document.getElementById(`message-${msgId}`); if (el) setReplyFromElement(el); };
+        window.copyMessageText = async (msgId) => { const textElement = document.querySelector(`#message-${msgId} .message-text`); if (textElement) { try { await navigator.clipboard.writeText(textElement.innerText); alert("تم نسخ النص!"); } catch (err) { console.error('Failed to copy text: ', err); alert("فشل نسخ النص."); } } };
+        function showEditModal(id, currentText) { const backdrop = document.createElement('div'); backdrop.className = 'edit-modal-backdrop'; backdrop.innerHTML = `<div class="edit-modal-content"><h6>قم بتعديل رسالتك:</h6><textarea id="edit-textarea">${currentText}</textarea><div class="edit-modal-buttons"><button class="btn btn-secondary btn-cancel">إلغاء</button><button class="btn btn-primary btn-ok">حفظ</button></div></div>`; document.body.appendChild(backdrop); const textarea = document.getElementById('edit-textarea'); textarea.focus(); textarea.setSelectionRange(textarea.value.length, textarea.value.length); backdrop.querySelector('.btn-ok').onclick = () => { const newText = textarea.value; if (newText.trim() && newText !== currentText) { updateDoc(doc(db, "messages", id), { text: newText, isEdited: true, lastEditedAt: serverTimestamp() }); } document.body.removeChild(backdrop); }; backdrop.querySelector('.btn-cancel').onclick = () => document.body.removeChild(backdrop); backdrop.onclick = (e) => { if (e.target === backdrop) document.body.removeChild(backdrop); }; }
+        window.editMessage = (id, text) => { showEditModal(id, text); };
         window.toggleReaction = async (msgId, emoji) => { if (!auth.currentUser) return; const msgRef = doc(db, "messages", msgId); const msgDoc = await getDoc(msgRef); const msgData = msgDoc.data(); const uid = auth.currentUser.uid; const existing = msgData.reactions?.find(r => r.userId === uid); if (existing) { await updateDoc(msgRef, { reactions: arrayRemove(existing) }); if (existing.emoji !== emoji) { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } } else { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } };
         window.deleteOwnMessage = async (id) => { if (confirm("هل أنت متأكد من حذف رسالتك؟")) { await deleteDoc(doc(db, "messages", id)); } };
         window.deleteOtherMessage = async (id) => { if (!isVisitor && !['developer', 'admin'].includes(currentUserRole)) return; if (confirm("هل أنت متأكد من حذف هذه الرسالة؟")) { await deleteDoc(doc(db, "messages", id)); } };
         window.banUser = async (uid, name) => { if (isVisitor || !['developer', 'admin'].includes(currentUserRole)) return; const userToBan = await getDoc(doc(db, "users", uid)); if (userToBan.exists() && (userToBan.data().role === 'admin' || userToBan.data().role === 'developer')) { alert("لا يمكنك حظر مشرف آخر."); return; } if (confirm(`هل أنت متأكد من حظر ${name}؟`)) { await setDoc(doc(db, "users", uid), { isBanned: true }, { merge: true }); alert(`تم حظر ${name}.`); } };
+        window.toggleAdminRole = async (uid, name) => { if (isVisitor || currentUserRole !== 'developer') return; try { const userDocRef = doc(db, "users", uid); const userDoc = await getDoc(userDocRef); const currentRole = userDoc.exists() ? userDoc.data().role || 'user' : 'user'; const isCurrentlyAdmin = currentRole === 'admin'; const newRole = isCurrentlyAdmin ? 'user' : 'admin'; const confirmationMessage = isCurrentlyAdmin ? `هل تريد إزالة ${name} من الإشراف؟` : `هل تريد ترقية ${name} إلى مشرف؟`; if (confirm(confirmationMessage)) { await setDoc(userDocRef, { role: newRole }, { merge: true }); alert(isCurrentlyAdmin ? `تمت إزالة ${name} من الإشراف.` : `تمت ترقية ${name} إلى مشرف.`); } } catch (error) { console.error("Error toggling admin role: ", error); } };
         
-        window.toggleAdminRole = async (uid, name) => {
-            if (isVisitor || currentUserRole !== 'developer') return;
-            try {
-                const userDocRef = doc(db, "users", uid);
-                const userDoc = await getDoc(userDocRef);
-                const currentRole = userDoc.exists() ? userDoc.data().role || 'user' : 'user';
-                const isCurrentlyAdmin = currentRole === 'admin';
-                const newRole = isCurrentlyAdmin ? 'user' : 'admin';
-                const confirmationMessage = isCurrentlyAdmin ? `ئەتەوێت ${name} لایبەی لەئەدمین؟` : `ئەتەوێت ${name} بکەیتە ئەدمین؟`;
-                if (confirm(confirmationMessage)) {
-                    await setDoc(userDocRef, { role: newRole }, { merge: true });
-                    alert(isCurrentlyAdmin ? `تمت إزالة ${name} من الإشراف.` : `تمت ترقية ${name} إلى مشرف.`);
-                }
-            } catch (error) { console.error("Error toggling admin role: ", error); }
-        };
+        function initializeAppLock() { const lockData = getLockData(); if (!lockData.enabled) return; const lastUnlock = localStorage.getItem('app_last_unlock') || 0; const timeSinceUnlock = Date.now() - lastUnlock; if (timeSinceUnlock >= RELOCK_TIME) { appLockOverlay.style.display = 'flex'; } }
+        function getLockData() { try { return JSON.parse(localStorage.getItem('app_lock_config')) || { enabled: false, passcode: null }; } catch (e) { return { enabled: false, passcode: null }; } }
+        function handleUnlock() { const enteredPasscode = passcodeInput.value; const lockData = getLockData(); passcodeError.style.display = 'none'; if (enteredPasscode === lockData.passcode) { localStorage.setItem('app_last_unlock', Date.now()); appLockOverlay.style.display = 'none'; passcodeInput.value = ''; } else { passcodeError.style.display = 'block'; passcodeInput.classList.add('is-invalid'); setTimeout(() => passcodeInput.classList.remove('is-invalid'), 1000); } }
+        unlockBtn.addEventListener('click', handleUnlock);
+        passcodeInput.addEventListener('keyup', (event) => { if (event.key === 'Enter') handleUnlock(); });
+
     </script>
 </body>
 </html>
+

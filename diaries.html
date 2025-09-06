@@ -246,7 +246,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script type="module">
-        // --- إضافة جديدة: استيراد الأوامر اللازمة من Firestore ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, where, onSnapshot, orderBy, deleteDoc, doc, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -264,45 +263,72 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- إضافة جديدة: دالة للاستماع للرسائل الجديدة ---
-        function listenForUnreadMessages(userId) {
+        // --- START: New Combined Notification Logic ---
+        function initializeGlobalChatNotifications(userId) {
             const chatBadge = document.querySelector('.chat-notification-badge');
             if (!chatBadge) return;
 
-            const lastReadTimestamp = parseInt(localStorage.getItem('lastReadTimestamp') || '0');
-            const messagesRef = collection(db, "messages");
-            
-            const q = query(messagesRef, where("createdAt", ">", Timestamp.fromMillis(lastReadTimestamp)));
+            let publicUnreadCount = 0;
+            let privateUnreadCount = 0;
 
-            onSnapshot(q, (snapshot) => {
-                let unreadCount = 0;
-                snapshot.forEach(doc => {
-                    if (doc.data().senderId !== userId) {
-                        unreadCount++;
-                    }
-                });
-
-                if (unreadCount > 0) {
-                    chatBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+            function updateBadge() {
+                const totalUnread = publicUnreadCount + privateUnreadCount;
+                if (totalUnread > 0) {
+                    chatBadge.textContent = totalUnread > 99 ? '99+' : totalUnread;
                     chatBadge.style.display = 'flex';
                 } else {
                     chatBadge.style.display = 'none';
                 }
+            }
+            
+            if (window.publicListenerUnsubscribe) window.publicListenerUnsubscribe();
+            if (window.privateListenerUnsubscribe) window.privateListenerUnsubscribe();
+
+            const lastReadTimestamp = parseInt(localStorage.getItem('lastReadTimestamp') || '0');
+            const messagesRef = collection(db, "messages");
+            const publicQuery = query(messagesRef, where("createdAt", ">", Timestamp.fromMillis(lastReadTimestamp)));
+            window.publicListenerUnsubscribe = onSnapshot(publicQuery, (snapshot) => {
+                let count = 0;
+                snapshot.forEach(doc => {
+                    if (doc.data().senderId !== userId) {
+                        count++;
+                    }
+                });
+                publicUnreadCount = count;
+                updateBadge();
             });
+
+            const userIsAnonymous = auth.currentUser ? auth.currentUser.isAnonymous : true;
+            if (!userIsAnonymous) {
+                const privateChatsQuery = query(collection(db, "private_chats"), where("participants", "array-contains", userId));
+                window.privateListenerUnsubscribe = onSnapshot(privateChatsQuery, (snapshot) => {
+                    let count = 0;
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (!data[`hidden_for_${userId}`]) {
+                            count += (data[`unread_count_${userId}`] || 0);
+                        }
+                    });
+                    privateUnreadCount = count;
+                    updateBadge();
+                });
+            } else {
+                privateUnreadCount = 0;
+                updateBadge();
+            }
         }
-        // --- نهاية الإضافة ---
+        // --- END: New Combined Notification Logic ---
 
         const notesContainer = document.getElementById('notes-container');
         const addNoteBtn = document.querySelector('.add-note-btn');
         const loadingSpinner = document.getElementById('loading-spinner');
         let currentUserId = null;
 
-        // --- إضافة جديدة: متغيرات وأوامر القفل ---
         const appLockOverlay = document.getElementById('app-lock-overlay');
         const passcodeError = document.getElementById('passcode-error');
         const unlockBtn = document.getElementById('unlock-btn');
         const passcodeInput = document.getElementById('passcode-input');
-        const RELOCK_TIME = 3 * 60 * 1000; // 3 دقائق
+        const RELOCK_TIME = 3 * 60 * 1000; 
 
         function getLockData() {
             try {
@@ -343,10 +369,8 @@
         passcodeInput.addEventListener('keyup', (event) => {
             if (event.key === 'Enter') handleUnlock();
         });
-        // --- نهاية الإضافة ---
 
         onAuthStateChanged(auth, user => {
-            // --- إضافة جديدة: تفعيل أوامر القفل ---
             initializeAppLock();
             setInterval(() => {
                 if (document.visibilityState === 'visible') {
@@ -358,18 +382,14 @@
                     initializeAppLock();
                 }
             });
-            // --- نهاية الإضافة ---
 
             addNoteBtn.style.display = 'flex';
             if (user) {
-                // --- إضافة جديدة: استدعاء دالة الإشعارات ---
-                listenForUnreadMessages(user.uid);
-                // --- نهاية الإضافة ---
+                initializeGlobalChatNotifications(user.uid);
                 if (user.emailVerified) {
                     currentUserId = user.uid;
                     loadNotesFromFirestore(currentUserId);
                 } else {
-                    // This handles anonymous users if you choose to support them.
                     currentUserId = null;
                     loadNotesFromLocalStorage();
                 }

@@ -411,7 +411,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
-        // --- إضافة جديدة: استيراد الأوامر اللازمة من Firestore ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc, getDoc, setDoc, where, orderBy, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -433,33 +432,61 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- إضافة جديدة: دالة للاستماع للرسائل الجديدة ---
-        function listenForUnreadMessages(userId) {
+        // --- START: New Combined Notification Logic ---
+        function initializeGlobalChatNotifications(userId) {
             const chatBadge = document.querySelector('.chat-notification-badge');
             if (!chatBadge) return;
 
-            const lastReadTimestamp = parseInt(localStorage.getItem('lastReadTimestamp') || '0');
-            const messagesRef = collection(db, "messages");
-            
-            const q = query(messagesRef, where("createdAt", ">", Timestamp.fromMillis(lastReadTimestamp)));
+            let publicUnreadCount = 0;
+            let privateUnreadCount = 0;
 
-            onSnapshot(q, (snapshot) => {
-                let unreadCount = 0;
-                snapshot.forEach(doc => {
-                    if (doc.data().senderId !== userId) {
-                        unreadCount++;
-                    }
-                });
-
-                if (unreadCount > 0) {
-                    chatBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+            function updateBadge() {
+                const totalUnread = publicUnreadCount + privateUnreadCount;
+                if (totalUnread > 0) {
+                    chatBadge.textContent = totalUnread > 99 ? '99+' : totalUnread;
                     chatBadge.style.display = 'flex';
                 } else {
                     chatBadge.style.display = 'none';
                 }
+            }
+            
+            if (window.publicListenerUnsubscribe) window.publicListenerUnsubscribe();
+            if (window.privateListenerUnsubscribe) window.privateListenerUnsubscribe();
+
+            const lastReadTimestamp = parseInt(localStorage.getItem('lastReadTimestamp') || '0');
+            const messagesRef = collection(db, "messages");
+            const publicQuery = query(messagesRef, where("createdAt", ">", Timestamp.fromMillis(lastReadTimestamp)));
+            window.publicListenerUnsubscribe = onSnapshot(publicQuery, (snapshot) => {
+                let count = 0;
+                snapshot.forEach(doc => {
+                    if (doc.data().senderId !== userId) {
+                        count++;
+                    }
+                });
+                publicUnreadCount = count;
+                updateBadge();
             });
+
+            const userIsAnonymous = auth.currentUser ? auth.currentUser.isAnonymous : true;
+            if (!userIsAnonymous) {
+                const privateChatsQuery = query(collection(db, "private_chats"), where("participants", "array-contains", userId));
+                window.privateListenerUnsubscribe = onSnapshot(privateChatsQuery, (snapshot) => {
+                    let count = 0;
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (!data[`hidden_for_${userId}`]) {
+                            count += (data[`unread_count_${userId}`] || 0);
+                        }
+                    });
+                    privateUnreadCount = count;
+                    updateBadge();
+                });
+            } else {
+                privateUnreadCount = 0;
+                updateBadge();
+            }
         }
-        // --- نهاية الإضافة ---
+        // --- END: New Combined Notification Logic ---
 
         const libraryView = document.getElementById('library-view');
         const pdfReaderView = document.getElementById('pdf-reader-view');
@@ -501,20 +528,17 @@
         let userFavorites = new Set();
         let unsubscribeFavorites = null;
 
-        // --- START: Go to Page Modal Variables ---
         let goToPageModalInstance = null;
         const goToPageModalEl = document.getElementById('goToPageModal');
         const goToPageModalForm = document.getElementById('go-to-page-modal-form');
         const goToPageModalInput = document.getElementById('go-to-page-modal-input');
         const pageRangeInfo = document.getElementById('page-range-info');
-        // --- END: Go to Page Modal Variables ---
 
-        // --- إضافة جديدة: متغيرات وأوامر القفل ---
         const appLockOverlay = document.getElementById('app-lock-overlay');
         const passcodeError = document.getElementById('passcode-error');
         const unlockBtn = document.getElementById('unlock-btn');
         const passcodeInput = document.getElementById('passcode-input');
-        const RELOCK_TIME = 3 * 60 * 1000; // 3 دقائق
+        const RELOCK_TIME = 3 * 60 * 1000;
 
         function getLockData() {
             try {
@@ -555,7 +579,6 @@
         passcodeInput.addEventListener('keyup', (event) => {
             if (event.key === 'Enter') handleUnlock();
         });
-        // --- نهاية الإضافة ---
 
         const getSectionsCollection = () => collection(db, currentView === 'private' ? `users/${DEVELOPER_UID}/private_sections` : 'sections');
         const getBooksCollection = () => collection(db, currentView === 'private' ? `users/${DEVELOPER_UID}/private_books` : 'books');
@@ -569,7 +592,7 @@
              new bootstrap.Modal(addSectionModalEl);
              moveBookModalInstance = new bootstrap.Modal(moveBookModalEl);
              editBookModalInstance = new bootstrap.Modal(editBookModalEl);
-             goToPageModalInstance = new bootstrap.Modal(goToPageModalEl); // Initialize Go to Page Modal
+             goToPageModalInstance = new bootstrap.Modal(goToPageModalEl); 
              pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
              updateZoomDisplay();
              setupPdfPanning();
@@ -581,7 +604,6 @@
         });
 
         onAuthStateChanged(auth, async (user) => {
-            // --- إضافة جديدة: تفعيل أوامر القفل ---
             initializeAppLock();
             setInterval(() => {
                 if (document.visibilityState === 'visible') {
@@ -593,7 +615,6 @@
                     initializeAppLock();
                 }
             });
-            // --- نهاية الإضافة ---
             if (!user) {
                 try {
                     currentUser = (await signInAnonymously(auth)).user;
@@ -602,9 +623,7 @@
                  currentUser = user; 
             }
             
-            // --- إضافة جديدة: استدعاء دالة الإشعارات ---
-            listenForUnreadMessages(currentUser.uid);
-            // --- نهاية الإضافة ---
+            initializeGlobalChatNotifications(currentUser.uid);
             
             const isDeveloper = currentUser.uid === DEVELOPER_UID;
             document.querySelector('.fab').style.display = isDeveloper ? 'flex' : 'none';
@@ -1285,7 +1304,6 @@
         prevPageBtn.addEventListener('click', showPrevPage);
         nextPageBtn.addEventListener('click', showNextPage);
 
-        // --- START: Go to Page Modal Logic ---
         goToPageModalEl.addEventListener('show.bs.modal', () => {
             if (pdfDoc) {
                 pageRangeInfo.textContent = `أدخل رقمًا بين 1 و ${pdfDoc.numPages}.`;
@@ -1305,7 +1323,7 @@
             const targetPage = parseInt(goToPageModalInput.value, 10);
 
             if (isNaN(targetPage) || !pdfDoc || targetPage < 1 || targetPage > pdfDoc.numPages) {
-                return; // Input is invalid, do nothing.
+                return;
             }
             
             if (targetPage !== pageNum) {
@@ -1314,9 +1332,7 @@
             }
             goToPageModalInstance.hide();
         });
-        // --- END: Go to Page Modal Logic ---
 
     </script>
 </body>
 </html>
-

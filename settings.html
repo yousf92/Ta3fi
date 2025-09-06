@@ -326,7 +326,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
-        // --- إضافة جديدة: استيراد الأوامر اللازمة من Firestore ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -344,33 +343,61 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- إضافة جديدة: دالة للاستماع للرسائل الجديدة ---
-        function listenForUnreadMessages(userId) {
+        // --- START: New Combined Notification Logic ---
+        function initializeGlobalChatNotifications(userId) {
             const chatBadge = document.querySelector('.chat-notification-badge');
             if (!chatBadge) return;
 
-            const lastReadTimestamp = parseInt(localStorage.getItem('lastReadTimestamp') || '0');
-            const messagesRef = collection(db, "messages");
-            
-            const q = query(messagesRef, where("createdAt", ">", Timestamp.fromMillis(lastReadTimestamp)));
+            let publicUnreadCount = 0;
+            let privateUnreadCount = 0;
 
-            onSnapshot(q, (snapshot) => {
-                let unreadCount = 0;
-                snapshot.forEach(doc => {
-                    if (doc.data().senderId !== userId) {
-                        unreadCount++;
-                    }
-                });
-
-                if (unreadCount > 0) {
-                    chatBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+            function updateBadge() {
+                const totalUnread = publicUnreadCount + privateUnreadCount;
+                if (totalUnread > 0) {
+                    chatBadge.textContent = totalUnread > 99 ? '99+' : totalUnread;
                     chatBadge.style.display = 'flex';
                 } else {
                     chatBadge.style.display = 'none';
                 }
+            }
+            
+            if (window.publicListenerUnsubscribe) window.publicListenerUnsubscribe();
+            if (window.privateListenerUnsubscribe) window.privateListenerUnsubscribe();
+
+            const lastReadTimestamp = parseInt(localStorage.getItem('lastReadTimestamp') || '0');
+            const messagesRef = collection(db, "messages");
+            const publicQuery = query(messagesRef, where("createdAt", ">", Timestamp.fromMillis(lastReadTimestamp)));
+            window.publicListenerUnsubscribe = onSnapshot(publicQuery, (snapshot) => {
+                let count = 0;
+                snapshot.forEach(doc => {
+                    if (doc.data().senderId !== userId) {
+                        count++;
+                    }
+                });
+                publicUnreadCount = count;
+                updateBadge();
             });
+
+            const userIsAnonymous = auth.currentUser ? auth.currentUser.isAnonymous : true;
+            if (!userIsAnonymous) {
+                const privateChatsQuery = query(collection(db, "private_chats"), where("participants", "array-contains", userId));
+                window.privateListenerUnsubscribe = onSnapshot(privateChatsQuery, (snapshot) => {
+                    let count = 0;
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (!data[`hidden_for_${userId}`]) {
+                            count += (data[`unread_count_${userId}`] || 0);
+                        }
+                    });
+                    privateUnreadCount = count;
+                    updateBadge();
+                });
+            } else {
+                privateUnreadCount = 0;
+                updateBadge();
+            }
         }
-        // --- نهاية الإضافة ---
+        // --- END: New Combined Notification Logic ---
 
         let currentUser = null;
         let currentUserData = {};
@@ -394,9 +421,7 @@
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // --- إضافة جديدة: استدعاء دالة الإشعارات ---
-                 listenForUnreadMessages(user.uid);
-                // --- نهاية الإضافة ---
+                initializeGlobalChatNotifications(user.uid);
                 if (!user.isAnonymous) {
                     isVisitor = false;
                     currentUser = user;
@@ -409,32 +434,28 @@
                     checkNameChangeStatus();
                 } else {
                     isVisitor = true;
-                    currentUser = user; // still assign to handle logout for visitor
+                    currentUser = user; 
                     logoutModalMessage.textContent = "هل أنت متأكد من رغبتك في العودة إلى صفحة تسجيل الدخول؟";
                     confirmLogoutBtn.textContent = "العودة";
                     loadVisitorProfile();
                     checkVisitorNameChangeStatus();
                 }
             } else {
-                 window.location.href = './login.html'; // Redirect if no user
+                 window.location.href = './login.html'; 
             }
             initializeAppLock();
             
-            // --- تعديل جديد: ربط أوامر القفل مع الملف الرئيسي ---
-            // القاعدة أ: لا تقفل التطبيق طالما أن المستخدم نشط بداخله.
             setInterval(() => {
                 if (document.visibilityState === 'visible') {
                     localStorage.setItem('app_last_unlock', Date.now());
                 }
             }, 60 * 1000);
 
-            // القاعدة ب: اقفل التطبيق بعد 3 دقائق من الخروج منه.
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') {
                     initializeAppLock();
                 }
             });
-            // --- نهاية التعديل ---
         });
 
         function getVisitorData() { try { return JSON.parse(localStorage.getItem('visitorProfile')) || {}; } catch(e) { return {}; } }
@@ -606,7 +627,6 @@
         
         const mainPageLockIcon = document.getElementById('main-page-lock-icon');
 
-        // --- تعديل جديد: توحيد مدة القفل مع الملف الرئيسي ---
         const RELOCK_TIME = 3 * 60 * 1000;
 
         function getLockData() {
@@ -657,7 +677,7 @@
                 }
             } else {
                 lockData.enabled = false;
-                lockData.passcode = null; // --- هذا هو السطر الجديد الذي تمت إضافته ---
+                lockData.passcode = null; 
                 saveLockData(lockData);
             }
             syncLockState();
