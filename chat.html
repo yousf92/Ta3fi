@@ -913,7 +913,7 @@
             if (senderName && senderId && text) {
                 privateReplyToMessage = { messageId: msgId, senderName, senderId, text };
                 document.getElementById('private-reply-preview-sender').textContent = `الرد على ${senderName}`;
-                document.getElementById('private-reply-preview-text').textContent = text;
+                document.getElementById('private-reply-preview-text').textContent = text.split('\n')[0];
                 document.getElementById('private-reply-preview').style.display = 'block';
                 privateMessageInput.focus();
             }
