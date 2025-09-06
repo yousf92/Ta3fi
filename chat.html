@@ -90,10 +90,10 @@
         .mute-dropdown a:hover { background-color: #2a3942; }
         .show-dropdown { display: block; }
         #chat-footer { flex-shrink: 0; }
-        #chat-footer .card-footer { background-color: #1e1e1e; border-top: 1px solid var(--border-color); padding: 10px 15px; }
-        #chat-footer .input-group { background-color: #2a3942; border-radius: 25px; padding: 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        #message-input { resize: none; overflow-y: auto; max-height: 120px; border: none; box-shadow: none; background-color: transparent; color: var(--text-color); }
-        #send-button { background-color: #009688; border-radius: 50%; width: 45px; height: 45px; border: none; display: flex; align-items: center; justify-content: center; }
+        #chat-footer .card-footer, #private-chat-footer .card-footer { background-color: #1e1e1e; border-top: 1px solid var(--border-color); padding: 10px 15px; }
+        #chat-footer .input-group, #private-chat-footer .input-group { background-color: #2a3942; border-radius: 25px; padding: 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        #message-input, #private-message-input { resize: none; overflow-y: auto; max-height: 120px; border: none; box-shadow: none; background-color: transparent; color: var(--text-color); }
+        #send-button, #private-send-button { background-color: #009688; border-radius: 50%; width: 45px; height: 45px; border: none; display: flex; align-items: center; justify-content: center; }
         #mention-notification { position: absolute; bottom: 15px; right: 20px; width: 40px; height: 40px; background-color: #53bdeb; color: white; border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: bold; cursor: pointer; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         .edit-modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1050; }
         .edit-modal-content { background-color: #3e4a54; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); color: white; }
@@ -555,10 +555,10 @@
                     </div>
                      <div id="block-notification" class="text-center p-3" style="display: none; background-color: #2a3942; color: var(--secondary-text-color);">
                      </div>
-                     <div class="card-footer p-3" id="private-input-area" style="background-color: #1e1e1e; border-top: 1px solid var(--border-color);">
-                        <div class="input-group" style="background-color: #2a3942; border-radius: 25px; padding: 5px;">
-                            <textarea id="private-message-input" class="form-control" placeholder="اكتب رسالتك..." rows="1" style="background-color: transparent; color: white; border: none; box-shadow: none;"></textarea>
-                            <button id="private-send-button" class="btn" style="background-color: #009688; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;"><i class="bi bi-send-fill"></i></button>
+                     <div class="card-footer p-3" id="private-input-area">
+                        <div class="input-group">
+                            <textarea id="private-message-input" class="form-control" placeholder="اكتب رسالتك..." rows="1"></textarea>
+                            <button id="private-send-button" class="btn"><i class="bi bi-send-fill"></i></button>
                         </div>
                     </div>
                 </div>
@@ -954,6 +954,7 @@
             });
 
             privateMessageInput.value = "";
+            privateMessageInput.style.height = 'auto';
             cancelPrivateReply();
         }
 
@@ -1003,12 +1004,25 @@
                     }
                     displayedReactionsHtml += '</div>';
 
+                    const isDeveloper = currentUserRole === 'developer';
+                    let copyButtonHtml = '';
+                    if (isDeveloper) {
+                        copyButtonHtml = `<a onclick="window.copyPrivateMessageText('${msgId}')" title="نسخ"><i class="bi bi-clipboard"></i></a>`;
+                    }
+
                     let controls = '';
                     if (isOwn) {
                         controls = `
                             <div class="message-actions">
+                                ${copyButtonHtml}
                                 <a onclick="window.editPrivateMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a>
                                 <a onclick="window.deletePrivateMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>
+                            </div>
+                        `;
+                    } else if (isDeveloper) {
+                         controls = `
+                            <div class="message-actions">
+                                ${copyButtonHtml}
                             </div>
                         `;
                     }
@@ -1034,7 +1048,7 @@
                         <div class="message-content">
                             ${reactionsContainerHtml}
                             ${repliedToHtml}
-                            <div>${msg.text}</div>
+                            <div class="private-message-text">${msg.text}</div>
                             <div class="timestamp-wrapper" style="justify-content: flex-end;">
                                 ${receiptIcon}
                                 <span class="timestamp">${time}</span>
@@ -1205,6 +1219,7 @@
 
         privateSendButton.addEventListener('click', sendPrivateMessage);
         privateMessageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendPrivateMessage(); } });
+        privateMessageInput.addEventListener('input', () => { privateMessageInput.style.height = 'auto'; privateMessageInput.style.height = (privateMessageInput.scrollHeight) + 'px'; });
         
         async function toggleBlockUser(shouldBlock) {
             if (!currentUserId || !recipientId) return;
@@ -1227,6 +1242,19 @@
 
         window.editPrivateMessage = (id, text) => {
             showPrivateEditModal(id, text);
+        };
+
+        window.copyPrivateMessageText = async (msgId) => {
+            const textElement = document.querySelector(`#private-message-${msgId} .private-message-text`);
+            if (textElement) {
+                try {
+                    await navigator.clipboard.writeText(textElement.innerText);
+                    alert("تم نسخ النص!");
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                    alert("فشل نسخ النص.");
+                }
+            }
         };
 
         function showPrivateEditModal(id, currentText) {
@@ -1291,10 +1319,10 @@
         function updateExistingDomNames() {
             if(userProfiles[currentUserId]) {
                 currentDisplayName = userProfiles[currentUserId].displayName;
+                currentUserRole = userProfiles[currentUserId].role || 'user'; // Ensure role is updated
                 let roleText = '';
-                const userRole = userProfiles[currentUserId].role;
-                if (userRole === 'developer') roleText = '⭐ (مطور)';
-                else if (userRole === 'admin') roleText = '🛡️ (مشرف)';
+                if (currentUserRole === 'developer') roleText = '⭐ (مطور)';
+                else if (currentUserRole === 'admin') roleText = '🛡️ (مشرف)';
                 userDisplayName.textContent = `مرحبا، ${currentDisplayName} ${roleText}`;
             }
 
