@@ -245,6 +245,30 @@
             position: relative;
             z-index: 2;
         }
+        
+        /* START: New Celebration Style */
+        .celebration-result {
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 0.7s ease-in-out;
+            color: var(--text-color);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .celebration-result::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+        .celebration-result > * {
+            position: relative;
+            z-index: 2;
+        }
+        /* END: New Celebration Style */
+
         .gemini-frame .form-label, 
         .gemini-frame .result-text {
             color: var(--text-color);
@@ -654,15 +678,32 @@
         ];
         let lastAnalysisBgIndex = -1;
         let lastSuggestionBgIndex = -1;
+        let lastCelebrationBgIndex = -1; // Added for celebration background
 
+        // Modified function to handle celebration background
         function setRandomBackground(element, type) {
           let randomIndex;
-          let lastIndex = (type === 'analysis') ? lastAnalysisBgIndex : lastSuggestionBgIndex;
+          let lastIndex;
+          if (type === 'analysis') {
+              lastIndex = lastAnalysisBgIndex;
+          } else if (type === 'suggestion') {
+              lastIndex = lastSuggestionBgIndex;
+          } else if (type === 'celebration') {
+              lastIndex = lastCelebrationBgIndex;
+          }
+          
           do {
             randomIndex = Math.floor(Math.random() * natureBackgrounds.length);
           } while (natureBackgrounds.length > 1 && randomIndex === lastIndex);
-          if (type === 'analysis') lastAnalysisBgIndex = randomIndex;
-          else lastSuggestionBgIndex = randomIndex;
+
+          if (type === 'analysis') {
+              lastAnalysisBgIndex = randomIndex;
+          } else if (type === 'suggestion') {
+              lastSuggestionBgIndex = randomIndex;
+          } else if (type === 'celebration') {
+              lastCelebrationBgIndex = randomIndex;
+          }
+
           element.style.backgroundImage = `url('${natureBackgrounds[randomIndex]}')`;
         }
         
@@ -708,6 +749,12 @@
                         btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> جاري كتابة رسالة احتفال...`;
                         const prompt = `بصفتك مشجع متحمس، مستخدمي حقق إنجاز رائع وهو ${streak} أيام متتالية من الانتصار في رحلة التعافي. اكتب له رسالة احتفال قصيرة جداً ومبهجة تعبر عن الفخر بهذا الإنجاز. شجعه على مواصلة هذا الزخم الرائع. التزم باللهجة السعودية العامية، وبدون تشكيل أو علامات ترقيم.`;
                         const result = await callGeminiAPI(prompt);
+                        
+                        // Apply new styling for celebration result
+                        contextualResultContainer.style.backgroundColor = ''; // Remove default background
+                        contextualResultContainer.classList.add('celebration-result');
+                        setRandomBackground(contextualResultContainer, 'celebration');
+
                         contextualResultText.textContent = result;
                         contextualResultContainer.classList.remove('d-none');
                         btn.disabled = false;
@@ -878,4 +925,3 @@
     </script>
 </body>
 </html>
-
