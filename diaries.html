@@ -19,7 +19,15 @@
         }
         body, html {
             margin: 0; padding: 0; font-family: 'Tajawal', sans-serif;
-            background-color: var(--background-color); color: var(--text-color);
+            background-color: var(--background-color);
+            /* --- التغيير المطلوب --- */
+            background-image: linear-gradient(rgba(18, 18, 18, 0.7), rgba(18, 18, 18, 0.7)), url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            /* --- نهاية التغيير --- */
+            color: var(--text-color);
             height: 100vh;
             overflow: hidden;
         }
@@ -28,6 +36,7 @@
             flex-direction: column;
             height: 100%;
             width: 100%;
+            /* تمت إزالة الخلفية من هنا لتظهر الصورة */
         }
         .top-header {
             flex-shrink: 0;
@@ -35,7 +44,7 @@
             justify-content: center;
             align-items: center;
             padding: 1rem;
-            background-color: var(--background-color);
+            background-color: transparent; /* تم تغييرها لتكون شفافة */
             border-bottom: 1px solid var(--border-color);
         }
         .content-area {
@@ -95,11 +104,12 @@
         /* --- نهاية الإضافة --- */
 
         .note-card { 
-            background-color: var(--card-background); 
+            background-color: rgba(30, 30, 30, 0.85); /* تعديل الشفافية */
             border: 1px solid var(--border-color); 
             margin-bottom: 1rem;
             border-radius: 15px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            backdrop-filter: blur(5px); /* إضافة تأثير بلور للخلفية */
         }
         .note-card .card-title { font-weight: 700; color: #FFFFFF; }
         .note-card .card-text { color: var(--text-color); font-size: 0.95rem; line-height: 1.6; }
