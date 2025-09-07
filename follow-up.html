@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #00a884;
@@ -38,12 +39,11 @@
         .nav-item i { font-size: 1.5rem; margin-bottom: 4px; transition: transform 0.3s ease; }
         .nav-item:hover i { transform: translateY(-3px); }
         .nav-item.active { color: var(--primary-color); }
-        .nav-item.special-item { transform: translateY(-20px); position: relative; } /* إضافة جديدة */
+        .nav-item.special-item { transform: translateY(-20px); position: relative; } 
         .special-item .icon-background { background: linear-gradient(135deg, #00a884, #00c896); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--primary-glow); transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .special-item:hover .icon-background { transform: scale(1.1); box-shadow: 0 6px 20px var(--primary-glow); }
         .special-item i { color: white; font-size: 2rem; margin: 0; }
 
-        /* --- إضافة جديدة: تنسيق عداد الإشعارات --- */
         .chat-notification-badge {
             position: absolute;
             top: -8px; 
@@ -55,55 +55,101 @@
             height: 24px;
             font-size: 13px;
             font-weight: bold;
-            display: none; /* مخفي بشكل افتراضي */
+            display: none; 
             justify-content: center;
             align-items: center;
             border: 2px solid var(--card-background);
             z-index: 1;
         }
-        /* --- نهاية الإضافة --- */
 
+        /* START: Modified Stat Grid Styling */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
             gap: 0.75rem;
-            margin-bottom: 1.5rem;
         }
         .stat-card {
-            padding: 0.75rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
             border-radius: 12px;
             text-align: center;
             color: white;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(0,0,0,0.2);
         }
         .stat-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
-        .stat-card .stat-number { font-size: 1.5rem; font-weight: 700; line-height: 1; }
-        .stat-card .stat-label { font-size: 0.7rem; font-weight: 500; opacity: 0.9; margin-top: 4px; }
-        .stat-card.orange { background: linear-gradient(135deg, #fd9843, #e67e22); }
-        .stat-card.red { background: linear-gradient(135deg, #e55454, #c0392b); }
-        .stat-card.green { background: linear-gradient(135deg, #27ae60, #2ecc71); }
-        .stat-card.grey { background: linear-gradient(135deg, #6c757d, #5a6268); }
-
-        .calendar-card {
-            background-color: var(--card-background);
+        .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+            opacity: 0.8;
+        }
+        .stat-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .stat-label { 
+            font-family: 'Amiri', serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            opacity: 0.95; 
+            margin-top: 4px;
+        }
+        .stat-card.orange, .stat-card.red, .stat-card.green, .stat-card.grey {
+            background-blend-mode: overlay;
+        }
+        .stat-card.orange { background-color: rgba(253, 152, 67, 0.5); }
+        .stat-card.red { background-color: rgba(229, 84, 84, 0.5); }
+        .stat-card.green { background-color: rgba(39, 174, 96, 0.5); }
+        .stat-card.grey { background-color: rgba(108, 117, 125, 0.5); }
+        /* END: Modified Stat Grid Styling */
+        
+        .calendar-container {
+            position: relative;
             border-radius: 20px;
+            overflow: hidden;
+            background-image: url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=1920');
+            background-size: cover;
+            background-position: center;
             padding: 1.5rem;
             border: 1px solid var(--border-color);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             margin-bottom: 1.5rem;
         }
+        .calendar-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(18, 18, 18, 0.6);
+            backdrop-filter: blur(1px);
+            z-index: 1;
+        }
+        .calendar-container > * {
+            position: relative;
+            z-index: 2;
+        }
+        .calendar-card {
+            background-color: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            margin-top: 1.5rem;
+        }
+        
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .calendar-header button { background-color: rgba(255,255,255,0.1); border-radius: 50%; border: none; color: var(--text-color); width: 40px; height: 40px; display:flex; align-items:center; justify-content:center; transition: background-color 0.3s ease; }
         .calendar-header button:hover { background-color: rgba(255,255,255,0.2); }
-        #month-year { font-size: 1.3rem; font-weight: 700; }
+        #month-year { font-size: 1.3rem; font-weight: 700; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; }
         .calendar-day, .weekday { text-align: center; font-size: 0.9rem; height: 40px; display: flex; align-items: center; justify-content: center; }
-        .weekday { color: var(--secondary-text-color); font-weight: 700; }
-        .calendar-day { border-radius: 50%; cursor: pointer; transition: all 0.3s ease; }
+        .weekday { color: var(--secondary-text-color); font-weight: 700; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
+        .calendar-day { border-radius: 50%; cursor: pointer; transition: all 0.3s ease; background-color: rgba(255,255,255,0.05); }
         .calendar-day.other-month { opacity: 0.3; pointer-events: none; }
         .calendar-day.today { border: 2px solid var(--primary-color); box-shadow: 0 0 10px var(--primary-glow); }
         .calendar-day.orange { background-color: var(--orange-color); color: white; }
@@ -137,8 +183,7 @@
         }
         #addStatusModal .modal-content { border-radius: 20px; }
         #addStatusModal .btn-lg { border-radius: 12px; font-weight: 700; padding: 1rem; }
-        #analysis-result-text { color: var(--text-color); }
-
+        
         #app-lock-overlay {
             position: fixed;
             top: 0;
@@ -173,19 +218,77 @@
             text-align: center;
             direction: ltr;
         }
-        #passcode-input::placeholder {
-            letter-spacing: normal;
+        #passcode-input::placeholder { letter-spacing: normal; }
+        #unlock-btn { width: 100%; max-width: 200px; }
+        #passcode-error { display: none; color: var(--danger-color); font-size: 0.9rem; margin-top: 1rem; }
+
+        .gemini-frame {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            padding: 1.5rem;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 0.7s ease-in-out;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         }
-        #unlock-btn {
-            width: 100%;
-            max-width: 200px;
+        .gemini-frame::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(18, 18, 18, 0.75); 
+            backdrop-filter: blur(2px);
+            z-index: 1;
         }
-        #passcode-error {
-            display: none;
-            color: var(--danger-color);
-            font-size: 0.9rem;
-            margin-top: 1rem;
+        .gemini-frame > * {
+            position: relative;
+            z-index: 2;
         }
+        .gemini-frame .form-label, 
+        .gemini-frame .result-text {
+            color: var(--text-color);
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+        .gemini-frame .result-container {
+            background-color: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* START: New Analysis Style Toggle */
+        .analysis-toggle-group {
+            display: flex;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        .analysis-toggle-btn {
+            flex: 1;
+            background-color: transparent;
+            border: none;
+            color: var(--secondary-text-color);
+            padding: 0.75rem 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Amiri', serif;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .analysis-toggle-btn:not(:last-child) {
+            border-left: 1px solid var(--border-color);
+        }
+        .analysis-toggle-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
+        .analysis-toggle-btn:hover:not(.active) {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        /* END: New Analysis Style Toggle */
     </style>
 </head>
 <body>
@@ -206,43 +309,77 @@
         </header>
         <main class="content-area">
             
-            <div class="stats-grid">
-                <div class="stat-card orange">
-                    <div id="absence-count" class="stat-number">0</div>
-                    <div class="stat-label">غياب</div>
+            <div class="calendar-container">
+                <div class="stats-grid">
+                    <div class="stat-card orange">
+                        <i class="bi bi-calendar-x stat-icon"></i>
+                        <div id="absence-count" class="stat-number">0</div>
+                        <div class="stat-label">غياب</div>
+                    </div>
+                    <div class="stat-card grey">
+                        <i class="bi bi-arrow-down-circle stat-icon"></i>
+                        <div id="relapse-count" class="stat-number">0</div>
+                        <div class="stat-label">انتكاسة</div>
+                    </div>
+                    <div class="stat-card red">
+                        <i class="bi bi-exclamation-triangle stat-icon"></i>
+                        <div id="slip-count" class="stat-number">0</div>
+                        <div class="stat-label">زلة</div>
+                    </div>
+                    <div class="stat-card green">
+                        <i class="bi bi-check-circle-fill stat-icon"></i>
+                        <div id="victory-count" class="stat-number">0</div>
+                        <div class="stat-label">انتصار</div>
+                    </div>
                 </div>
-                <div class="stat-card grey">
-                    <div id="relapse-count" class="stat-number">0</div>
-                    <div class="stat-label">انتكاسة</div>
+
+                <div class="calendar-card">
+                    <div class="calendar-header">
+                        <button id="prev-month"><i class="bi bi-chevron-right"></i></button>
+                        <div id="month-year"></div>
+                        <button id="next-month"><i class="bi bi-chevron-left"></i></button>
+                    </div>
+                    <div class="calendar-grid" id="weekdays"></div>
+                    <div class="calendar-grid" id="calendar-days"></div>
                 </div>
-                <div class="stat-card red">
-                    <div id="slip-count" class="stat-number">0</div>
-                    <div class="stat-label">زلة</div>
-                </div>
-                <div class="stat-card green">
-                    <div id="victory-count" class="stat-number">0</div>
-                    <div class="stat-label">انتصار</div>
+            </div>
+            
+            <div id="contextual-gemini-card" class="card mt-4 d-none" style="background-color: var(--card-background); border-radius: 15px; border: 1px solid var(--primary-color); box-shadow: 0 0 15px var(--primary-glow);">
+                <div class="card-body text-center">
+                    <h6 id="contextual-gemini-title" class="mb-3 fw-bold"></h6>
+                    <button id="contextual-gemini-btn" class="btn btn-warning w-100 fw-bold"></button>
+                    <div id="contextual-gemini-result-container" class="mt-3 p-3 rounded d-none" style="background-color: var(--background-color);">
+                        <p id="contextual-gemini-result-text" class="mb-0" style="white-space: pre-wrap;"></p>
+                    </div>
                 </div>
             </div>
 
-            <div class="calendar-card">
-                <div class="calendar-header">
-                    <button id="prev-month"><i class="bi bi-chevron-right"></i></button>
-                    <div id="month-year"></div>
-                    <button id="next-month"><i class="bi bi-chevron-left"></i></button>
-                </div>
-                <div class="calendar-grid" id="weekdays"></div>
-                <div class="calendar-grid" id="calendar-days"></div>
+            <div id="analysis-frame" class="gemini-frame mt-4">
+                 <div class="analysis-options mb-3">
+                     <label class="form-label small fw-bold">اختر أسلوب التحليل</label>
+                     <div id="analysis-style-group" class="analysis-toggle-group">
+                        <button class="analysis-toggle-btn active" data-style="advisor">
+                            <i class="bi bi-shield-heart me-2"></i><span>ناصح أمين</span>
+                        </button>
+                        <button class="analysis-toggle-btn" data-style="leader">
+                            <i class="bi bi-award me-2"></i><span>قائد ملهم</span>
+                        </button>
+                    </div>
+                 </div>
+                 <button id="analyze-performance-btn" class="btn btn-info w-100 fw-bold">
+                      <i class="bi bi-magic me-2"></i>حلل أدائي
+                 </button>
+                 <div id="analysis-result-container" class="result-container mt-3 p-3 rounded d-none">
+                      <p id="analysis-result-text" class="result-text mb-0" style="white-space: pre-wrap;"></p>
+                 </div>
             </div>
 
-            <div class="card mt-4" style="background-color: var(--card-background); border-radius: 15px;">
-                 <div class="card-body">
-                      <button id="analyze-performance-btn" class="btn btn-info w-100 fw-bold">
-                           <i class="bi bi-magic me-2"></i>حلل أدائي
-                      </button>
-                      <div id="analysis-result-container" class="mt-3 p-3 rounded d-none" style="background-color: var(--background-color);">
-                           <p id="analysis-result-text" class="mb-0" style="white-space: pre-wrap;"></p>
-                      </div>
+            <div id="suggestion-frame" class="gemini-frame mt-3">
+                 <button id="suggest-step-btn" class="btn btn-outline-success w-100 fw-bold">
+                      <i class="bi bi-sparkles me-2"></i>✨ اقترح خطوة اليوم
+                 </button>
+                 <div id="suggestion-result-container" class="result-container mt-3 p-3 rounded d-none">
+                      <p id="suggestion-result-text" class="result-text mb-0" style="white-space: pre-wrap;"></p>
                  </div>
             </div>
 
@@ -259,7 +396,6 @@
             <a href="chat.html" class="nav-item special-item">
                 <div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div>
                 <span>دردشة</span>
-                <!-- إضافة جديدة: هذا العنصر سيظهر كعداد للإشعارات -->
                 <span class="chat-notification-badge"></span>
             </a>
             <a href="follow-up.html" class="nav-item active"><i class="bi bi-signpost-split-fill"></i><span>المتابعة</span></a>
@@ -307,14 +443,11 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- START: New Combined Notification Logic ---
         function initializeGlobalChatNotifications(userId) {
             const chatBadge = document.querySelector('.chat-notification-badge');
             if (!chatBadge) return;
-
             let publicUnreadCount = 0;
             let privateUnreadCount = 0;
-
             function updateBadge() {
                 const totalUnread = publicUnreadCount + privateUnreadCount;
                 if (totalUnread > 0) {
@@ -324,24 +457,19 @@
                     chatBadge.style.display = 'none';
                 }
             }
-            
             if (window.publicListenerUnsubscribe) window.publicListenerUnsubscribe();
             if (window.privateListenerUnsubscribe) window.privateListenerUnsubscribe();
-
             const lastReadTimestamp = parseInt(localStorage.getItem('lastReadTimestamp') || '0');
             const messagesRef = collection(db, "messages");
             const publicQuery = query(messagesRef, where("createdAt", ">", Timestamp.fromMillis(lastReadTimestamp)));
             window.publicListenerUnsubscribe = onSnapshot(publicQuery, (snapshot) => {
                 let count = 0;
                 snapshot.forEach(doc => {
-                    if (doc.data().senderId !== userId) {
-                        count++;
-                    }
+                    if (doc.data().senderId !== userId) count++;
                 });
                 publicUnreadCount = count;
                 updateBadge();
             });
-
             const userIsAnonymous = auth.currentUser ? auth.currentUser.isAnonymous : true;
             if (!userIsAnonymous) {
                 const privateChatsQuery = query(collection(db, "private_chats"), where("participants", "array-contains", userId));
@@ -349,9 +477,7 @@
                     let count = 0;
                     snapshot.forEach(doc => {
                         const data = doc.data();
-                        if (!data[`hidden_for_${userId}`]) {
-                            count += (data[`unread_count_${userId}`] || 0);
-                        }
+                        if (!data[`hidden_for_${userId}`]) count += (data[`unread_count_${userId}`] || 0);
                     });
                     privateUnreadCount = count;
                     updateBadge();
@@ -361,12 +487,12 @@
                 updateBadge();
             }
         }
-        // --- END: New Combined Notification Logic ---
 
         let currentUserId = null;
         let isVisitor = true;
         let userHabitData = {};
         let previousAnalyses = [];
+        let previousSuggestions = []; 
 
         const appLockOverlay = document.getElementById('app-lock-overlay');
         const passcodeError = document.getElementById('passcode-error');
@@ -377,21 +503,15 @@
         function getLockData() {
             try {
                 return JSON.parse(localStorage.getItem('app_lock_config')) || { enabled: false, passcode: null };
-            } catch (e) {
-                return { enabled: false, passcode: null };
-            }
+            } catch (e) { return { enabled: false, passcode: null }; }
         }
 
         function initializeAppLock() {
             const lockData = getLockData();
             if (!lockData.enabled) return;
-            
             const lastUnlock = localStorage.getItem('app_last_unlock') || 0;
             const timeSinceUnlock = Date.now() - lastUnlock;
-
-            if (timeSinceUnlock >= RELOCK_TIME) {
-                appLockOverlay.style.display = 'flex';
-            }
+            if (timeSinceUnlock >= RELOCK_TIME) appLockOverlay.style.display = 'flex';
         }
 
         function handleUnlock() {
@@ -419,25 +539,19 @@
             const payload = { contents: [{ parts: [{ text: prompt }] }], };
             try {
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) { return "حدث خطأ أثناء تحليل البيانات."; }
+                if (!response.ok) return "حدث خطأ أثناء جلب النصيحة.";
                 const result = await response.json();
-                return result.candidates?.[0]?.content?.parts?.[0]?.text.trim() || "لم أتمكن من تقديم تحليل حاليًا.";
-            } catch (error) {
-                return "خطأ في الشبكة.";
-            }
+                return result.candidates?.[0]?.content?.parts?.[0]?.text.trim() || "لم أتمكن من تقديم نصيحة حاليًا.";
+            } catch (error) { return "خطأ في الشبكة."; }
         }
 
         onAuthStateChanged(auth, (user) => {
             initializeAppLock();
             setInterval(() => {
-                if (document.visibilityState === 'visible') {
-                    localStorage.setItem('app_last_unlock', Date.now());
-                }
+                if (document.visibilityState === 'visible') localStorage.setItem('app_last_unlock', Date.now());
             }, 60 * 1000);
             document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') {
-                    initializeAppLock();
-                }
+                if (document.visibilityState === 'visible') initializeAppLock();
             });
             if (user) {
                 initializeGlobalChatNotifications(user.uid);
@@ -459,9 +573,22 @@
         const prevMonthBtn = document.getElementById('prev-month');
         const nextMonthBtn = document.getElementById('next-month');
         const addStatusModal = new bootstrap.Modal(document.getElementById('addStatusModal'));
+        
+        const analyzeFrame = document.getElementById('analysis-frame');
         const analyzeBtn = document.getElementById('analyze-performance-btn');
         const analysisResultContainer = document.getElementById('analysis-result-container');
         const analysisResultText = document.getElementById('analysis-result-text');
+        
+        const suggestionFrame = document.getElementById('suggestion-frame');
+        const suggestStepBtn = document.getElementById('suggest-step-btn');
+        const suggestionResultContainer = document.getElementById('suggestion-result-container');
+        const suggestionResultText = document.getElementById('suggestion-result-text');
+        
+        const contextualCard = document.getElementById('contextual-gemini-card');
+        const contextualTitle = document.getElementById('contextual-gemini-title');
+        const contextualBtn = document.getElementById('contextual-gemini-btn');
+        const contextualResultContainer = document.getElementById('contextual-gemini-result-container');
+        const contextualResultText = document.getElementById('contextual-gemini-result-text');
 
         let currentDate = new Date();
 
@@ -489,9 +616,7 @@
                 const userDocRef = doc(db, "users", currentUserId);
                 try {
                     await setDoc(userDocRef, { habitData: data }, { merge: true });
-                } catch (error) {
-                    console.error("Error saving habit data: ", error);
-                }
+                } catch (error) { console.error("Error saving habit data: ", error); }
             }
         }
 
@@ -503,13 +628,10 @@
             const habitData = await getHabitData();
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-
             const firstEntryDateStr = Object.keys(habitData).sort()[0];
             if (!firstEntryDateStr) return;
-
             let loopDate = new Date(firstEntryDateStr);
             let hasChanged = false;
-
             while (loopDate < today) {
                 const dateStr = toDateString(loopDate);
                 if (!habitData[dateStr]) {
@@ -518,114 +640,218 @@
                 }
                 loopDate.setDate(loopDate.getDate() + 1);
             }
-            
-            if (hasChanged) {
-                await saveHabitData(habitData);
+            if (hasChanged) await saveHabitData(habitData);
+        }
+
+        const natureBackgrounds = [
+            'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=1920',
+            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=1920',
+            'https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=1920',
+            'https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=1920',
+            'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?q=80&w=1920',
+            'https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?q=80&w=1920',
+            'https://images.unsplash.com/photo-1505852679233-d9fd70aff56d?q=80&w=1920'
+        ];
+        let lastAnalysisBgIndex = -1;
+        let lastSuggestionBgIndex = -1;
+
+        function setRandomBackground(element, type) {
+          let randomIndex;
+          let lastIndex = (type === 'analysis') ? lastAnalysisBgIndex : lastSuggestionBgIndex;
+          do {
+            randomIndex = Math.floor(Math.random() * natureBackgrounds.length);
+          } while (natureBackgrounds.length > 1 && randomIndex === lastIndex);
+          if (type === 'analysis') lastAnalysisBgIndex = randomIndex;
+          else lastSuggestionBgIndex = randomIndex;
+          element.style.backgroundImage = `url('${natureBackgrounds[randomIndex]}')`;
+        }
+        
+        async function updateContextualGeminiFeature() {
+            contextualCard.classList.add('d-none');
+            contextualResultContainer.classList.add('d-none');
+            const sortedDates = Object.keys(userHabitData).sort((a, b) => new Date(b) - new Date(a));
+            if (sortedDates.length === 0) return;
+            const latestDate = sortedDates[0];
+            const latestStatus = userHabitData[latestDate];
+            if (latestStatus === 'slip' || latestStatus === 'relapse') {
+                contextualTitle.textContent = 'لحظة للتعلّم';
+                contextualBtn.innerHTML = '<i class="bi bi-lightbulb-fill me-2"></i>✨ تعلم من هذه التجربة';
+                contextualCard.classList.remove('d-none');
+                const newBtn = contextualBtn.cloneNode(true);
+                contextualBtn.parentNode.replaceChild(newBtn, contextualBtn);
+                document.getElementById('contextual-gemini-btn').addEventListener('click', async (e) => {
+                    const btn = e.currentTarget;
+                    btn.disabled = true;
+                    btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> جاري استخلاص العبرة...`;
+                    const prompt = `بصفتك مرشد حكيم ومتعاطف، مستخدمي مر بتجربة صعبة اليوم في رحلة التعافي (زلة أو انتكاسة). مهمتك هي أن تقدم له رسالة قصيرة تساعده على تحويل هذه التجربة إلى فرصة للتعلم والنمو، وليس سببًا لليأس. لا توبخه أبداً. قدم له سؤالاً واحداً فقط يساعده على التفكير في المسبب المحتمل. اختتم الرسالة بتذكير بسيط بأن كل يوم هو فرصة جديدة. التزم باللهجة السعودية العامية، وبدون تشكيل أو علامات ترقيم.`;
+                    const result = await callGeminiAPI(prompt);
+                    contextualResultText.textContent = result;
+                    contextualResultContainer.classList.remove('d-none');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-lightbulb-fill me-2"></i>✨ اطلب نصيحة أخرى';
+                });
+            } else if (latestStatus === 'victory') {
+                let streak = 0;
+                for (const date of sortedDates) {
+                    if (userHabitData[date] === 'victory') streak++;
+                    else break;
+                }
+                if (streak >= 3) {
+                    contextualTitle.innerHTML = `أحسنت! <span class="text-success">${streak} أيام</span> من الانتصار المتواصل`;
+                    contextualBtn.innerHTML = `<i class="bi bi-trophy-fill me-2"></i>✨ احتفل بإنجازك`;
+                    contextualCard.classList.remove('d-none');
+                    const newBtn = contextualBtn.cloneNode(true);
+                    contextualBtn.parentNode.replaceChild(newBtn, contextualBtn);
+                    document.getElementById('contextual-gemini-btn').addEventListener('click', async (e) => {
+                        const btn = e.currentTarget;
+                        btn.disabled = true;
+                        btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> جاري كتابة رسالة احتفال...`;
+                        const prompt = `بصفتك مشجع متحمس، مستخدمي حقق إنجاز رائع وهو ${streak} أيام متتالية من الانتصار في رحلة التعافي. اكتب له رسالة احتفال قصيرة جداً ومبهجة تعبر عن الفخر بهذا الإنجاز. شجعه على مواصلة هذا الزخم الرائع. التزم باللهجة السعودية العامية، وبدون تشكيل أو علامات ترقيم.`;
+                        const result = await callGeminiAPI(prompt);
+                        contextualResultText.textContent = result;
+                        contextualResultContainer.classList.remove('d-none');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-trophy-fill me-2"></i>✨ اطلب رسالة جديدة';
+                    });
+                }
             }
         }
 
         async function renderCalendar() {
             await autoFillAbsence();
-            
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
-            
             const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
             monthYearEl.textContent = `${monthNames[month]} ${year}`;
-
             weekdaysEl.innerHTML = ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'].map(day => `<div class="weekday">${day}</div>`).join('');
-            
             daysEl.innerHTML = '';
-            
             const firstDayOfMonth = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
-            for (let i = 0; i < firstDayOfMonth; i++) {
-                daysEl.innerHTML += `<div></div>`;
-            }
-
+            for (let i = 0; i < firstDayOfMonth; i++) daysEl.innerHTML += `<div></div>`;
             const habitData = userHabitData;
             let counts = { absence: 0, relapse: 0, slip: 0, victory: 0 };
-
             for (const dateStr in habitData) {
                 const status = habitData[dateStr];
-                if (counts[status] !== undefined) {
-                    counts[status]++;
-                }
+                if (counts[status] !== undefined) counts[status]++;
             }
-
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayEl = document.createElement('div');
                 dayEl.className = 'calendar-day';
                 dayEl.textContent = day;
-                
                 const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                
                 if (habitData[dateString]) {
                     const status = habitData[dateString];
                     const colorMap = { absence: 'orange', relapse: 'grey', slip: 'red', victory: 'green' };
                     dayEl.classList.add(colorMap[status]);
                 }
-
                 if (day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
                     dayEl.classList.add('today');
                 }
-                
                 daysEl.appendChild(dayEl);
             }
-
             document.getElementById('absence-count').textContent = counts.absence;
             document.getElementById('relapse-count').textContent = counts.relapse;
             document.getElementById('slip-count').textContent = counts.slip;
             document.getElementById('victory-count').textContent = counts.victory;
+            await updateContextualGeminiFeature();
         }
+
+        // START: New logic for toggle buttons
+        const styleButtons = document.querySelectorAll('.analysis-toggle-btn');
+        styleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                styleButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
 
         analyzeBtn.addEventListener('click', async () => {
             analyzeBtn.disabled = true;
             analyzeBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> جار التحليل...`;
             analysisResultContainer.classList.add('d-none');
-
-            const counts = {
-                victory: document.getElementById('victory-count').textContent,
-                slip: document.getElementById('slip-count').textContent,
-                relapse: document.getElementById('relapse-count').textContent,
-                absence: document.getElementById('absence-count').textContent,
-            };
-
-            let prompt = `
-                بصفتك مدرب شخصي وناصح أمين، حلل بيانات الأداء هذي لشخص يحاول يتعافى من إدمان:
-                - أيام الانتصار: ${counts.victory}
-                - أيام الزلات: ${counts.slip}
-                - أيام الانتكاسات: ${counts.relapse}
-                - أيام الغياب: ${counts.absence}
-
-                عطني تقرير مختصر وداعم. التزم بالقواعد هذي بدقة:
-                1.  **اللهجة:** تكلم باللهجة السعودية العامية فقط.
-                2.  **التنسيق:** لا تستخدم أي تشكيل أو علامات ترقيم أبداً.
-                3.  **الأسلوب:** خل كلامك طبيعي كأنك تسولف مع واحد تعرفه وتشجعه.
-                4.  **المحتوى:** عطني كلام تشجيعي وركز على الإيجابيات وقدم نصيحة عملية للخطوة الجاية.
-            `;
             
-            if (previousAnalyses.length > 0) {
-                prompt += `\nالتحليلات اللي عطيتها قبل هي: "${previousAnalyses.join('", "')}". لا تكرر نفس الكلام وعطني تحليل جديد ومختلف.`;
+            const selectedStyle = document.querySelector('.analysis-toggle-btn.active').dataset.style;
+            const counts = { victory: document.getElementById('victory-count').textContent, slip: document.getElementById('slip-count').textContent, relapse: document.getElementById('relapse-count').textContent, absence: document.getElementById('absence-count').textContent, };
+            let personaPrompt = "";
+            switch (selectedStyle) {
+                case 'leader': personaPrompt = "بصفتك قائد ملهم يخاطب أحد أبطاله، حلل بيانات الأداء هذي. استخدم لغة قوية ومفعمة بالفخر وركز على الانتصارات كدليل على العزيمة والإصرار. اجعل التحليل بمثابة وسام شرف وتقدير للمعركة التي يخوضها."; break;
+                case 'advisor': default: personaPrompt = "بصفتك مدرب شخصي وناصح أمين، حلل بيانات الأداء هذي لشخص يحاول يتعافى من إدمان."; break;
             }
-
+            let prompt = `${personaPrompt} بيانات الأداء الإجمالية: - أيام الانتصار: ${counts.victory} - أيام الزلات: ${counts.slip} - أيام الانتكاسات: ${counts.relapse} - أيام الغياب: ${counts.absence}. عطني تقرير مختصر وداعم. التزم بالقواعد هذي بدقة: 1. اللهجة: تكلم باللهجة السعودية العامية فقط. 2. التنسيق: لا تستخدم أي تشكيل أو علامات ترقيم أبداً. 3. الأسلوب: خل كلامك طبيعي كأنك تسولف مع واحد تعرفه. 4. المحتوى: عطني تحليل مناسب للشخصية اللي طلبتها.`;
+            if (previousAnalyses.length > 0) prompt += `\nالتحليلات اللي عطيتها قبل هي: "${previousAnalyses.join('", "')}". لا تكرر نفس الكلام وعطني تحليل جديد ومختلف.`;
             const result = await callGeminiAPI(prompt);
-            
             if(result && !previousAnalyses.includes(result)) {
                 previousAnalyses.push(result);
+                if (previousAnalyses.length > 5) previousAnalyses.shift(); 
             }
-
             analysisResultText.textContent = result;
             analysisResultContainer.classList.remove('d-none');
-            
+            setRandomBackground(analyzeFrame, 'analysis'); 
             analyzeBtn.disabled = false;
             analyzeBtn.innerHTML = '✨ إعادة تحليل أدائي';
+        });
+        
+        function loadPreviousSuggestions() {
+            const saved = localStorage.getItem('previousSuggestions');
+            if (saved) {
+                try {
+                    previousSuggestions = JSON.parse(saved);
+                } catch (e) {
+                    previousSuggestions = [];
+                }
+            }
+        }
+
+        function saveSuggestion(suggestion) {
+            if (!previousSuggestions.includes(suggestion)) {
+                previousSuggestions.push(suggestion);
+                if (previousSuggestions.length > 50) { 
+                    previousSuggestions.shift();
+                }
+                localStorage.setItem('previousSuggestions', JSON.stringify(previousSuggestions));
+            }
+        }
+
+        suggestStepBtn.addEventListener('click', async () => {
+            suggestStepBtn.disabled = true;
+            suggestStepBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> جار إعداد النصيحة...`;
+            suggestionResultContainer.classList.add('d-none');
+            
+            const exclusionList = previousSuggestions.length > 0 
+                ? `من الضروري جدا ان تكون النصيحة جديدة تماما ومختلفة عن هذه النصائح السابقة التي تم تقديمها: "${previousSuggestions.join('" , "')}"`
+                : "";
+
+            const prompt = `
+                بصفتك ناصحا حكيما وموجها على المنهج السلفي الصالح قدم للمستخدم نصيحة فريدة لم تقدمها له من قبل.
+                يجب ان تكون النصيحة متوازنة تنفعه في دينه ودنياه وتغطي جوانب مثل العبادات والاخلاق وتزكية النفس او جوانب دنيوية من منظور شرعي مثل ادارة الوقت وتطوير الذات والتعامل مع الناس.
+                
+                الشروط الحاسمة:
+                1. الإيجاز الشديد: يجب أن تكون النصيحة موجزة ومختصرة جدا لا تتجاوز سطرين.
+                2. التنسيق: يجب ان تكون النصيحة كنص متصل واحد وبدون اي تعداد نقطي او رقمي وبدون استخدام اي حركات تشكيل على الحروف اطلاقا.
+                3. عدم التكرار: ${exclusionList}
+            `;
+            
+            const result = await callGeminiAPI(prompt);
+            
+            if (result && !result.toLowerCase().includes("خطأ")) {
+                saveSuggestion(result);
+            }
+
+            suggestionResultText.textContent = result;
+            suggestionResultContainer.classList.remove('d-none');
+            setRandomBackground(suggestionFrame, 'suggestion');
+            suggestStepBtn.disabled = false;
+            suggestStepBtn.innerHTML = '<i class="bi bi-sparkles me-2"></i>✨ اطلب تذكرة أخرى';
         });
 
         async function initializeCalendar() {
             await getHabitData();
             await renderCalendar();
+
+            loadPreviousSuggestions(); 
+            
+            setRandomBackground(analyzeFrame, 'analysis');
+            setRandomBackground(suggestionFrame, 'suggestion');
 
             prevMonthBtn.addEventListener('click', () => {
                 currentDate.setMonth(currentDate.getMonth() - 1);
@@ -641,11 +867,9 @@
                 button.addEventListener('click', async () => {
                     const status = button.dataset.status;
                     const dateString = toDateString(new Date());
-                    
                     const currentData = await getHabitData();
                     currentData[dateString] = status;
                     await saveHabitData(currentData);
-                    
                     addStatusModal.hide();
                     await renderCalendar();
                 });
@@ -654,3 +878,4 @@
     </script>
 </body>
 </html>
+
