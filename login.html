@@ -18,7 +18,11 @@
         }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: #121212;
+            /* تم تغيير الخلفية لصورة طبيعة خلابة مع الحفاظ على وضوح النص */
+            background-image: linear-gradient(rgba(18, 18, 18, 0.4), rgba(18, 18, 18, 0.4)), url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -27,7 +31,9 @@
             color: var(--text-color);
         }
         .form-container {
-            background: var(--card-background);
+            background: rgba(30, 30, 30, 0.7); /* زيادة شفافية الخلفية */
+            backdrop-filter: blur(10px); /* إضافة تأثير بلور للخلفية */
+            -webkit-backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 40px;
             max-width: 450px;
@@ -287,3 +293,4 @@
 
 </body>
 </html>
+

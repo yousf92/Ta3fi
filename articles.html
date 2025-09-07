@@ -20,11 +20,28 @@
         }
         body, html {
             margin: 0; padding: 0; font-family: 'Tajawal', sans-serif;
-            background-color: var(--background-color); color: var(--text-color);
+            background-image: url('https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-color);
             position: fixed; width: 100%; height: 100%; overflow: hidden;
         }
         .page { display: flex; flex-direction: column; height: 100%; width: 100%; }
-        .bottom-nav { display: flex; justify-content: space-around; padding: 0.5rem 0; background-color: rgba(30, 30, 30, 0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 -2px 15px rgba(0,0,0,0.3); position: fixed; bottom: 0; width: 100%; z-index: 100; border-top: 1px solid var(--border-color); }
+        .bottom-nav { 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 0.5rem 0; 
+            background-color: rgba(30, 30, 30, 0.5); 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px); 
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.3); 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            z-index: 100; 
+            border-top: 1px solid rgba(56, 56, 56, 0.5);
+        }
         
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--secondary-text-color); text-decoration: none; font-size: 0.75rem; cursor: pointer; width: 14%; height: 50px; justify-content: center; transition: color 0.3s ease; }
         .nav-item:hover { color: var(--text-color); }
@@ -57,9 +74,7 @@
         /* --- نهاية الإضافة --- */
 
         #articles-section-wrapper { 
-            background-image: linear-gradient(rgba(18,18,18,0.8), rgba(18,18,18,0.95)), url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop'); 
-            background-size: cover; 
-            background-position: center; 
+            background-color: transparent; 
             flex-grow: 1; 
             overflow-y: auto; 
             padding: 20px; 
@@ -82,7 +97,19 @@
             box-shadow: 0 12px 40px rgba(0,0,0,0.4);
         }
         
-        .articles-header { display: flex; justify-content: center; align-items: center; padding: 1rem; background-color: transparent; border-bottom: 1px solid var(--border-color); flex-shrink: 0; position: relative; z-index: 2; }
+        .articles-header { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 1rem; 
+            background-color: rgba(18, 18, 18, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0; 
+            position: relative; 
+            z-index: 2; 
+        }
         .articles-header h5 { text-shadow: 0 0 10px var(--primary-glow); font-weight: 700; }
 
         #admin-article-form, #gemini-pro-section {
