@@ -488,7 +488,6 @@
             appId: "1:789086064752:web:d081f1b6832dabca1d64b5"
         };
         
-        const apiKey = "AIzaSyAEWEOoEZ3WudeE19LnyHLInEZy7Bqlyss";
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -584,15 +583,35 @@
             if (event.key === 'Enter') handleUnlock();
         });
 
-        async function callGeminiAPI(prompt) {
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-            const payload = { contents: [{ parts: [{ text: prompt }] }], };
-            try {
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) return "حدث خطأ أثناء جلب النصيحة.";
-                const result = await response.json();
-                return result.candidates?.[0]?.content?.parts?.[0]?.text.trim() || "لم أتمكن من تقديم نصيحة حاليًا.";
-            } catch (error) { return "خطأ في الشبكة."; }
+        function callGeminiAPI(prompt) {
+            return new Promise((resolve, reject) => {
+                // هذا هو رابط الخادم الآمن
+                const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzy60SZy33Xg49BlK2FPG9gRjWw9Ql9rK38WOm5bMRXcSHnTD4UVgjNyDG8hNN8UTl9/exec";
+                
+                const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+
+                window[callbackName] = function(data) {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    if (data.error) {
+                        console.error("Error from Apps Script:", data.error);
+                        resolve("عفوًا، حدثت مشكلة مؤقتة. يرجى المحاولة مرة أخرى لاحقًا.");
+                    } else {
+                        resolve(data.text);
+                    }
+                };
+
+                const script = document.createElement('script');
+                script.src = WEB_APP_URL + '?callback=' + callbackName + '&prompt=' + encodeURIComponent(prompt);
+                
+                script.onerror = function() {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    resolve("حدثت مشكلة في الاتصال بالشبكة.");
+                };
+
+                document.body.appendChild(script);
+            });
         }
 
         onAuthStateChanged(auth, (user) => {
