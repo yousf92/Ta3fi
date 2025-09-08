@@ -345,7 +345,7 @@
         /* --- END: New Styles for Inspiration Display --- */
     </style>
 </head>
-<body>
+<body style="visibility: hidden;">
     <div id="app-lock-overlay">
         <div class="lock-container">
             <i class="bi bi-shield-lock-fill icon"></i>
@@ -814,6 +814,9 @@
 
             onAuthStateChanged(auth, async (user) => {
                 if (user && (user.emailVerified || user.isAnonymous)) {
+                    // إذا كان المستخدم مسجلاً، أظهر الصفحة الرئيسية
+                    document.body.style.visibility = 'visible';
+                    
                     initializeAppLock();
 
                     setInterval(() => {
@@ -879,7 +882,7 @@
                         loadNotifications(user.uid);
                     }
                 } else {
-                    localStorage.setItem('app_last_unlock', Date.now());
+                    // إذا لم يكن مسجلاً، انقله إلى صفحة تسجيل الدخول
                     window.location.href = 'index.html';
                 }
             });
@@ -1261,4 +1264,3 @@
     </script>
 </body>
 </html>
-

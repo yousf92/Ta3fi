@@ -99,7 +99,7 @@
         }
     </style>
 </head>
-<body>
+<body style="visibility: hidden;">
 
     <div class="form-container text-center">
         <!-- Initial View -->
@@ -220,11 +220,11 @@
 
         onAuthStateChanged(auth, user => {
             if (user && (user.emailVerified || user.isAnonymous)) {
-                if(user.isAnonymous) {
-                     window.location.href = 'main.html';
-                } else {
-                     window.location.href = 'main.html';
-                }
+                // إذا كان المستخدم مسجلاً، انقله مباشرة إلى main.html
+                window.location.href = 'main.html';
+            } else {
+                // إذا لم يكن مسجلاً، أظهر صفحة تسجيل الدخول
+                document.body.style.visibility = 'visible';
             }
         });
 
@@ -293,4 +293,3 @@
 
 </body>
 </html>
-
