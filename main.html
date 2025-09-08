@@ -627,8 +627,6 @@
             ];
             let lastImageIndex = -1;
 
-            const apiKey = "AIzaSyATciHQuf7c0-7vRk0oMLC7vBslCKG78og";
-
             const appLockOverlay = document.getElementById('app-lock-overlay');
             const passcodeError = document.getElementById('passcode-error');
             const unlockBtn = document.getElementById('unlock-btn');
@@ -680,51 +678,39 @@
             });
             window.addEventListener('storage', syncLockState);
 
-            async function callGeminiAPI(prompt) {
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-                const payload = { contents: [{ parts: [{ text: prompt }] }], };
-                try {
-                    const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            function callGeminiAPI(prompt) {
+                return new Promise((resolve, reject) => {
+                    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyYn_lPlFg25E8QTJQGie4ams49eYQekl-qZ9mm9oB4BkLyBtuTS2ZX9pw6D5mfj1Io/exec";
                     
-                    if (!response.ok) {
-                        console.error("Gemini API response not ok:", response.status, response.statusText);
-                        let errorBody;
-                        try {
-                            errorBody = await response.json();
-                        } catch (e) {
-                            errorBody = await response.text();
+                    const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+
+                    window[callbackName] = function(data) {
+                        delete window[callbackName];
+                        document.body.removeChild(script);
+                        if (data.error) {
+                            console.error("Error from Apps Script:", data.error);
+                            resolve("عفوًا، حدثت مشكلة مؤقتة. يرجى المحاولة مرة أخرى لاحقًا.");
+                        } else {
+                            resolve(data.text);
                         }
-                        console.error("Error body:", errorBody);
-                        const errorMessage = errorBody?.error?.message || "فشل الاتصال بالـ API. تأكد من صلاحية مفتاح الـ API وتفعيل الفوترة في حساب Google Cloud.";
-                        return `<span style="color: var(--danger-color);">خطأ في الخادم:</span><br><small>${errorMessage}</small>`;
-                    }
+                    };
 
-                    const result = await response.json();
-                    const candidate = result.candidates?.[0];
+                    const script = document.createElement('script');
+                    script.src = WEB_APP_URL + '?callback=' + callbackName + '&prompt=' + encodeURIComponent(prompt);
+                    
+                    script.onerror = function() {
+                        delete window[callbackName];
+                        document.body.removeChild(script);
+                        resolve("حدثت مشكلة في الاتصال بالشبكة.");
+                    };
 
-                    if (candidate && candidate.content?.parts?.[0]?.text) {
-                        return candidate.content.parts[0].text.trim();
-                    } else {
-                        console.error("Invalid response structure from Gemini API:", result);
-                        return "لم أتمكن من الحصول على رد صالح. حاول مرة أخرى.";
-                    }
-                } catch (error) {
-                    console.error("Error calling Gemini API:", error);
-                    return `<span style="color: var(--danger-color);">خطأ في الشبكة:</span><br><small>تأكد من اتصالك بالإنترنت وأن لا شيء يمنع الوصول إلى خدمات Google.</small>`;
-                }
+                    document.body.appendChild(script);
+                });
             }
 
             function setupGeminiFeatures() {
                 const inspirationBtn = document.getElementById('inspiration-btn');
                 
-                if (!apiKey || apiKey === "YOUR_GEMINI_API_KEY") {
-                    console.warn("مفتاح Gemini API فارغ. الميزات التي تعتمد على الذكاء الاصطناعي معطلة.");
-                    inspirationBtn.disabled = true;
-                    inspirationBtn.style.cursor = 'not-allowed';
-                    inspirationBtn.innerHTML = `<span>تحتاج لإضافة مفتاح API صالح</span>`;
-                    return;
-                }
-
                 inspirationBtn.addEventListener('click', async () => {
                     const inspirationDisplay = document.getElementById('inspiration-display');
                     const inspirationText = document.getElementById('inspiration-text');
@@ -778,7 +764,7 @@
                 let previousAdvice = [];
 
                 async function generateAiAdvice() {
-                    if (isGenerating || !apiKey || apiKey === "YOUR_GEMINI_API_KEY") return;
+                    if (isGenerating) return;
                     isGenerating = true;
                     
                     adviceTextEl.innerHTML = '<div class="spinner-grow text-light spinner-grow-sm" role="status"><span class="visually-hidden">Loading...</span></div>';
@@ -820,12 +806,6 @@
                     adviceCard.style.backgroundImage = `url('${natureImages[newImageIndex]}')`;
                     
                     isGenerating = false;
-                }
-
-                if (!apiKey || apiKey === "YOUR_GEMINI_API_KEY") {
-                    adviceTextEl.textContent = 'ميزة الذكاء الاصطناعي تحتاج مفتاح API صالح للعمل';
-                    refreshBtn.style.display = 'none';
-                    return;
                 }
 
                 refreshBtn.addEventListener('click', generateAiAdvice);
@@ -1128,11 +1108,6 @@
                 quotePage.style.display = 'flex';
                 quotePage.classList.add('active');
                 
-                if (!apiKey || apiKey === "YOUR_GEMINI_API_KEY") {
-                    quoteText.textContent = "استمر في التقدم كل خطوة مهمه";
-                    return;
-                }
-
                 quoteText.textContent = "لحظة من فضلك أفكر في شيء ملهم لك";
                 const prompt = "بصفتك ناصح أمين على منهج السلف الصالح خاطب شخص على وشك يطيح في معصية العادة السرية أو مشاهدة الإباحية عطه كلام قوي ومباشر يجمع بين العقل والترهيب والتذكير بعواقب الفعل عشان يتراجع فورا تكلم باللهجة السعودية العامية وردك لازم يكون بدون تشكيل وبدون أي علامات ترقيم نهائيا وخليه قصير ومختصر وطبيعي كأنك تكلم خويك";
                 const generatedQuote = await callGeminiAPI(prompt);
@@ -1286,3 +1261,4 @@
     </script>
 </body>
 </html>
+
