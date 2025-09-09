@@ -605,25 +605,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // --- START: Service Worker Registration ---
-            // Check if service workers are supported by the browser.
-            if ('serviceWorker' in navigator) {
-                // Register the service worker after the page has finished loading to avoid
-                // impacting the initial page load performance.
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('./sw.js')
-                        .then(registration => {
-                            // Log a success message to the console.
-                            console.log('Service Worker for video caching registered successfully with scope:', registration.scope);
-                        })
-                        .catch(error => {
-                            // Log any errors that occur during registration.
-                            console.error('Service Worker registration failed:', error);
-                        });
-                });
-            }
-            // --- END: Service Worker Registration ---
-
             let startTime = null;
             let timerInterval = null;
             let currentUserRole = 'user';
@@ -1281,6 +1262,14 @@
             setupAiAdviceFeature();
         });
     </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => console.log('Unified Service Worker registered for main.html.'))
+                    .catch(error => console.error('SW registration failed:', error));
+            });
+        }
+    </script>
 </body>
 </html>
-

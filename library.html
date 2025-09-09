@@ -470,14 +470,6 @@
         import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc, getDoc, setDoc, where, orderBy, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./library.js')
-                    .then(registration => console.log('Service Worker registered for library with scope:', registration.scope))
-                    .catch(error => console.error('SW registration failed:', error));
-            });
-        }
-        
         const DEVELOPER_UID = "sytCf4Ru91ZplxTeXYfvqGhDnn12";
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -721,7 +713,7 @@
 
         async function checkIfBookIsCached(url) {
             if (!('caches' in window)) return false;
-            const cache = await caches.open('app-assets-cache-v2');
+            const cache = await caches.open('app-assets-cache-v4'); // Updated cache name
             const response = await cache.match(url);
             return !!response;
         }
@@ -746,6 +738,9 @@
                 const icon = saveOfflineBtn.querySelector('i');
                 icon.className = 'spinner-border spinner-border-sm';
 
+                // This message type can be removed from sw.js if not needed elsewhere
+                // But for now, let's assume it might be useful.
+                // The main caching will happen via the fetch listener.
                 navigator.serviceWorker.controller.postMessage({
                     type: 'CACHE_BOOK',
                     url: currentPdfUrl
@@ -1460,6 +1455,14 @@
         });
 
     </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => console.log('Unified Service Worker registered for library.html.'))
+                    .catch(error => console.error('SW registration failed:', error));
+            });
+        }
+    </script>
 </body>
 </html>
-
