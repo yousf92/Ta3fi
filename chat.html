@@ -890,7 +890,7 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDoc, getDocs, deleteDoc, setDoc, updateDoc, arrayUnion, arrayRemove, where, limit, increment, writeBatch, deleteField } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -1265,6 +1265,8 @@
             loadGroupPinnedMessage(groupId);
             loadGroupMessages(groupId);
         }
+        window.showGroupChatView = showGroupChatView;
+
 
         backToMainViewBtn.addEventListener('click', showMainView);
         backToMainFromGroupBtn.addEventListener('click', showMainView);
@@ -1278,12 +1280,12 @@
             if (user) {
                 // User is signed in.
                 localStorage.setItem('lastReadTimestamp', Date.now().toString());
-
                 currentUserId = user.uid;
                 
                 const userDocRef = doc(db, "users", user.uid);
                 const userDocSnap = await getDoc(userDocRef);
                 
+                // If user doc doesn't exist and they are not anonymous, they are a new user who shouldn't be here.
                 if (!userDocSnap.exists() && !user.isAnonymous) {
                      window.location.href = 'index.html';
                      return;
@@ -1581,14 +1583,17 @@
             querySnapshot.forEach(doc => {
                 const group = doc.data();
                 const isMember = group.members && group.members[currentUserId];
-                
+                const escapedGroupName = group.groupName.replace(/'/g, "\\'");
+
                 const resultEl = document.createElement('div');
-                resultEl.className = 'group-list-item'; // Reusing style
-                 const groupPhoto = group.groupPhotoURL || `https://placehold.co/100x100/00a884/FFFFFF?text=${group.groupName.charAt(0)}`;
+                resultEl.className = 'group-list-item';
+                const groupPhoto = group.groupPhotoURL || `https://placehold.co/100x100/00a884/FFFFFF?text=${group.groupName.charAt(0)}`;
                 
                 let buttonHtml = '';
-                if (isMember) {
-                     buttonHtml = `<button class="btn btn-sm btn-info request-join-btn" onclick="showGroupChatView('${doc.id}', '${group.groupName.replace(/'/g, `\\'`)}')">دخول</button>`;
+                if (currentUserRole === 'developer') {
+                    buttonHtml = `<button class="btn btn-sm btn-info request-join-btn" onclick="window.showGroupChatView('${doc.id}', '${escapedGroupName}')">دخول</button>`;
+                } else if (isMember) {
+                     buttonHtml = `<button class="btn btn-sm btn-info request-join-btn" onclick="window.showGroupChatView('${doc.id}', '${escapedGroupName}')">دخول</button>`;
                 } else {
                     buttonHtml = `<button class="btn btn-sm btn-success request-join-btn" onclick="window.requestToJoinGroup('${doc.id}', this)">طلب انضمام</button>`;
                 }
