@@ -43,11 +43,42 @@
             flex-shrink: 0; color: white;
         }
         .chat-header h5, .chat-header #user-display-name { color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); }
-        #pinned-message-container { padding: 8px 15px; background-color: rgba(255, 251, 230, 0.1); border-bottom: 1px solid #ffe58f; display: none; font-size: 0.9rem; flex-shrink: 0; position: relative; }
-        #pinned-message-clickable-area { cursor: pointer; padding-right: 25px; }
-        #pinned-by-text { font-weight: bold; color: #ffe58f; display: block; font-size: 0.8rem; }
-        #pinned-message-text { color: #ffe58f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-        #unpin-button { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer; font-size: 1.2rem; color: #ffe58f; z-index: 2; }
+        #pinned-message-container, #group-pinned-message-container { 
+            padding: 8px 15px; 
+            background-color: rgba(255, 251, 230, 0.1); 
+            border-bottom: 1px solid #ffe58f; 
+            display: none; 
+            font-size: 0.9rem; 
+            flex-shrink: 0; 
+            position: relative; 
+        }
+        #pinned-message-clickable-area, #group-pinned-message-clickable-area { 
+            cursor: pointer; 
+            padding-right: 25px; 
+        }
+        #pinned-by-text, #group-pinned-by-text { 
+            font-weight: bold; 
+            color: #ffe58f; 
+            display: block; 
+            font-size: 0.8rem; 
+        }
+        #pinned-message-text, #group-pinned-message-text { 
+            color: #ffe58f; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            display: block; 
+        }
+        #unpin-button, #group-unpin-button { 
+            position: absolute; 
+            top: 50%; 
+            right: 10px; 
+            transform: translateY(-50%); 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            color: #ffe58f; 
+            z-index: 2; 
+        }
         .main-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; position: relative; }
         #chat-section { display: flex; flex-direction: column; height: 100%; position: relative; }
         #messages-box {
@@ -96,7 +127,8 @@
         #message-input, #private-message-input, #group-message-input { resize: none; overflow-y: auto; max-height: 120px; border: none; box-shadow: none; background-color: transparent; color: var(--text-color); }
         #send-button, #private-send-button, #group-send-button { background-color: #009688; border-radius: 50%; width: 45px; height: 45px; border: none; display: flex; align-items: center; justify-content: center; }
         #mention-notification { position: absolute; bottom: 15px; right: 20px; width: 40px; height: 40px; background-color: #53bdeb; color: white; border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: bold; cursor: pointer; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-        .edit-modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1050; }
+        .edit-modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1050; }
+        .edit-modal-backdrop.show { display: flex; }
         .edit-modal-content { background-color: #3e4a54; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); color: white; }
         .edit-modal-content textarea { width: 100%; min-height: 100px; background-color: #2a3942; color: white; border: 1px solid #53bdeb; border-radius: 5px; padding: 10px; margin-bottom: 15px; resize: vertical; }
         .edit-modal-buttons { display: flex; justify-content: flex-end; gap: 10px; }
@@ -719,7 +751,15 @@
                         <button id="delete-group-photo" class="btn btn-sm" title="حذف صورة المجموعة"><i class="bi bi-trash-fill"></i></button>
                      </div>
                 </div>
+                 <div id="group-pinned-message-container">
+                    <i id="group-unpin-button" class="bi bi-x-circle-fill"></i>
+                    <div id="group-pinned-message-clickable-area">
+                        <span id="group-pinned-by-text"></span>
+                        <span id="group-pinned-message-text"></span>
+                    </div>
+                </div>
                  <div class="main-content">
+                     <div id="group-swipe-reply-icon" class="swipe-reply-icon-class"><i class="bi bi-reply-fill"></i></div>
                      <div id="join-requests-container">
                         <!-- Join requests will be populated here -->
                      </div>
@@ -785,6 +825,19 @@
         </div>
     </div>
     <!-- END: Group Members Modal -->
+
+    <!-- START: Edit Message Modal -->
+    <div class="edit-modal-backdrop" id="edit-message-modal">
+        <div class="edit-modal-content">
+            <h6>قم بتعديل رسالتك:</h6>
+            <textarea id="edit-message-textarea"></textarea>
+            <div class="edit-modal-buttons">
+                <button id="cancel-edit-btn" class="btn btn-secondary">إلغاء</button>
+                <button id="save-edit-btn" class="btn btn-primary">حفظ</button>
+            </div>
+        </div>
+    </div>
+    <!-- END: Edit Message Modal -->
     
     <!-- START: Custom Confirm Modal HTML -->
     <div class="confirm-modal-backdrop" id="custom-confirm-modal">
@@ -845,11 +898,11 @@
         originalChatStructure.style.flexDirection = 'column';
         originalChatStructure.style.height = '100%';
         originalChatStructure.innerHTML = `
-            <div id="pinned-message-container" style="padding: 8px 15px; background-color: rgba(255, 251, 230, 0.1); border-bottom: 1px solid #ffe58f; display: none; font-size: 0.9rem; flex-shrink: 0; position: relative;">
-                 <i id="unpin-button" class="bi bi-x-circle-fill" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer; font-size: 1.2rem; color: #ffe58f; z-index: 2;"></i>
-                <div id="pinned-message-clickable-area" style="cursor: pointer; padding-right: 25px;">
-                    <span id="pinned-by-text" style="font-weight: bold; color: #ffe58f; display: block; font-size: 0.8rem;"></span>
-                    <span id="pinned-message-text" style="color: #ffe58f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;"></span>
+            <div id="pinned-message-container">
+                 <i id="unpin-button" class="bi bi-x-circle-fill"></i>
+                <div id="pinned-message-clickable-area">
+                    <span id="pinned-by-text"></span>
+                    <span id="pinned-message-text"></span>
                 </div>
             </div>
             <div class="main-content">
@@ -957,6 +1010,17 @@
         const joinRequestsContainer = document.getElementById('join-requests-container');
         const groupReplyPreview = document.getElementById('group-reply-preview');
         const cancelGroupReplyBtn = document.getElementById('cancel-group-reply');
+        const groupPinnedMessageContainer = document.getElementById('group-pinned-message-container');
+        const groupPinnedByText = document.getElementById('group-pinned-by-text');
+        const groupPinnedMessageText = document.getElementById('group-pinned-message-text');
+        const groupUnpinButton = document.getElementById('group-unpin-button');
+        const groupPinnedMessageClickableArea = document.getElementById('group-pinned-message-clickable-area');
+
+        // Edit Modal References
+        const editMessageModalEl = document.getElementById('edit-message-modal');
+        const editMessageTextarea = document.getElementById('edit-message-textarea');
+        const saveEditBtn = document.getElementById('save-edit-btn');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
 
         // App Lock References
         const appLockOverlay = document.getElementById('app-lock-overlay');
@@ -970,6 +1034,7 @@
         let replyToMessage = null;
         let privateReplyToMessage = null; 
         let groupReplyToMessage = null;
+        let editingMessageInfo = null;
         const userProfiles = {};
         let isVisitor = true;
         let unreadCount = 0;
@@ -987,6 +1052,7 @@
         let unsubscribeUserDoc = null; 
         let unsubscribeRecipientDoc = null;
         let unsubscribeMyGroups = null;
+        let unsubscribeGroupDoc = null;
         let unsubscribeGroupMessages = null;
         let unsubscribeJoinRequests = null;
 
@@ -994,7 +1060,6 @@
         
         // --- START: Custom Confirm Modal Logic ---
         const confirmModalEl = document.getElementById('custom-confirm-modal');
-        const confirmModal = new bootstrap.Modal(confirmModalEl, { backdrop: 'static', keyboard: false });
         const confirmMessageEl = document.getElementById('custom-confirm-message');
         const confirmIconEl = confirmModalEl.querySelector('.confirm-modal-icon i');
         const confirmOkBtn = document.getElementById('custom-confirm-ok');
@@ -1040,6 +1105,7 @@
             if (unsubscribeRecipientDoc) { unsubscribeRecipientDoc(); unsubscribeRecipientDoc = null; }
             if (unsubscribeGroupMessages) { unsubscribeGroupMessages(); unsubscribeGroupMessages = null; }
             if (unsubscribeJoinRequests) { unsubscribeJoinRequests(); unsubscribeJoinRequests = null; }
+            if (unsubscribeGroupDoc) { unsubscribeGroupDoc(); unsubscribeGroupDoc = null; }
         }
 
         async function showPrivateChatView(targetUserId, targetUserName, targetUserAvatar) {
@@ -1125,10 +1191,8 @@
             currentGroupData = groupDocSnap.data();
             let isMember = currentGroupData.members && currentGroupData.members[currentUserId];
 
-            // Developer auto-join logic
             if (currentUserRole === 'developer' && !isMember) {
                 await updateDoc(groupDocRef, { [`members.${currentUserId}`]: 'member' });
-                // Re-fetch data after joining
                 const updatedGroupSnap = await getDoc(groupDocRef);
                 currentGroupData = updatedGroupSnap.data();
                 isMember = true;
@@ -1145,7 +1209,6 @@
             
             const currentUserRoleInGroup = currentGroupData.members[currentUserId];
 
-            // Show upload/delete buttons only for owner
             if (currentGroupData.ownerId === currentUserId) {
                 uploadGroupPhotoContainer.style.display = 'flex';
                 uploadGroupPhotoBtn.onclick = () => uploadGroupPhoto(groupId);
@@ -1168,6 +1231,7 @@
 
             groupChatHeaderClickable.onclick = () => showGroupMembers(groupId);
             
+            loadGroupPinnedMessage(groupId);
             loadGroupMessages(groupId);
         }
 
@@ -1229,7 +1293,10 @@
             const container = document.getElementById(containerId);
             if (!container) return;
             const swipeIcon = container.parentElement.querySelector('.swipe-reply-icon-class');
-            if (!swipeIcon) return;
+            if (!swipeIcon) {
+                console.warn(`Swipe icon not found for container ${containerId}`);
+                return;
+            }
             let startX = 0, startY = 0, currentX = 0, swipedElement = null, isScrolling = false, isSwipeGesture = false;
             const SWIPE_THRESHOLD = 80, DIRECTION_LOCK_THRESHOLD = 10;
             container.addEventListener('touchstart', (e) => {
@@ -1369,7 +1436,8 @@
             const memberIds = Object.keys(groupData.members);
 
             for (const memberId of memberIds) {
-                const userProfile = userProfiles[memberId] || { displayName: 'مستخدم محذوف', photoURL: 'https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png' };
+                const userProfile = userProfiles[memberId];
+                 if (!userProfile) continue; // Skip if profile not loaded yet
                 
                 // Stealth Mode for Developers
                 if (userProfile.role === 'developer') {
@@ -1567,11 +1635,12 @@
                      const senderProfile = userProfiles[msg.senderId] || {};
                      const displayName = senderProfile.displayName || 'مستخدم غير معروف';
                      const photoURL = senderProfile.photoURL || 'https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png';
+                     const currentUserRoleInGroup = currentGroupData?.members[currentUserId];
                      
                      let roleBadge = '';
-                     const senderRole = currentGroupData?.members[msg.senderId];
-                     if (senderRole === 'owner') roleBadge = '<span class="badge bg-primary role-badge">المالك</span>';
-                     else if (senderRole === 'admin') roleBadge = '<span class="badge bg-success role-badge">مشرف</span>';
+                     const senderRoleInGroup = currentGroupData?.members[msg.senderId];
+                     if (senderRoleInGroup === 'owner') roleBadge = '<span class="badge bg-primary role-badge">المالك</span>';
+                     else if (senderRoleInGroup === 'admin') roleBadge = '<span class="badge bg-success role-badge">مشرف</span>';
                      const senderNameDisplay = `${displayName} ${roleBadge}`;
                      
                      const msgWrapper = document.createElement('div');
@@ -1605,8 +1674,22 @@
                      }
                      displayedReactionsHtml += '</div>';
 
-                     const replyButton = `<a onclick="window.setGroupReplyWrapper('${msgId}')" title="رد"><i class="bi bi-reply-fill"></i></a>`;
-                     const actions = `<div class="message-actions">${replyButton}</div>`;
+                     let actionsHtml = `<a onclick="window.setGroupReplyWrapper('${msgId}')" title="رد"><i class="bi bi-reply-fill"></i></a>`;
+                     if (isOwn) {
+                        actionsHtml += `<a onclick="window.editGroupMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a>`;
+                        actionsHtml += `<a onclick="window.deleteOwnGroupMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>`;
+                     }
+
+                     if (currentUserRoleInGroup === 'owner' || currentUserRoleInGroup === 'admin') {
+                        actionsHtml += `<a onclick="window.pinGroupMessage('${msgId}')" title="تثبيت"><i class="bi bi-pin-angle-fill"></i></a>`;
+                        if (!isOwn) {
+                            actionsHtml += `<a onclick="window.deleteOtherGroupMessage('${msgId}')" title="حذف (إدارة)"><i class="bi bi-shield-x"></i></a>`;
+                        }
+                     }
+                     
+                     const actions = `<div class="message-actions">${actionsHtml}</div>`;
+
+                     const editedBadge = msg.isEdited ? `<span class="edited-badge">(تم التعديل)</span>` : '';
 
                      msgWrapper.innerHTML = `
                         <img src="${photoURL}" alt="${displayName}" class="avatar">
@@ -1618,6 +1701,7 @@
                                 <div class="message-text">${msg.text}</div>
                                 <div class="timestamp-wrapper">
                                     <span class="timestamp">${time}</span>
+                                    ${editedBadge}
                                 </div>
                                 ${displayedReactionsHtml}
                             </div>
@@ -1718,6 +1802,70 @@
         groupMessageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendGroupMessage(); } });
         groupMessageInput.addEventListener('input', () => { groupMessageInput.style.height = 'auto'; groupMessageInput.style.height = (groupMessageInput.scrollHeight) + 'px'; });
         // --- END: Group System Logic ---
+
+        // --- START: Group Message Actions ---
+        window.editGroupMessage = (msgId, text) => {
+            editingMessageInfo = { id: msgId, collectionPath: `groups/${currentGroupId}/messages` };
+            editMessageTextarea.value = text;
+            editMessageModalEl.classList.add('show');
+            editMessageTextarea.focus();
+        };
+
+        window.deleteOwnGroupMessage = async (msgId) => {
+            showCustomConfirm("هل أنت متأكد من حذف رسالتك؟", "bi bi-trash-fill", async () => {
+                await deleteDoc(doc(db, "groups", currentGroupId, "messages", msgId));
+            });
+        };
+
+        window.deleteOtherGroupMessage = async (msgId) => {
+            showCustomConfirm("هل أنت متأكد من حذف هذه الرسالة؟ (إجراء إداري)", "bi bi-shield-x", async () => {
+                await deleteDoc(doc(db, "groups", currentGroupId, "messages", msgId));
+            });
+        };
+
+        window.pinGroupMessage = async (messageId) => {
+            const messageRef = doc(db, "groups", currentGroupId, "messages", messageId);
+            const messageSnap = await getDoc(messageRef);
+            if (!messageSnap.exists()) return;
+            const messageData = messageSnap.data();
+
+            const pinnedData = {
+                messageId: messageId,
+                text: messageData.text,
+                senderName: userProfiles[messageData.senderId]?.displayName || 'عضو',
+                pinnedBy: currentDisplayName
+            };
+
+            await updateDoc(doc(db, "groups", currentGroupId), { pinnedMessage: pinnedData });
+        };
+        
+        window.unpinGroupMessage = async () => {
+             await updateDoc(doc(db, "groups", currentGroupId), { pinnedMessage: deleteField() });
+        };
+
+        function loadGroupPinnedMessage(groupId) {
+            if (unsubscribeGroupDoc) unsubscribeGroupDoc();
+            unsubscribeGroupDoc = onSnapshot(doc(db, "groups", groupId), (docSnap) => {
+                if (docSnap.exists()) {
+                    currentGroupData = docSnap.data(); // Keep group data fresh
+                    const pinned = docSnap.data().pinnedMessage;
+                    const currentUserRoleInGroup = currentGroupData?.members[currentUserId];
+                    const canManagePin = currentUserRoleInGroup === 'owner' || currentUserRoleInGroup === 'admin';
+
+                    if (pinned && pinned.text) {
+                        groupPinnedByText.textContent = `تم التثبيت بواسطة: ${pinned.pinnedBy}`;
+                        groupPinnedMessageText.textContent = `${pinned.senderName}: ${pinned.text}`;
+                        groupPinnedMessageContainer.style.display = 'block';
+                        groupUnpinButton.style.display = canManagePin ? 'block' : 'none';
+                        groupUnpinButton.onclick = () => window.unpinGroupMessage();
+                    } else {
+                        groupPinnedMessageContainer.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // --- END: Group Message Actions ---
         
         // --- START: Private Chat Logic ---
         function setPrivateReplyFromElement(el) {
@@ -2074,7 +2222,10 @@
         }
 
         window.editPrivateMessage = (id, text) => {
-            showPrivateEditModal(id, text);
+            editingMessageInfo = { id: id, collectionPath: `private_chats/${privateChatRoomId}/messages` };
+            editMessageTextarea.value = text;
+            editMessageModalEl.classList.add('show');
+            editMessageTextarea.focus();
         };
 
         window.copyPrivateMessageText = async (msgId) => {
@@ -2089,42 +2240,6 @@
                 }
             }
         };
-
-        function showPrivateEditModal(id, currentText) {
-            const backdrop = document.createElement('div');
-            backdrop.className = 'edit-modal-backdrop';
-            backdrop.innerHTML = `
-                <div class="edit-modal-content">
-                    <h6>قم بتعديل رسالتك:</h6>
-                    <textarea id="edit-textarea">${currentText}</textarea>
-                    <div class="edit-modal-buttons">
-                        <button class="btn btn-secondary btn-cancel">إلغاء</button>
-                        <button class="btn btn-primary btn-ok">حفظ</button>
-                    </div>
-                </div>`;
-            document.body.appendChild(backdrop);
-            const textarea = document.getElementById('edit-textarea');
-            textarea.focus();
-            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-            
-            backdrop.querySelector('.btn-ok').onclick = () => {
-                const newText = textarea.value;
-                if (newText.trim() && newText !== currentText) {
-                    const msgRef = doc(db, "private_chats", privateChatRoomId, "messages", id);
-                    updateDoc(msgRef, {
-                        text: newText,
-                        isEdited: true,
-                        lastEditedAt: serverTimestamp()
-                    });
-                }
-                document.body.removeChild(backdrop);
-            };
-            
-            backdrop.querySelector('.btn-cancel').onclick = () => document.body.removeChild(backdrop);
-            backdrop.onclick = (e) => {
-                if (e.target === backdrop) document.body.removeChild(backdrop);
-            };
-        }
 
         window.togglePrivateReaction = async (msgId, emoji) => {
             if (!currentUserId || !privateChatRoomId) return;
@@ -2248,7 +2363,7 @@
                     const replyButton = `<a onclick="window.setReplyWrapper('${msgId}')" title="رد"><i class="bi bi-reply-fill"></i></a>`;
                     const copyButton = `<a onclick="window.copyMessageText('${msgId}')" title="نسخ"><i class="bi bi-clipboard"></i></a>`;
                     if (isOwn) {
-                        controls = `<div class="message-actions">${copyButton}${replyButton}<a onclick="window.editMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a><a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`;
+                        controls = `<div class="message-actions">${copyButton}${replyButton}<a onclick="window.editMessage('${msgId}', 'public', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a><a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`;
                     } else {
                         let actionButtons = `${startPrivateChatIcon}${copyButton}${replyButton}`;
                         if(canModerate){
@@ -2293,8 +2408,39 @@
         function setReplyFromElement(el) { const msgId = el.id.replace('message-', ''); const senderName = el.dataset.senderName; const senderId = el.dataset.senderId; const text = el.dataset.text; const firstLine = text.split('\n')[0]; if(senderName && senderId && text){ replyToMessage = { messageId: msgId, senderName, senderId, text: firstLine }; document.getElementById('reply-preview-sender').textContent = `الرد على ${senderName}`; document.getElementById('reply-preview-text').textContent = firstLine; replyPreview.style.display = 'block'; messageInput.focus(); } }
         window.setReplyWrapper = (msgId) => { event.stopPropagation(); const el = document.getElementById(`message-${msgId}`); if (el) setReplyFromElement(el); };
         window.copyMessageText = async (msgId) => { const textElement = document.querySelector(`#message-${msgId} .message-text`); if (textElement) { try { await navigator.clipboard.writeText(textElement.innerText); alert("تم نسخ النص!"); } catch (err) { console.error('Failed to copy text: ', err); alert("فشل نسخ النص."); } } };
-        function showEditModal(id, currentText) { const backdrop = document.createElement('div'); backdrop.className = 'edit-modal-backdrop'; backdrop.innerHTML = `<div class="edit-modal-content"><h6>قم بتعديل رسالتك:</h6><textarea id="edit-textarea">${currentText}</textarea><div class="edit-modal-buttons"><button class="btn btn-secondary btn-cancel">إلغاء</button><button class="btn btn-primary btn-ok">حفظ</button></div></div>`; document.body.appendChild(backdrop); const textarea = document.getElementById('edit-textarea'); textarea.focus(); textarea.setSelectionRange(textarea.value.length, textarea.value.length); backdrop.querySelector('.btn-ok').onclick = () => { const newText = textarea.value; if (newText.trim() && newText !== currentText) { updateDoc(doc(db, "messages", id), { text: newText, isEdited: true, lastEditedAt: serverTimestamp() }); } document.body.removeChild(backdrop); }; backdrop.querySelector('.btn-cancel').onclick = () => document.body.removeChild(backdrop); backdrop.onclick = (e) => { if (e.target === backdrop) document.body.removeChild(backdrop); }; }
-        window.editMessage = (id, text) => { showEditModal(id, text); };
+        
+        window.editMessage = (msgId, type, text) => {
+            let collectionPath = '';
+            if (type === 'public') {
+                collectionPath = 'messages';
+            } // This function will now be generic, but we only call it for public from here
+            // It will be replaced by more specific edit functions
+            editingMessageInfo = { id: msgId, collectionPath: collectionPath };
+            editMessageTextarea.value = text;
+            editMessageModalEl.classList.add('show');
+            editMessageTextarea.focus();
+        };
+
+        saveEditBtn.addEventListener('click', () => {
+            if (!editingMessageInfo) return;
+            const newText = editMessageTextarea.value.trim();
+            if (newText) {
+                const msgRef = doc(db, editingMessageInfo.collectionPath, editingMessageInfo.id);
+                updateDoc(msgRef, {
+                    text: newText,
+                    isEdited: true,
+                    lastEditedAt: serverTimestamp()
+                });
+            }
+            editMessageModalEl.classList.remove('show');
+            editingMessageInfo = null;
+        });
+        cancelEditBtn.addEventListener('click', () => {
+            editMessageModalEl.classList.remove('show');
+            editingMessageInfo = null;
+        });
+
+
         window.toggleReaction = async (msgId, emoji) => { if (!auth.currentUser) return; const msgRef = doc(db, "messages", msgId); const msgDoc = await getDoc(msgRef); const msgData = msgDoc.data(); const uid = auth.currentUser.uid; const existing = msgData.reactions?.find(r => r.userId === uid); if (existing) { await updateDoc(msgRef, { reactions: arrayRemove(existing) }); if (existing.emoji !== emoji) { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } } else { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } };
         window.deleteOwnMessage = async (id) => { showCustomConfirm("هل أنت متأكد من حذف رسالتك؟", "bi bi-trash-fill", async () => await deleteDoc(doc(db, "messages", id))); };
         window.deleteOtherMessage = async (id) => { if (isVisitor || !['developer', 'admin'].includes(currentUserRole)) return; showCustomConfirm("هل أنت متأكد من حذف هذه الرسالة؟", "bi bi-trash-fill", async () => await deleteDoc(doc(db, "messages", id))); };
