@@ -522,9 +522,11 @@
         }
         #upload-group-photo-container {
             position: absolute;
-            left: 55px; /* Adjust based on back button width */
+            left: 60px; /* Adjust based on back button width */
             top: 50%;
             transform: translateY(-50%);
+            display: flex;
+            gap: 5px;
         }
         #upload-group-photo, #delete-group-photo {
             background-color: rgba(0,0,0,0.5);
@@ -901,7 +903,7 @@
                 </div>
                 <div id="group-search-results" class="p-2 flex-shrink-0" style="overflow-y: auto; max-height: 250px;"></div>
                 <div id="my-groups-list-container" class="flex-grow-1" style="overflow-y: auto; display: flex; flex-direction: column;">
-                    <h6 class="text-muted p-2 flex-shrink-0">مجموعاتي</h6>
+                    <h6 class="text-muted p-2 flex-shrink-0" id="my-groups-title">مجموعاتي</h6>
                     <div id="my-groups-list" class="flex-grow-1">
                         <p class="text-center text-muted p-3">أنت لست عضواً في أي مجموعة بعد</p>
                     </div>
@@ -939,6 +941,7 @@
         const createGroupModal = new bootstrap.Modal(document.getElementById('create-group-modal'));
         const groupMembersModal = new bootstrap.Modal(document.getElementById('group-members-modal'));
         const myGroupsList = document.getElementById('my-groups-list');
+        const myGroupsTitle = document.getElementById('my-groups-title');
         const groupSearchInput = document.getElementById('group-search-input');
         const groupSearchResults = document.getElementById('group-search-results');
         const backToMainFromGroupBtn = document.getElementById('back-to-main-from-group');
@@ -1292,8 +1295,10 @@
             
             let q;
             if (currentUserRole === 'developer') {
+                myGroupsTitle.textContent = "جميع المجموعات (وضع المطور)";
                 q = query(collection(db, "groups"), orderBy("createdAt", "desc"));
             } else {
+                myGroupsTitle.textContent = "مجموعاتي";
                 q = query(collection(db, "groups"), where(`members.${currentUserId}`, 'in', ['owner', 'admin', 'member']));
             }
             
@@ -1303,7 +1308,6 @@
                     groups.push({ id: doc.id, ...doc.data() });
                 });
                 
-                // Client-side sort if not a developer (since Firestore can't sort on timestamp with the 'in' filter)
                 if(currentUserRole !== 'developer'){
                      groups.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
                 }
@@ -1365,8 +1369,14 @@
             const memberIds = Object.keys(groupData.members);
 
             for (const memberId of memberIds) {
-                const memberRole = groupData.members[memberId];
                 const userProfile = userProfiles[memberId] || { displayName: 'مستخدم محذوف', photoURL: 'https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png' };
+                
+                // Stealth Mode for Developers
+                if (userProfile.role === 'developer') {
+                    continue; 
+                }
+
+                const memberRole = groupData.members[memberId];
                 const escapedMemberName = userProfile.displayName.replace(/'/g, "\\'");
                 
                 let actionsHtml = '<div class="member-actions">';
@@ -1449,7 +1459,7 @@
                 
                 let buttonHtml = '';
                 if (isMember) {
-                    buttonHtml = `<button class="btn btn-sm btn-secondary request-join-btn" disabled>عضو بالفعل</button>`;
+                     buttonHtml = `<button class="btn btn-sm btn-info request-join-btn" onclick="showGroupChatView('${doc.id}', '${group.groupName.replace(/'/g, `\\'`)}')">دخول</button>`;
                 } else {
                     buttonHtml = `<button class="btn btn-sm btn-success request-join-btn" onclick="window.requestToJoinGroup('${doc.id}', this)">طلب انضمام</button>`;
                 }
