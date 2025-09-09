@@ -821,10 +821,34 @@
                 <div class="modal-body p-0" id="group-members-list">
                     <!-- Members will be populated here by JS -->
                 </div>
+                <div class="modal-footer border-secondary" id="group-members-modal-footer">
+                    <!-- Edit description button will be injected here by JS -->
+                </div>
             </div>
         </div>
     </div>
     <!-- END: Group Members Modal -->
+
+    <!-- START: Edit Group Description Modal -->
+    <div class="modal fade" id="edit-group-description-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title">تعديل وصف المجموعة</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-group-description-form">
+                        <div class="mb-3">
+                            <textarea class="form-control" id="group-description-textarea" rows="4"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">حفظ التغييرات</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Edit Group Description Modal -->
 
     <!-- START: Edit Message Modal -->
     <div class="edit-modal-backdrop" id="edit-message-modal">
@@ -946,17 +970,17 @@
         // --- Groups Tab ---
         groupsTab.innerHTML = `
             <div style="display: flex; flex-direction: column; height: 100%;">
-                <div class="p-2 flex-shrink-0">
+                <div class="p-2 flex-shrink: 0;">
                     <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#create-group-modal">
                         <i class="bi bi-plus-circle-fill me-2"></i> إنشاء مجموعة جديدة
                     </button>
                 </div>
-                <div class="p-2 flex-shrink-0">
+                <div class="p-2 flex-shrink: 0;">
                     <input type="search" id="group-search-input" placeholder="اكتشف مجموعات...">
                 </div>
-                <div id="group-search-results" class="p-2 flex-shrink-0" style="overflow-y: auto; max-height: 250px;"></div>
+                <div id="group-search-results" class="p-2 flex-shrink: 0;" style="overflow-y: auto; max-height: 250px;"></div>
                 <div id="my-groups-list-container" class="flex-grow-1" style="overflow-y: auto; display: flex; flex-direction: column;">
-                    <h6 class="text-muted p-2 flex-shrink-0" id="my-groups-title">مجموعاتي</h6>
+                    <h6 class="text-muted p-2 flex-shrink: 0;" id="my-groups-title">مجموعاتي</h6>
                     <div id="my-groups-list" class="flex-grow-1">
                         <p class="text-center text-muted p-3">أنت لست عضواً في أي مجموعة بعد</p>
                     </div>
@@ -992,7 +1016,8 @@
         // Group System References
         const createGroupForm = document.getElementById('create-group-form');
         const createGroupModal = new bootstrap.Modal(document.getElementById('create-group-modal'));
-        const groupMembersModal = new bootstrap.Modal(document.getElementById('group-members-modal'));
+        const groupMembersModalEl = document.getElementById('group-members-modal');
+        const groupMembersModal = new bootstrap.Modal(groupMembersModalEl);
         const myGroupsList = document.getElementById('my-groups-list');
         const myGroupsTitle = document.getElementById('my-groups-title');
         const groupSearchInput = document.getElementById('group-search-input');
@@ -1021,6 +1046,9 @@
         const editMessageTextarea = document.getElementById('edit-message-textarea');
         const saveEditBtn = document.getElementById('save-edit-btn');
         const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const editGroupDescriptionModalEl = document.getElementById('edit-group-description-modal');
+        const editGroupDescriptionModal = new bootstrap.Modal(editGroupDescriptionModalEl);
+        const editGroupDescriptionForm = document.getElementById('edit-group-description-form');
 
         // App Lock References
         const appLockOverlay = document.getElementById('app-lock-overlay');
@@ -1191,8 +1219,10 @@
             currentGroupData = groupDocSnap.data();
             let isMember = currentGroupData.members && currentGroupData.members[currentUserId];
 
+            // Developer auto-join logic
             if (currentUserRole === 'developer' && !isMember) {
                 await updateDoc(groupDocRef, { [`members.${currentUserId}`]: 'member' });
+                // Re-fetch data after joining
                 const updatedGroupSnap = await getDoc(groupDocRef);
                 currentGroupData = updatedGroupSnap.data();
                 isMember = true;
@@ -1209,6 +1239,7 @@
             
             const currentUserRoleInGroup = currentGroupData.members[currentUserId];
 
+            // Show upload/delete buttons only for owner
             if (currentGroupData.ownerId === currentUserId) {
                 uploadGroupPhotoContainer.style.display = 'flex';
                 uploadGroupPhotoBtn.onclick = () => uploadGroupPhoto(groupId);
@@ -1245,34 +1276,31 @@
             document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') initializeAppLock(); });
 
             if (user) {
+                // User is signed in.
                 localStorage.setItem('lastReadTimestamp', Date.now().toString());
 
                 currentUserId = user.uid;
-                isVisitor = user.isAnonymous;
                 
                 const userDocRef = doc(db, "users", user.uid);
                 const userDocSnap = await getDoc(userDocRef);
-                const existingData = userDocSnap.exists() ? userDocSnap.data() : {};
-                let dataToSet = {};
+                
+                if (!userDocSnap.exists() && !user.isAnonymous) {
+                     window.location.href = 'index.html';
+                     return;
+                }
 
-                if (isVisitor) {
-                    const visitorData = getVisitorProfile();
-                    currentDisplayName = visitorData.displayName || `زائر-${user.uid.substring(0, 5)}`;
-                    currentUserRole = 'user';
-                    dataToSet = { displayName: currentDisplayName, isVisitor: true, role: existingData.role || 'user' };
-                } else { 
-                    if (!user.emailVerified) { window.location.href = './index.html'; return; }
-                    currentDisplayName = user.displayName || user.email;
-                    currentUserRole = existingData.role || 'user';
-                    const status = await checkUserStatus(user.uid);
-                    if (status === 'banned') { messagesBox.innerHTML = '<div class="text-center p-5 h-100 d-flex justify-content-center align-items-center"><h1>لقد تم حظرك</h1></div>'; document.getElementById('chat-footer').style.display = 'none'; signOut(auth); return; }
-                    dataToSet = { displayName: currentDisplayName, isVisitor: false, role: currentUserRole };
+                const userData = userDocSnap.exists() ? userDocSnap.data() : {};
+                
+                // Set global user state
+                currentDisplayName = userData.displayName || `زائر-${user.uid.substring(0, 5)}`;
+                currentUserRole = userData.role || 'user';
+                isVisitor = user.isAnonymous || !userData.displayName;
+
+                if (isVisitor && !userData.displayName) {
+                    await setDoc(userDocRef, { displayName: currentDisplayName, isVisitor: true, role: 'user' }, { merge: true });
                 }
                 
-                if (existingData.displayName !== dataToSet.displayName || existingData.isVisitor !== dataToSet.isVisitor || existingData.role !== dataToSet.role) {
-                    await setDoc(userDocRef, dataToSet, { merge: true });
-                }
-                userProfiles[user.uid] = dataToSet;
+                userProfiles[user.uid] = { ...userData, displayName: currentDisplayName, role: currentUserRole, isVisitor };
                 
                 listenForUserProfiles(); 
                 loadMessages();
@@ -1283,20 +1311,25 @@
                 initializeSwipeToReply('private-messages-box', '.private-message-wrapper', setPrivateReplyFromElement);
                 initializeSwipeToReply('group-messages-box', '.message', setGroupReplyFromElement);
 
-
             } else {
-                signInAnonymously(auth).catch((error) => { console.error("Anonymous sign-in failed:", error); messagesBox.innerHTML = '<div class="text-center p-5">فشل الاتصال بالدردشة.</div>'; });
+                // No user is signed in. Redirect to login page.
+                window.location.href = 'index.html';
             }
         });
 
         function initializeSwipeToReply(containerId, messageSelector, replyFunction) {
             const container = document.getElementById(containerId);
             if (!container) return;
-            const swipeIcon = container.parentElement.querySelector('.swipe-reply-icon-class');
+            // The public chat doesn't have its own swipe icon, it's inside the main content.
+            const swipeIcon = containerId === 'messages-box'
+                ? document.getElementById('swipe-reply-icon')
+                : container.parentElement.querySelector('.swipe-reply-icon-class');
+            
             if (!swipeIcon) {
                 console.warn(`Swipe icon not found for container ${containerId}`);
                 return;
             }
+
             let startX = 0, startY = 0, currentX = 0, swipedElement = null, isScrolling = false, isSwipeGesture = false;
             const SWIPE_THRESHOLD = 80, DIRECTION_LOCK_THRESHOLD = 10;
             container.addEventListener('touchstart', (e) => {
@@ -1431,7 +1464,21 @@
             const groupData = groupSnap.data();
             const currentUserRoleInGroup = groupData.members[currentUserId];
             const membersListEl = document.getElementById('group-members-list');
+            const membersModalFooter = document.getElementById('group-members-modal-footer');
             membersListEl.innerHTML = '';
+            membersModalFooter.innerHTML = '';
+
+            if (currentUserRoleInGroup === 'owner') {
+                const editDescBtn = document.createElement('button');
+                editDescBtn.className = 'btn btn-outline-info';
+                editDescBtn.innerHTML = '<i class="bi bi-pencil-fill me-2"></i> تعديل الوصف';
+                editDescBtn.onclick = () => {
+                    document.getElementById('group-description-textarea').value = groupData.description || '';
+                    groupMembersModal.hide(); // Hide members modal before showing the other
+                    editGroupDescriptionModal.show();
+                };
+                membersModalFooter.appendChild(editDescBtn);
+            }
 
             const memberIds = Object.keys(groupData.members);
 
@@ -1479,6 +1526,20 @@
             }
             groupMembersModal.show();
         }
+
+        editGroupDescriptionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentGroupId) return;
+            const newDescription = document.getElementById('group-description-textarea').value.trim();
+            const groupRef = doc(db, "groups", currentGroupId);
+            try {
+                await updateDoc(groupRef, { description: newDescription });
+                editGroupDescriptionModal.hide();
+            } catch (error) {
+                console.error("Error updating description:", error);
+                alert("فشل تحديث الوصف.");
+            }
+        });
 
         window.toggleGroupAdminRole = async (groupId, memberId, newRole) => {
             const groupRef = doc(db, "groups", groupId);
@@ -2363,7 +2424,7 @@
                     const replyButton = `<a onclick="window.setReplyWrapper('${msgId}')" title="رد"><i class="bi bi-reply-fill"></i></a>`;
                     const copyButton = `<a onclick="window.copyMessageText('${msgId}')" title="نسخ"><i class="bi bi-clipboard"></i></a>`;
                     if (isOwn) {
-                        controls = `<div class="message-actions">${copyButton}${replyButton}<a onclick="window.editMessage('${msgId}', 'public', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a><a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`;
+                        controls = `<div class="message-actions">${copyButton}${replyButton}<a onclick="window.editPublicMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a><a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`;
                     } else {
                         let actionButtons = `${startPrivateChatIcon}${copyButton}${replyButton}`;
                         if(canModerate){
@@ -2409,13 +2470,8 @@
         window.setReplyWrapper = (msgId) => { event.stopPropagation(); const el = document.getElementById(`message-${msgId}`); if (el) setReplyFromElement(el); };
         window.copyMessageText = async (msgId) => { const textElement = document.querySelector(`#message-${msgId} .message-text`); if (textElement) { try { await navigator.clipboard.writeText(textElement.innerText); alert("تم نسخ النص!"); } catch (err) { console.error('Failed to copy text: ', err); alert("فشل نسخ النص."); } } };
         
-        window.editMessage = (msgId, type, text) => {
-            let collectionPath = '';
-            if (type === 'public') {
-                collectionPath = 'messages';
-            } // This function will now be generic, but we only call it for public from here
-            // It will be replaced by more specific edit functions
-            editingMessageInfo = { id: msgId, collectionPath: collectionPath };
+        window.editPublicMessage = (msgId, text) => {
+            editingMessageInfo = { id: msgId, collectionPath: 'messages' };
             editMessageTextarea.value = text;
             editMessageModalEl.classList.add('show');
             editMessageTextarea.focus();
