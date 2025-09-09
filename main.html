@@ -1170,17 +1170,6 @@
                     videoElement.src = videoUrl;
                     videoElement.classList.add('visible');
                     videoElement.play().catch(e => console.error("Video play failed:", e));
-
-                    // --- START: Service Worker Communication ---
-                    // إرسال رسالة إلى الـ Service Worker لتخزين الفيديو مؤقتًا
-                    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                        navigator.serviceWorker.controller.postMessage({
-                            type: 'CACHE_VIDEO',
-                            url: videoUrl
-                        });
-                    }
-                    // --- END: Service Worker Communication ---
-
                 } else {
                     cardElement.style.background = ''; // Restore gradient
                     overlayElement.classList.remove('visible');
@@ -1272,21 +1261,16 @@
             setupGeminiFeatures();
             setupAiAdviceFeature();
         });
-
-        // --- START: Service Worker Registration ---
+    </script>
+    <script>
         if ('serviceWorker' in navigator) {
-            // استخدام window.addEventListener('load') يضمن عدم تأخير تحميل الصفحة
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(registration => {
-                        console.log('Service Worker registered with scope:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.error('Service Worker registration failed:', error);
-                    });
+                    .then(registration => console.log('Unified Service Worker registered successfully.'))
+                    .catch(error => console.error('Unified SW registration failed:', error));
             });
         }
-        // --- END: Service Worker Registration ---
     </script>
 </body>
 </html>
+

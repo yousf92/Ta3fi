@@ -7,7 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- تم تحديث هذا السطر إلى إصدار أحدث وأكثر استقرارًا -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
         :root {
@@ -21,7 +20,6 @@
         }
         body, html {
             margin: 0; padding: 0; font-family: 'Tajawal', sans-serif;
-            /* تم تغيير الخلفية وإضافة طبقة تعتيم لضمان وضوح النص */
             background-image: linear-gradient(rgba(18, 18, 18, 0.6), rgba(18, 18, 18, 0.6)), url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80');
             background-size: cover;
             background-position: center;
@@ -62,11 +60,10 @@
         .nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary-color); }
         
-        .nav-item.special-item { transform: translateY(-20px); position: relative; } /* إضافة جديدة */
+        .nav-item.special-item { transform: translateY(-20px); position: relative; }
         .nav-item.special-item .icon-background { width: 60px; height: 60px; background: linear-gradient(135deg, #00a884, #00c896); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 168, 132, 0.4); }
         .special-item .icon-background i { color: white; font-size: 2rem; margin: 0; }
 
-        /* --- إضافة جديدة: تنسيق عداد الإشعارات --- */
         .chat-notification-badge {
             position: absolute;
             top: -8px; 
@@ -78,13 +75,12 @@
             height: 24px;
             font-size: 13px;
             font-weight: bold;
-            display: none; /* مخفي بشكل افتراضي */
+            display: none;
             justify-content: center;
             align-items: center;
             border: 2px solid var(--card-background);
             z-index: 1;
         }
-        /* --- نهاية الإضافة --- */
        
         .card, .modal-content { background-color: var(--card-background); border: 1px solid var(--border-color); color: var(--text-color); }
         .card-title { font-weight: 700; color: #FFFFFF; font-size: 0.9rem; }
@@ -116,14 +112,13 @@
         #pdf-canvas.comfort-mode { filter: sepia(70%) contrast(95%) brightness(95%); }
         #pdf-canvas.night-mode { filter: invert(1) hue-rotate(180deg) brightness(95%) contrast(90%); }
         
-        /* START: Updated PDF Controls Styles */
         #pdf-controls { 
             display: flex; 
-            flex-direction: column; /* Arrange rows vertically */
+            flex-direction: column;
             padding: 8px; 
             background-color: var(--card-background); 
             border-top: 1px solid var(--border-color); 
-            gap: 8px; /* Space between rows */
+            gap: 8px;
             position: relative; 
             z-index: 1052; 
         }
@@ -132,9 +127,8 @@
             justify-content: center;
             align-items: center;
             width: 100%;
-            gap: 10px; /* Space between items in a row */
+            gap: 10px;
         }
-        /* END: Updated PDF Controls Styles */
 
         #zoom-controls { display: flex; align-items: center; gap: 5px; }
         #zoom-range { width: 80px; margin: 0 5px; }
@@ -214,9 +208,44 @@
             font-size: 0.9rem;
             margin-top: 1rem;
         }
+
+        /* --- START: Toast Notification Styles --- */
+        .toast-container {
+            z-index: 1100; /* Ensure it's above other elements */
+        }
+        .custom-toast {
+            background-color: var(--card-background);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+        }
+        .custom-toast .toast-header {
+            background-color: #2a2a2a;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .custom-toast .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+        /* --- END: Toast Notification Styles --- */
     </style>
 </head>
 <body>
+    <!-- START: Toast container for notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="app-toast" class="toast custom-toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <strong class="me-auto" id="toast-title">إشعار</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toast-body">
+                ...
+            </div>
+        </div>
+    </div>
+    <!-- END: Toast container -->
+
     <div id="app-lock-overlay">
         <div class="lock-container">
             <i class="bi bi-shield-lock-fill icon"></i>
@@ -251,18 +280,20 @@
     <div id="pdf-reader-view" class="d-none">
         <div id="pdf-viewer-container"><canvas id="pdf-canvas"></canvas></div>
         
-        <!-- START: Updated Controls Layout -->
         <div id="pdf-controls">
-            <!-- Top Row: Page Navigation -->
             <div class="pdf-controls-row">
                 <button class="btn btn-primary btn-sm" id="prev-page"><i class="bi bi-arrow-right-short"></i> السابق</button>
                 <span id="page-num" class="fw-bold px-2"></span>
                 <button class="btn btn-primary btn-sm" id="next-page">التالي <i class="bi bi-arrow-left-short"></i></button>
             </div>
 
-            <!-- Bottom Row: Tools -->
             <div class="pdf-controls-row">
                  <button class="btn btn-secondary btn-sm" id="display-mode-btn" title="تغيير وضع العرض"><i class="bi bi-moon-fill"></i></button>
+                 <!-- START: New Save Offline Button -->
+                 <button class="btn btn-secondary btn-sm" id="save-offline-btn" title="حفظ الكتاب للقراءة بدون انترنت">
+                     <i class="bi bi-cloud-arrow-down-fill"></i>
+                 </button>
+                 <!-- END: New Save Offline Button -->
                 <div id="zoom-controls">
                     <button class="btn btn-secondary btn-sm" id="zoom-out-btn"><i class="bi bi-dash"></i></button>
                     <input type="range" id="zoom-range" min="0.1" max="3.0" step="0.01" value="0.8" class="form-range">
@@ -275,7 +306,6 @@
                 <button class="btn btn-secondary btn-sm" id="close-reader-btn" title="الرجوع"><i class="bi bi-arrow-right"></i></button>
             </div>
         </div>
-        <!-- END: Updated Controls Layout -->
     </div>
 
     <div class="modal fade" id="addSectionModal" tabindex="-1">
@@ -396,7 +426,6 @@
       </div>
     </div>
 
-    <!-- START: Go to Page Modal -->
     <div class="modal fade" id="goToPageModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -420,7 +449,6 @@
         </div>
       </div>
     </div>
-    <!-- END: Go to Page Modal -->
 
     <nav class="bottom-nav">
         <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
@@ -429,7 +457,6 @@
         <a href="chat.html" class="nav-item special-item">
             <div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div>
             <span>دردشة</span>
-            <!-- إضافة جديدة: هذا العنصر سيظهر كعداد للإشعارات -->
             <span class="chat-notification-badge"></span>
         </a>
         <a href="follow-up.html" class="nav-item"><i class="bi bi-signpost-split-fill"></i><span>المتابعة</span></a>
@@ -460,7 +487,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- START: New Combined Notification Logic ---
         function initializeGlobalChatNotifications(userId) {
             const chatBadge = document.querySelector('.chat-notification-badge');
             if (!chatBadge) return;
@@ -514,7 +540,6 @@
                 updateBadge();
             }
         }
-        // --- END: New Combined Notification Logic ---
 
         const libraryView = document.getElementById('library-view');
         const pdfReaderView = document.getElementById('pdf-reader-view');
@@ -527,11 +552,13 @@
         const zoomRange = document.getElementById('zoom-range');
         const currentZoomPercent = document.getElementById('current-zoom-percent');
         const displayModeBtn = document.getElementById('display-mode-btn'); 
-        const closeReaderBtn = document.getElementById('close-reader-btn'); 
+        const closeReaderBtn = document.getElementById('close-reader-btn');
+        const saveOfflineBtn = document.getElementById('save-offline-btn');
         let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumIsPending = null;
-        let currentBookId = null, currentScale = parseFloat(zoomRange.value);
+        let currentBookId = null, currentPdfUrl = null, currentScale = parseFloat(zoomRange.value);
         let currentUser = null;
         let addBookModalInstance = null;
+        let appToastInstance = null;
         
         const sectionsContainer = document.getElementById('sections-container');
         const noBooksPlaceholder = document.getElementById('no-books-placeholder');
@@ -620,7 +647,8 @@
              new bootstrap.Modal(addSectionModalEl);
              moveBookModalInstance = new bootstrap.Modal(moveBookModalEl);
              editBookModalInstance = new bootstrap.Modal(editBookModalEl);
-             goToPageModalInstance = new bootstrap.Modal(goToPageModalEl); 
+             goToPageModalInstance = new bootstrap.Modal(goToPageModalEl);
+             appToastInstance = new bootstrap.Toast(document.getElementById('app-toast'));
              pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
              updateZoomDisplay();
              setupPdfPanning();
@@ -675,6 +703,54 @@
             await fetchAndApplyUserPreferences();
             fetchSectionsAndBooks(); 
         });
+
+        // --- START: Offline Save Logic ---
+        function showToast(title, body) {
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-body').textContent = body;
+            appToastInstance.show();
+        }
+
+        async function checkIfBookIsCached(url) {
+            if (!('caches' in window)) return false;
+            const cache = await caches.open('unified-assets-cache-v1'); // Use the unified cache name
+            const response = await cache.match(url);
+            return !!response;
+        }
+
+        async function updateOfflineButtonState(pdfUrl) {
+            const isCached = await checkIfBookIsCached(pdfUrl);
+            const icon = saveOfflineBtn.querySelector('i');
+            if (isCached) {
+                saveOfflineBtn.disabled = true;
+                saveOfflineBtn.title = "الكتاب محفوظ بالفعل";
+                icon.className = 'bi bi-check-circle-fill';
+            } else {
+                saveOfflineBtn.disabled = false;
+                saveOfflineBtn.title = "حفظ الكتاب للقراءة بدون انترنت";
+                icon.className = 'bi bi-cloud-arrow-down-fill';
+            }
+        }
+
+        saveOfflineBtn.addEventListener('click', async () => {
+            if (currentPdfUrl) {
+                saveOfflineBtn.disabled = true;
+                const icon = saveOfflineBtn.querySelector('i');
+                icon.className = 'spinner-border spinner-border-sm';
+
+                try {
+                    // The fetch event in sw.js will automatically cache this
+                    await fetch(currentPdfUrl); 
+                    showToast('نجاح', 'تم حفظ الكتاب بنجاح!');
+                    updateOfflineButtonState(currentPdfUrl);
+                } catch (error) {
+                    console.error('Caching failed:', error);
+                    showToast('فشل', 'لم يتمكن من حفظ الكتاب.');
+                    updateOfflineButtonState(currentPdfUrl);
+                }
+            }
+        });
+        // --- END: Offline Save Logic ---
 
         sectionsContainer.addEventListener('click', (e) => {
             const favoriteBtn = e.target.closest('.favorite-btn');
@@ -1264,10 +1340,12 @@
         async function openPdfReader(bookId, pdfUrl, title) {
             if (!pdfUrl) return;
             currentBookId = bookId;
+            currentPdfUrl = pdfUrl; // Store current PDF URL
             await fetchAndApplyUserPreferences();
             libraryView.classList.add('d-none');
             pdfReaderView.classList.remove('d-none');
             pageNumSpan.textContent = 'يتم التحميل...';
+            updateOfflineButtonState(pdfUrl); // Check if cached
             const userProgress = await getUserBookProgress(bookId);
             try {
                 const loadingTask = pdfjsLib.getDocument(pdfUrl);
@@ -1290,7 +1368,7 @@
                     await setDoc(progressRef, { lastReadPage: pageNum, zoomLevel: currentScale }, { merge: true });
                 } catch (error) { console.error("Failed to save user progress:", error); }
             }
-            pdfDoc = null; currentBookId = null; pageNum = 1;
+            pdfDoc = null; currentBookId = null; currentPdfUrl = null; pageNum = 1;
             libraryView.classList.remove('d-none');
             pdfReaderView.classList.add('d-none');
         }
@@ -1361,6 +1439,15 @@
             goToPageModalInstance.hide();
         });
 
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => console.log('Unified Service Worker registered successfully.'))
+                    .catch(error => console.error('Unified SW registration failed:', error));
+            });
+        }
     </script>
 </body>
 </html>
