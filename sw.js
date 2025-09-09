@@ -1,78 +1,62 @@
-// Define a new, unique name for the cache to ensure the service worker updates correctly.
-const CACHE_NAME = 'app-assets-cache-v4';
+const CACHE_NAME = 'video-cache-v2';
 
 /**
- * 'install' event listener
- * Fired when the service worker is first installed.
- * We use self.skipWaiting() to ensure the new service worker activates immediately.
+ * يخزن عنوان URL للفيديو المحدد في ذاكرة التخزين المؤقت.
+ * @param {string} videoUrl - عنوان URL للفيديو المراد تخزينه.
  */
-self.addEventListener('install', event => {
-    event.waitUntil(self.skipWaiting());
-    console.log('Unified SW: Installed');
-});
+const cacheVideo = (videoUrl) => {
+    // لا تفعل شيئًا إذا كان عنوان URL فارغًا
+    if (!videoUrl) return Promise.resolve();
+    
+    return caches.open(CACHE_NAME).then(cache => {
+        console.log(`[Service Worker] Caching new video: ${videoUrl}`);
+        // تحقق مما إذا كان الفيديو موجودًا بالفعل لتجنب إعادة التنزيل
+        return cache.match(videoUrl).then(response => {
+            if (!response) {
+                return cache.add(videoUrl).catch(err => {
+                    console.error('[Service Worker] Failed to cache video:', err);
+                });
+            }
+            return Promise.resolve();
+        });
+    });
+};
 
-/**
- * 'activate' event listener
- * Fired when the service worker becomes active. This is the perfect place
- * to clean up old, unused caches.
- */
+// عند تفعيل الـ Service Worker، قم بتنظيف ذاكرة التخزين المؤقت القديمة
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(cacheNames => {
-            // Delete all caches that are not the current one.
             return Promise.all(
-                cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
+                cacheNames.filter(cacheName => {
+                    // حذف أي ذاكرة تخزين مؤقت تبدأ بـ 'video-cache-' وليست الحالية
+                    return cacheName.startsWith('video-cache-') && cacheName !== CACHE_NAME;
+                }).map(cacheName => {
+                    return caches.delete(cacheName);
+                })
             );
-        }).then(() => {
-            // Allow the active service worker to take control of the page immediately.
-            console.log('Unified SW: Activated and old caches cleared.');
-            return self.clients.claim();
-        })
+        }).then(() => self.clients.claim()) // السيطرة على الصفحات المفتوحة فورًا
     );
 });
 
-/**
- * 'fetch' event listener
- * Fired for every network request made by the application.
- * We use a "Cache First" strategy for important assets.
- */
+// اعتراض طلبات الشبكة (fetch)
 self.addEventListener('fetch', event => {
-    const { request } = event;
-    const { destination } = request;
-
-    // We only want to cache specific types of assets: images, videos,
-    // and requests with an empty destination (which often includes PDFs and other direct file links).
-    if (destination === 'image' || destination === 'video' || destination === '') {
-        // We only handle GET requests, as other requests (like POST) are not cacheable.
-        if (request.method !== 'GET') {
-            return;
-        }
-
+    // تعامل فقط مع الطلبات التي تكون وجهتها 'video'
+    if (event.request.destination === 'video') {
         event.respondWith(
             caches.open(CACHE_NAME).then(cache => {
-                // First, try to find a matching response in the cache.
-                return cache.match(request).then(cachedResponse => {
-                    // If a cached response is found, return it immediately.
-                    if (cachedResponse) {
-                        return cachedResponse;
+                return cache.match(event.request).then(response => {
+                    // إذا تم العثور على الفيديو في ذاكرة التخزين المؤقت، قم بإرجاعه
+                    if (response) {
+                        console.log(`[Service Worker] Serving video from cache: ${event.request.url}`);
+                        return response;
                     }
 
-                    // If not in cache, fetch it from the network.
-                    return fetch(request).then(networkResponse => {
-                        // We must clone the response because it's a stream that can only be consumed once.
-                        // We check for a valid response (status 200) before caching.
-                        // We also check if the response type is 'cors' or 'basic' to avoid caching opaque responses.
-                        if (networkResponse && networkResponse.status === 200 && (networkResponse.type === 'cors' || networkResponse.type === 'basic')) {
-                             cache.put(request, networkResponse.clone());
-                        }
-
-                        // Return the original network response to the page.
+                    // إذا لم يكن موجودًا، اطلبه من الشبكة، خزنه في ذاكرة التخزين المؤقت، ثم أرجعه
+                    console.log(`[Service Worker] Fetching video from network: ${event.request.url}`);
+                    return fetch(event.request).then(networkResponse => {
+                        // استنساخ الاستجابة، لأن الاستجابة عبارة عن stream يمكن استهلاكه مرة واحدة فقط
+                        cache.put(event.request, networkResponse.clone());
                         return networkResponse;
-                    }).catch(error => {
-                        // Optional: Handle fetch errors, e.g., by returning an offline fallback page/image.
-                        console.error('SW Fetch Error:', error);
-                        // Re-throw the error to allow the browser to handle the network failure.
-                        throw error;
                     });
                 });
             })
@@ -80,29 +64,10 @@ self.addEventListener('fetch', event => {
     }
 });
 
-/**
- * Optional: 'message' event listener
- * You can keep this if you need to trigger caching manually from your app's code,
- * for example, for pre-caching specific resources.
- */
+// الاستماع إلى الرسائل من الصفحة الرئيسية لتخزين فيديو جديد
 self.addEventListener('message', event => {
-    if (event.data && event.data.type === 'CACHE_BOOK') {
-        const urlToCache = event.data.url;
-        console.log('Unified SW: Received request to cache:', urlToCache);
-
-        event.waitUntil(
-            caches.open(CACHE_NAME).then(cache => {
-                return cache.add(urlToCache).then(() => {
-                    if (event.source) {
-                        event.source.postMessage({ type: 'CACHE_SUCCESS', url: urlToCache });
-                    }
-                }).catch(error => {
-                    console.error('Unified SW: Failed to cache', urlToCache, error);
-                    if (event.source) {
-                        event.source.postMessage({ type: 'CACHE_FAIL', url: urlToCache });
-                    }
-                });
-            })
-        );
+    if (event.data && event.data.type === 'CACHE_VIDEO' && event.data.url) {
+        // تأكد من أن الـ Service Worker يظل نشطًا حتى اكتمال عملية التخزين
+        event.waitUntil(cacheVideo(event.data.url));
     }
 });
