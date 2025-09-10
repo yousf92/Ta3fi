@@ -677,7 +677,6 @@
         const analysisResultText = document.getElementById('analysis-result-text');
         
         const suggestionFrame = document.getElementById('suggestion-frame');
-        // const suggestStepBtn = document.getElementById('suggest-step-btn'); // No longer needed for direct binding
         const suggestionResultContainer = document.getElementById('suggestion-result-container');
         const suggestionResultText = document.getElementById('suggestion-result-text');
         
@@ -963,47 +962,60 @@
                 localStorage.setItem('previousSuggestions', JSON.stringify(previousSuggestions));
             }
         }
-        
-        // --- START: NEW EVENT DELEGATION LOGIC ---
-        document.addEventListener('click', async (event) => {
-            const suggestButton = event.target.closest('#suggest-step-btn');
 
-            if (suggestButton) {
-                event.preventDefault(); // Good practice to prevent any default browser action
+        // --- START: تعديل الكود لحل المشكلة ---
+        suggestionFrame.addEventListener('click', async (event) => {
+            const suggestStepBtn = event.target.closest('#suggest-step-btn');
+            
+            // تحقق إذا كان الزر موجودًا أو إذا كان معطلاً بالفعل لمنع النقرات المتعددة
+            if (!suggestStepBtn || suggestStepBtn.disabled) {
+                return;
+            }
 
-                suggestButton.disabled = true;
-                suggestButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> جار إعداد النصيحة...`;
+            try {
+                // الخطوة 1: تعطيل الزر وعرض حالة التحميل
+                suggestStepBtn.disabled = true;
+                suggestStepBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> جار إعداد النصيحة...`;
                 suggestionResultContainer.classList.add('d-none');
-                
+
+                // الخطوة 2: إعداد وإرسال الطلب إلى API
                 const exclusionList = previousSuggestions.length > 0 
                     ? `من الضروري جدا ان تكون النصيحة جديدة تماما ومختلفة عن هذه النصائح السابقة التي تم تقديمها: "${previousSuggestions.join('" , "')}"`
                     : "";
-
                 const prompt = `
                     بصفتك ناصحا حكيما وموجها على المنهج السلفي الصالح قدم للمستخدم نصيحة فريدة لم تقدمها له من قبل.
                     يجب ان تكون النصيحة متوازنة تنفعه في دينه ودنياه وتغطي جوانب مثل العبادات والاخلاق وتزكية النفس او جوانب دنيوية من منظور شرعي مثل ادارة الوقت وتطوير الذات والتعامل مع الناس.
-                    
                     الشروط الحاسمة:
-                    1. الإيجاز الشديد: يجب أن تكون النصيحة مطولا كٲنها انسان يقولها مش ذكاء اصطناعي.
+                    1. الإيجاز الشديد: يجب أن تكون النصيحة موجزة ومختصرة جدا لا تتجاوز سطرين.
                     2. التنسيق: يجب ان تكون النصيحة كنص متصل واحد وبدون اي تعداد نقطي او رقمي وبدون استخدام اي حركات تشكيل على الحروف اطلاقا.
                     3. عدم التكرار: ${exclusionList}
                 `;
                 
                 const result = await callGeminiAPI(prompt);
                 
-                if (result && !result.toLowerCase().includes("خطأ")) {
+                // الخطوة 3: معالجة النتيجة وعرضها
+                if (result && !result.toLowerCase().includes("خطأ") && result !== "حدثت مشكلة في الاتصال بالشبكة.") {
                     saveSuggestion(result);
                 }
-
                 suggestionResultText.textContent = result;
                 suggestionResultContainer.classList.remove('d-none');
                 setRandomBackground(suggestionFrame, 'suggestion');
-                
-                suggestButton.disabled = false;
-                suggestButton.innerHTML = '<i class="bi bi-sparkles me-2"></i>✨ اطلب تذكرة أخرى';
+
+            } catch (error) {
+                // في حالة حدوث أي خطأ غير متوقع
+                console.error("Error suggesting step:", error);
+                suggestionResultText.textContent = "عفوًا، حدث خطأ غير متوقع.";
+                suggestionResultContainer.classList.remove('d-none');
+            } finally {
+                // الخطوة 4 (الأهم): هذا الجزء سيعمل دائمًا، سواء نجح الطلب أو فشل
+                // إعادة تفعيل الزر وتحديث نصه ليكون جاهزًا للنقرة التالية
+                if (suggestStepBtn) { 
+                   suggestStepBtn.disabled = false;
+                   suggestStepBtn.innerHTML = '<i class="bi bi-sparkles me-2"></i>✨ اطلب تذكرة أخرى';
+                }
             }
         });
-        // --- END: NEW EVENT DELEGATION LOGIC ---
+        // --- END: نهاية الكود المعدل ---
 
 
         async function initializeCalendar() {
@@ -1040,3 +1052,4 @@
     </script>
 </body>
 </html>
+
