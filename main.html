@@ -611,7 +611,7 @@
             let breathingTimeouts = [];
             let countdownInterval = null;
             let remainingTime = 0;
-            let previousSolutions = [];
+            let lastSolution = null; // -- FIX: Changed from array to string
             const welcomeUserEl = document.getElementById('welcome-user');
             const openSendModalBtn = document.getElementById('open-send-modal-btn');
             const startTimerBtn = document.getElementById('start-timer-btn');
@@ -729,15 +729,16 @@
                         5.  **التنوع:** إذا قلت لك 'أبغى حل ثاني'، عطني حل جديد ومختلف تماماً. لا تكرر نفس الكلام.
                     `;
                     
-                    if (previousSolutions.length > 0) {
-                        const previousSolutionsText = previousSolutions.join(' و ');
-                        basePrompt += `\nالحلول اللي عطيتني إياها قبل هي: ${previousSolutionsText}. لا تكررها وعطني شي جديد.`;
+                    // -- FIX: Check for the last single solution, not an array
+                    if (lastSolution) {
+                        basePrompt += `\nالحل اللي عطيتني إياه قبل هو: ${lastSolution}. لا تكرره وعطني شي جديد.`;
                     }
 
                     const generatedText = await callGeminiAPI(basePrompt);
                     
+                    // -- FIX: Store only the last generated solution
                     if (generatedText && !generatedText.includes('خطأ')) {
-                         previousSolutions.push(generatedText);
+                         lastSolution = generatedText;
                     }
                     
                     let newImageIndex;
