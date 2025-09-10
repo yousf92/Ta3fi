@@ -343,6 +343,16 @@
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
         }
         /* --- END: New Styles for Inspiration Display --- */
+        
+        /* START: Background Theme Styles */
+        body.solid-black-bg {
+            background-image: none !important;
+            background-color: #000000 !important;
+        }
+        body.gradient-blue-bg {
+            background-image: linear-gradient(135deg, #0f2027, #203a43, #2c5364) !important;
+        }
+        /* END: Background Theme Styles */
     </style>
 </head>
 <body style="visibility: hidden;">
@@ -605,6 +615,20 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            // --- START: Background Theme Logic ---
+            function applyBackgroundPreference() {
+                const savedTheme = localStorage.getItem('appBackgroundTheme') || 'default';
+                const body = document.body;
+                body.classList.remove('solid-black-bg', 'gradient-blue-bg');
+                if (savedTheme === 'solid-black') {
+                    body.classList.add('solid-black-bg');
+                } else if (savedTheme === 'gradient-blue') {
+                    body.classList.add('gradient-blue-bg');
+                }
+            }
+            applyBackgroundPreference();
+            // --- END: Background Theme Logic ---
+
             let startTime = null;
             let timerInterval = null;
             let currentUserRole = 'user';

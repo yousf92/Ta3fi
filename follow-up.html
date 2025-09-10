@@ -343,6 +343,16 @@
             background-color: rgba(255, 255, 255, 0.1);
         }
         /* END: New Analysis Style Toggle */
+        
+        /* START: Background Theme Styles */
+        body.solid-black-bg {
+            background-image: none !important;
+            background-color: #000000 !important;
+        }
+        body.gradient-blue-bg {
+            background-image: linear-gradient(135deg, #0f2027, #203a43, #2c5364) !important;
+        }
+        /* END: Background Theme Styles */
     </style>
 </head>
 <body>
@@ -495,6 +505,20 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // --- START: Background Theme Logic ---
+        function applyBackgroundPreference() {
+            const savedTheme = localStorage.getItem('appBackgroundTheme') || 'default';
+            const body = document.body;
+            body.classList.remove('solid-black-bg', 'gradient-blue-bg');
+            if (savedTheme === 'solid-black') {
+                body.classList.add('solid-black-bg');
+            } else if (savedTheme === 'gradient-blue') {
+                body.classList.add('gradient-blue-bg');
+            }
+        }
+        applyBackgroundPreference();
+        // --- END: Background Theme Logic ---
 
         function initializeGlobalChatNotifications(userId) {
             const chatBadge = document.querySelector('.chat-notification-badge');
@@ -653,7 +677,7 @@
         const analysisResultText = document.getElementById('analysis-result-text');
         
         const suggestionFrame = document.getElementById('suggestion-frame');
-        const suggestStepBtn = document.getElementById('suggest-step-btn');
+        // const suggestStepBtn = document.getElementById('suggest-step-btn'); // No longer needed for direct binding
         const suggestionResultContainer = document.getElementById('suggestion-result-container');
         const suggestionResultText = document.getElementById('suggestion-result-text');
         
@@ -939,38 +963,48 @@
                 localStorage.setItem('previousSuggestions', JSON.stringify(previousSuggestions));
             }
         }
+        
+        // --- START: NEW EVENT DELEGATION LOGIC ---
+        document.addEventListener('click', async (event) => {
+            const suggestButton = event.target.closest('#suggest-step-btn');
 
-        suggestStepBtn.addEventListener('click', async () => {
-            suggestStepBtn.disabled = true;
-            suggestStepBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> جار إعداد النصيحة...`;
-            suggestionResultContainer.classList.add('d-none');
-            
-            const exclusionList = previousSuggestions.length > 0 
-                ? `من الضروري جدا ان تكون النصيحة جديدة تماما ومختلفة عن هذه النصائح السابقة التي تم تقديمها: "${previousSuggestions.join('" , "')}"`
-                : "";
+            if (suggestButton) {
+                event.preventDefault(); // Good practice to prevent any default browser action
 
-            const prompt = `
-                بصفتك ناصحا حكيما وموجها على المنهج السلفي الصالح قدم للمستخدم نصيحة فريدة لم تقدمها له من قبل.
-                يجب ان تكون النصيحة متوازنة تنفعه في دينه ودنياه وتغطي جوانب مثل العبادات والاخلاق وتزكية النفس او جوانب دنيوية من منظور شرعي مثل ادارة الوقت وتطوير الذات والتعامل مع الناس.
+                suggestButton.disabled = true;
+                suggestButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> جار إعداد النصيحة...`;
+                suggestionResultContainer.classList.add('d-none');
                 
-                الشروط الحاسمة:
-                1. الإيجاز الشديد: يجب أن تكون النصيحة موجزة ومختصرة جدا لا تتجاوز سطرين.
-                2. التنسيق: يجب ان تكون النصيحة كنص متصل واحد وبدون اي تعداد نقطي او رقمي وبدون استخدام اي حركات تشكيل على الحروف اطلاقا.
-                3. عدم التكرار: ${exclusionList}
-            `;
-            
-            const result = await callGeminiAPI(prompt);
-            
-            if (result && !result.toLowerCase().includes("خطأ")) {
-                saveSuggestion(result);
-            }
+                const exclusionList = previousSuggestions.length > 0 
+                    ? `من الضروري جدا ان تكون النصيحة جديدة تماما ومختلفة عن هذه النصائح السابقة التي تم تقديمها: "${previousSuggestions.join('" , "')}"`
+                    : "";
 
-            suggestionResultText.textContent = result;
-            suggestionResultContainer.classList.remove('d-none');
-            setRandomBackground(suggestionFrame, 'suggestion');
-            suggestStepBtn.disabled = false;
-            suggestStepBtn.innerHTML = '<i class="bi bi-sparkles me-2"></i>✨ اطلب تذكرة أخرى';
+                const prompt = `
+                    بصفتك ناصحا حكيما وموجها على المنهج السلفي الصالح قدم للمستخدم نصيحة فريدة لم تقدمها له من قبل.
+                    يجب ان تكون النصيحة متوازنة تنفعه في دينه ودنياه وتغطي جوانب مثل العبادات والاخلاق وتزكية النفس او جوانب دنيوية من منظور شرعي مثل ادارة الوقت وتطوير الذات والتعامل مع الناس.
+                    
+                    الشروط الحاسمة:
+                    1. الإيجاز الشديد: يجب أن تكون النصيحة مطولا كٲنها انسان يقولها مش ذكاء اصطناعي.
+                    2. التنسيق: يجب ان تكون النصيحة كنص متصل واحد وبدون اي تعداد نقطي او رقمي وبدون استخدام اي حركات تشكيل على الحروف اطلاقا.
+                    3. عدم التكرار: ${exclusionList}
+                `;
+                
+                const result = await callGeminiAPI(prompt);
+                
+                if (result && !result.toLowerCase().includes("خطأ")) {
+                    saveSuggestion(result);
+                }
+
+                suggestionResultText.textContent = result;
+                suggestionResultContainer.classList.remove('d-none');
+                setRandomBackground(suggestionFrame, 'suggestion');
+                
+                suggestButton.disabled = false;
+                suggestButton.innerHTML = '<i class="bi bi-sparkles me-2"></i>✨ اطلب تذكرة أخرى';
+            }
         });
+        // --- END: NEW EVENT DELEGATION LOGIC ---
+
 
         async function initializeCalendar() {
             await getHabitData();

@@ -199,6 +199,59 @@
             font-size: 1.2rem;
             letter-spacing: 0.5rem;
         }
+        
+        /* START: Background Theme Styles */
+        .theme-selector-container {
+            display: flex;
+            justify-content: space-around;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        .theme-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 15px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: border-color 0.3s ease, transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .theme-preview:hover {
+            transform: scale(1.05);
+        }
+        .theme-preview.active {
+            border-color: var(--primary-color);
+        }
+        .theme-preview span {
+             font-size: 0.8rem;
+             color: white;
+             text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+             text-align: center;
+             padding: 5px;
+        }
+        #theme-default {
+            background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=200&q=80');
+            background-size: cover;
+        }
+        #theme-black {
+            background-color: #000000;
+        }
+        #theme-gradient {
+             background-image: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        }
+        
+        body.solid-black-bg {
+            background-image: none !important;
+            background-color: #000000 !important;
+        }
+        body.gradient-blue-bg {
+            background-image: linear-gradient(135deg, #0f2027, #203a43, #2c5364) !important;
+        }
+        /* END: Background Theme Styles */
     </style>
 </head>
 <body>
@@ -235,6 +288,29 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- START: Appearance Section -->
+            <div class="settings-card">
+                <div class="card-header">المظهر</div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <div class="w-100">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-palette-fill fs-5"></i>
+                                    <span>خلفية التطبيق</span>
+                                </div>
+                                <div class="theme-selector-container">
+                                    <div class="theme-preview" id="theme-default" data-theme="default"><span>افتراضي</span></div>
+                                    <div class="theme-preview" id="theme-black" data-theme="solid-black"><span>أسود</span></div>
+                                    <div class="theme-preview" id="theme-gradient" data-theme="gradient-blue"><span>هادئ</span></div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- END: Appearance Section -->
 
             <div class="settings-card">
                 <div class="card-header">عام</div>
@@ -368,6 +444,36 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        
+        // --- START: Background Theme Logic ---
+        function applyBackgroundPreference() {
+            const savedTheme = localStorage.getItem('appBackgroundTheme') || 'default';
+            const body = document.body;
+            document.querySelectorAll('.theme-preview').forEach(el => el.classList.remove('active'));
+            
+            body.classList.remove('solid-black-bg', 'gradient-blue-bg');
+            
+            if (savedTheme === 'solid-black') {
+                body.classList.add('solid-black-bg');
+                document.getElementById('theme-black').classList.add('active');
+            } else if (savedTheme === 'gradient-blue') {
+                body.classList.add('gradient-blue-bg');
+                document.getElementById('theme-gradient').classList.add('active');
+            } else {
+                document.getElementById('theme-default').classList.add('active');
+            }
+        }
+        
+        document.querySelectorAll('.theme-preview').forEach(button => {
+            button.addEventListener('click', () => {
+                const theme = button.dataset.theme;
+                localStorage.setItem('appBackgroundTheme', theme);
+                applyBackgroundPreference();
+            });
+        });
+
+        applyBackgroundPreference();
+        // --- END: Background Theme Logic ---
 
         // --- START: New Combined Notification Logic ---
         function initializeGlobalChatNotifications(userId) {
@@ -779,3 +885,4 @@
     </script>
 </body>
 </html>
+

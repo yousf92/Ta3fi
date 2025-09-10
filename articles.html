@@ -182,6 +182,16 @@
             font-size: 0.9rem;
             margin-top: 1rem;
         }
+        
+        /* START: Background Theme Styles */
+        body.solid-black-bg {
+            background-image: none !important;
+            background-color: #000000 !important;
+        }
+        body.gradient-blue-bg {
+            background-image: linear-gradient(135deg, #0f2027, #203a43, #2c5364) !important;
+        }
+        /* END: Background Theme Styles */
     </style>
 </head>
 <body>
@@ -331,6 +341,20 @@
             }
         }
         // --- END: New Combined Notification Logic ---
+
+        // --- START: Background Theme Logic ---
+        function applyBackgroundPreference() {
+            const savedTheme = localStorage.getItem('appBackgroundTheme') || 'default';
+            const body = document.body;
+            body.classList.remove('solid-black-bg', 'gradient-blue-bg');
+            if (savedTheme === 'solid-black') {
+                body.classList.add('solid-black-bg');
+            } else if (savedTheme === 'gradient-blue') {
+                body.classList.add('gradient-blue-bg');
+            }
+        }
+        applyBackgroundPreference();
+        // --- END: Background Theme Logic ---
 
         const adminArticleForm = document.getElementById('admin-article-form');
         const geminiProSection = document.getElementById('gemini-pro-section');
