@@ -1466,13 +1466,22 @@
     </script>
     
     <!-- START: Service Worker Registration -->
-    <!-- تم إضافة هذا الكود لتسجيل الـ Service Worker -->
+    <!-- تم إضافة هذا الكود وتعديله لضمان أفضل أداء وتوافق -->
     <script>
+        // تحقق مما إذا كان المتصفح يدعم Service Workers
         if ('serviceWorker' in navigator) {
+            // انتظر حتى يتم تحميل الصفحة بالكامل
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => console.log('Unified Service Worker registered successfully.'))
-                    .catch(error => console.error('Unified SW registration failed:', error));
+                // قم بتسجيل ملف sw.js الموجود في المجلد الرئيسي (root)
+                // تحديد النطاق { scope: '/' } يضمن أن هذا الـ Service Worker
+                // سيتحكم في جميع الصفحات داخل تطبيقك.
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                    .then(registration => {
+                        console.log('Unified Service Worker registered successfully. Scope:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('Unified SW registration failed:', error);
+                    });
             });
         }
     </script>
@@ -1480,3 +1489,4 @@
 
 </body>
 </html>
+

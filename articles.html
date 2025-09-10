@@ -629,25 +629,94 @@
         });
     </script>
 
-    <!-- START: Service Worker Registration Code -->
+    <!-- START: Unified Service Worker Registration Script -->
+    <script id="service-worker-code" type="text/plain">
+    // --- Service Worker موحد وقوي لتخزين الصور ---
+    const CACHE_NAME = 'image-assets-cache-v1';
+    const ASSET_PATTERNS = [
+      /\.(jpg|jpeg|png|gif|webp|svg)$/i,
+      /res\.cloudinary\.com/i
+    ];
+
+    function isCacheableImage(request) {
+      const url = new URL(request.url);
+      return ASSET_PATTERNS.some(pattern => pattern.test(url.href));
+    }
+
+    self.addEventListener('install', event => {
+      console.log('Service Worker: جارٍ التثبيت...');
+      self.skipWaiting();
+    });
+
+    self.addEventListener('activate', event => {
+        console.log('Service Worker: جارٍ التفعيل...');
+        event.waitUntil(
+            caches.keys().then(cacheNames => {
+                return Promise.all(
+                    cacheNames
+                        .filter(cacheName => cacheName.startsWith('image-assets-cache-') && cacheName !== CACHE_NAME)
+                        .map(cacheName => {
+                            console.log(`Service Worker: جارٍ حذف الـ cache القديم: ${cacheName}`);
+                            return caches.delete(cacheName);
+                        })
+                );
+            }).then(() => self.clients.claim())
+        );
+    });
+
+    self.addEventListener('fetch', event => {
+      if (event.request.method !== 'GET' || !isCacheableImage(event.request)) {
+        return;
+      }
+
+      event.respondWith(
+        caches.open(CACHE_NAME).then(async (cache) => {
+          const cachedResponse = await cache.match(event.request);
+          if (cachedResponse) {
+            console.log('SW: تم العثور على الصورة في الـ CACHE ->', event.request.url);
+            return cachedResponse;
+          }
+
+          console.log('SW: الصورة غير موجودة، جارٍ جلبها من الشبكة NETWORK ->', event.request.url);
+          try {
+            const networkResponse = await fetch(event.request);
+            if (networkResponse.ok) {
+               console.log('SW: جارٍ تخزين الصورة الجديدة في الـ CACHE ->', event.request.url);
+               await cache.put(event.request, networkResponse.clone());
+            }
+            return networkResponse;
+          } catch (error) {
+            console.error('SW: فشل في جلب الصورة من الشبكة:', error);
+            throw error;
+          }
+        })
+      );
+    });
+    </script>
     <script>
-      // تحقق أولاً مما إذا كان المتصفح يدعم Service Workers
+      // --- تسجيل الـ Service Worker بالطريقة المبتكرة ---
       if ('serviceWorker' in navigator) {
-        // انتظر حتى يتم تحميل الصفحة بالكامل قبل محاولة التسجيل
-        window.addEventListener('load', () => {
-          // قم بتسجيل ملف Service Worker الموجود في './sw.js'
-          navigator.serviceWorker.register('./sw.js')
-            .then(registration => {
-              // تم التسجيل بنجاح
-              console.log('تم تسجيل Service Worker بنجاح. النطاق:', registration.scope);
-            })
-            .catch(error => {
-              // حدث خطأ أثناء التسجيل
-              console.log('فشل تسجيل Service Worker:', error);
-            });
-        });
+          window.addEventListener('load', () => {
+              try {
+                  const swCode = document.getElementById('service-worker-code').textContent;
+                  const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                  const swUrl = URL.createObjectURL(swBlob);
+
+                  navigator.serviceWorker.register(swUrl, { scope: '/' })
+                      .then(registration => {
+                          console.log('تم تسجيل Service Worker المدمج بنجاح. النطاق:', registration.scope);
+                      })
+                      .catch(error => {
+                          console.error('فشل تسجيل Service Worker المدمج:', error);
+                      });
+
+              } catch (e) {
+                  console.error("لم يتمكن من تسجيل الـ Service Worker من الكود المدمج:", e);
+              }
+          });
       }
     </script>
-    <!-- END: Service Worker Registration Code -->
+    <!-- END: Unified Service Worker Registration Script -->
 </body>
 </html>
+
