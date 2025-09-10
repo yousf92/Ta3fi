@@ -628,5 +628,26 @@
             }
         });
     </script>
+
+    <!-- START: Service Worker Registration Code -->
+    <script>
+      // تحقق أولاً مما إذا كان المتصفح يدعم Service Workers
+      if ('serviceWorker' in navigator) {
+        // انتظر حتى يتم تحميل الصفحة بالكامل قبل محاولة التسجيل
+        window.addEventListener('load', () => {
+          // قم بتسجيل ملف Service Worker الموجود في './sw.js'
+          navigator.serviceWorker.register('./sw.js')
+            .then(registration => {
+              // تم التسجيل بنجاح
+              console.log('تم تسجيل Service Worker بنجاح. النطاق:', registration.scope);
+            })
+            .catch(error => {
+              // حدث خطأ أثناء التسجيل
+              console.log('فشل تسجيل Service Worker:', error);
+            });
+        });
+      }
+    </script>
+    <!-- END: Service Worker Registration Code -->
 </body>
 </html>
