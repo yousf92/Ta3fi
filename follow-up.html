@@ -305,10 +305,6 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        #contextual-gemini-result-text {
-            color: #FFFFFF; /* تأكيد أن اللون أبيض */
-        }
-
         /* START: New Analysis Style Toggle */
         .analysis-toggle-group {
             display: flex;
@@ -343,7 +339,7 @@
             background-color: rgba(255, 255, 255, 0.1);
         }
         /* END: New Analysis Style Toggle */
-        
+
         /* START: Background Theme Styles */
         body.solid-black-bg {
             background-image: none !important;
@@ -510,13 +506,18 @@
         function applyBackgroundPreference() {
             const savedTheme = localStorage.getItem('appBackgroundTheme') || 'default';
             const body = document.body;
+            
             body.classList.remove('solid-black-bg', 'gradient-blue-bg');
+            
             if (savedTheme === 'solid-black') {
                 body.classList.add('solid-black-bg');
             } else if (savedTheme === 'gradient-blue') {
                 body.classList.add('gradient-blue-bg');
             }
+            // If 'default', no class is added, and the original CSS background is used.
         }
+
+        // Apply the theme as soon as the script runs
         applyBackgroundPreference();
         // --- END: Background Theme Logic ---
 
@@ -677,6 +678,7 @@
         const analysisResultText = document.getElementById('analysis-result-text');
         
         const suggestionFrame = document.getElementById('suggestion-frame');
+        const suggestStepBtn = document.getElementById('suggest-step-btn');
         const suggestionResultContainer = document.getElementById('suggestion-result-container');
         const suggestionResultText = document.getElementById('suggestion-result-text');
         
@@ -796,20 +798,7 @@
                     const btn = e.currentTarget;
                     btn.disabled = true;
                     btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> جاري استخلاص العبرة...`;
-                    const prompt = `
-بصفتك مرشد حكيم وخبير في علم النفس السلوكي، مستخدمي مر بتجربة صعبة اليوم (زلة أو انتكاسة) ويريد أن يتعلم منها.
-
-مهمتك هي أن تقدم له تحليلاً عميقاً ومفصلاً لمساعدته على فهم الأسباب الجذرية وتجنبها مستقبلاً.
-
-**الضوابط الحاسمة:**
-1.  **الأسلوب:** استخدم لغة عربية فصيحة وواضحة، بأسلوب يجمع بين التعاطف والجدية.
-2.  **المحتوى:** يجب أن يكون التحليل طويلاً ومفصلاً، ويغطي النقاط التالية:
-    * ابدأ بتطمين المستخدم وأن هذه التجربة ليست نهاية الطريق.
-    * اطرح عليه سلسلة من الأسئلة العميقة التي تدفعه للتفكير (مثال: ما هو المحفز الذي سبق التجربة؟ ما هي الحالة النفسية التي كنت فيها؟ هل كان هناك شعور بالوحدة أو الفراغ؟).
-    * قدم له استراتيجية عملية واحدة وواضحة يمكنه تطبيقها في المرة القادمة التي يواجه فيها نفس المحفز.
-3.  **التنوع المطلق:** عند كل طلب جديد، يجب أن يكون التحليل والأسئلة والاستراتيجية مختلفين بنسبة 100% عن المرة السابقة. لا تكرر أي فكرة أو سؤال أبداً.
-4.  **التنسيق:** لا تستخدم أي تشكيل أو علامات ترقيم.
-`;
+                    const prompt = `بصفتك مرشد حكيم ومتعاطف، مستخدمي مر بتجربة صعبة اليوم في رحلة التعافي (زلة أو انتكاسة). مهمتك هي أن تقدم له رسالة قصيرة تساعده على تحويل هذه التجربة إلى فرصة للتعلم والنمو، وليس سببًا لليأس. لا توبخه أبداً. قدم له سؤالاً واحداً فقط يساعده على التفكير في المسبب المحتمل. اختتم الرسالة بتذكير بسيط بأن كل يوم هو فرصة جديدة. التزم باللهجة السعودية العامية، وبدون تشكيل أو علامات ترقيم.`;
                     const result = await callGeminiAPI(prompt);
                     contextualResultText.textContent = result;
                     contextualResultContainer.classList.remove('d-none');
@@ -963,60 +952,37 @@
             }
         }
 
-        // --- START: تعديل الكود لحل المشكلة ---
-        suggestionFrame.addEventListener('click', async (event) => {
-            const suggestStepBtn = event.target.closest('#suggest-step-btn');
+        suggestStepBtn.addEventListener('click', async () => {
+            suggestStepBtn.disabled = true;
+            suggestStepBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> جار إعداد النصيحة...`;
+            suggestionResultContainer.classList.add('d-none');
             
-            // تحقق إذا كان الزر موجودًا أو إذا كان معطلاً بالفعل لمنع النقرات المتعددة
-            if (!suggestStepBtn || suggestStepBtn.disabled) {
-                return;
+            const exclusionList = previousSuggestions.length > 0 
+                ? `من الضروري جدا ان تكون النصيحة جديدة تماما ومختلفة عن هذه النصائح السابقة التي تم تقديمها: "${previousSuggestions.join('" , "')}"`
+                : "";
+
+            const prompt = `
+                بصفتك ناصحا حكيما وموجها على المنهج السلفي الصالح قدم للمستخدم نصيحة فريدة لم تقدمها له من قبل.
+                يجب ان تكون النصيحة متوازنة تنفعه في دينه ودنياه وتغطي جوانب مثل العبادات والاخلاق وتزكية النفس او جوانب دنيوية من منظور شرعي مثل ادارة الوقت وتطوير الذات والتعامل مع الناس.
+                
+                الشروط الحاسمة:
+                1. الإيجاز الشديد: يجب أن تكون النصيحة موجزة ومختصرة جدا لا تتجاوز سطرين.
+                2. التنسيق: يجب ان تكون النصيحة كنص متصل واحد وبدون اي تعداد نقطي او رقمي وبدون استخدام اي حركات تشكيل على الحروف اطلاقا.
+                3. عدم التكرار: ${exclusionList}
+            `;
+            
+            const result = await callGeminiAPI(prompt);
+            
+            if (result && !result.toLowerCase().includes("خطأ")) {
+                saveSuggestion(result);
             }
 
-            try {
-                // الخطوة 1: تعطيل الزر وعرض حالة التحميل
-                suggestStepBtn.disabled = true;
-                suggestStepBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> جار إعداد النصيحة...`;
-                suggestionResultContainer.classList.add('d-none');
-
-                // الخطوة 2: إعداد وإرسال الطلب إلى API
-                const exclusionList = previousSuggestions.length > 0 
-                    ? `من الضروري جدا ان تكون النصيحة جديدة تماما ومختلفة عن هذه النصائح السابقة التي تم تقديمها: "${previousSuggestions.join('" , "')}"`
-                    : "";
-                const prompt = `
-                    بصفتك ناصحا حكيما وموجها على المنهج السلفي الصالح قدم للمستخدم نصيحة فريدة لم تقدمها له من قبل.
-                    يجب ان تكون النصيحة متوازنة تنفعه في دينه ودنياه وتغطي جوانب مثل العبادات والاخلاق وتزكية النفس او جوانب دنيوية من منظور شرعي مثل ادارة الوقت وتطوير الذات والتعامل مع الناس.
-                    الشروط الحاسمة:
-                    1. الإيجاز الشديد: يجب أن تكون النصيحة موجزة ومختصرة جدا لا تتجاوز سطرين.
-                    2. التنسيق: يجب ان تكون النصيحة كنص متصل واحد وبدون اي تعداد نقطي او رقمي وبدون استخدام اي حركات تشكيل على الحروف اطلاقا.
-                    3. عدم التكرار: ${exclusionList}
-                `;
-                
-                const result = await callGeminiAPI(prompt);
-                
-                // الخطوة 3: معالجة النتيجة وعرضها
-                if (result && !result.toLowerCase().includes("خطأ") && result !== "حدثت مشكلة في الاتصال بالشبكة.") {
-                    saveSuggestion(result);
-                }
-                suggestionResultText.textContent = result;
-                suggestionResultContainer.classList.remove('d-none');
-                setRandomBackground(suggestionFrame, 'suggestion');
-
-            } catch (error) {
-                // في حالة حدوث أي خطأ غير متوقع
-                console.error("Error suggesting step:", error);
-                suggestionResultText.textContent = "عفوًا، حدث خطأ غير متوقع.";
-                suggestionResultContainer.classList.remove('d-none');
-            } finally {
-                // الخطوة 4 (الأهم): هذا الجزء سيعمل دائمًا، سواء نجح الطلب أو فشل
-                // إعادة تفعيل الزر وتحديث نصه ليكون جاهزًا للنقرة التالية
-                if (suggestStepBtn) { 
-                   suggestStepBtn.disabled = false;
-                   suggestStepBtn.innerHTML = '<i class="bi bi-sparkles me-2"></i>✨ اطلب تذكرة أخرى';
-                }
-            }
+            suggestionResultText.textContent = result;
+            suggestionResultContainer.classList.remove('d-none');
+            setRandomBackground(suggestionFrame, 'suggestion');
+            suggestStepBtn.disabled = false;
+            suggestStepBtn.innerHTML = '<i class="bi bi-sparkles me-2"></i>✨ اطلب تذكرة أخرى';
         });
-        // --- END: نهاية الكود المعدل ---
-
 
         async function initializeCalendar() {
             await getHabitData();
@@ -1052,4 +1018,3 @@
     </script>
 </body>
 </html>
-
