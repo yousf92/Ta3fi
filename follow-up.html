@@ -434,15 +434,6 @@
                  </div>
             </div>
 
-            <div id="suggestion-frame" class="gemini-frame mt-3">
-                 <button id="suggest-step-btn" class="btn btn-outline-success w-100 fw-bold">
-                      <i class="bi bi-sparkles me-2"></i>✨ اقترح خطوة اليوم
-                 </button>
-                 <div id="suggestion-result-container" class="result-container mt-3 p-3 rounded d-none">
-                      <p id="suggestion-result-text" class="result-text mb-0" style="white-space: pre-wrap;"></p>
-                 </div>
-            </div>
-
         </main>
 
         <button class="add-status-button" data-bs-toggle="modal" data-bs-target="#addStatusModal" title="إضافة حالة اليوم">
@@ -570,7 +561,6 @@
         let isVisitor = true;
         let userHabitData = {};
         let previousAnalyses = [];
-        let previousSuggestions = []; 
 
         const appLockOverlay = document.getElementById('app-lock-overlay');
         const passcodeError = document.getElementById('passcode-error');
@@ -677,11 +667,6 @@
         const analysisResultContainer = document.getElementById('analysis-result-container');
         const analysisResultText = document.getElementById('analysis-result-text');
         
-        const suggestionFrame = document.getElementById('suggestion-frame');
-        const suggestStepBtn = document.getElementById('suggest-step-btn');
-        const suggestionResultContainer = document.getElementById('suggestion-result-container');
-        const suggestionResultText = document.getElementById('suggestion-result-text');
-        
         const contextualCard = document.getElementById('contextual-gemini-card');
         const contextualTitle = document.getElementById('contextual-gemini-title');
         const contextualBtn = document.getElementById('contextual-gemini-btn');
@@ -751,17 +736,13 @@
             'https://images.unsplash.com/photo-1505852679233-d9fd70aff56d?q=80&w=1920'
         ];
         let lastAnalysisBgIndex = -1;
-        let lastSuggestionBgIndex = -1;
-        let lastCelebrationBgIndex = -1; // Added for celebration background
+        let lastCelebrationBgIndex = -1;
 
-        // Modified function to handle celebration background
         function setRandomBackground(element, type) {
           let randomIndex;
           let lastIndex;
           if (type === 'analysis') {
               lastIndex = lastAnalysisBgIndex;
-          } else if (type === 'suggestion') {
-              lastIndex = lastSuggestionBgIndex;
           } else if (type === 'celebration') {
               lastIndex = lastCelebrationBgIndex;
           }
@@ -772,8 +753,6 @@
 
           if (type === 'analysis') {
               lastAnalysisBgIndex = randomIndex;
-          } else if (type === 'suggestion') {
-              lastSuggestionBgIndex = randomIndex;
           } else if (type === 'celebration') {
               lastCelebrationBgIndex = randomIndex;
           }
@@ -896,7 +875,6 @@
             await updateContextualGeminiFeature();
         }
 
-        // START: New logic for toggle buttons
         const styleButtons = document.querySelectorAll('.analysis-toggle-btn');
         styleButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -931,67 +909,11 @@
             analyzeBtn.innerHTML = '✨ إعادة تحليل أدائي';
         });
         
-        function loadPreviousSuggestions() {
-            const saved = localStorage.getItem('previousSuggestions');
-            if (saved) {
-                try {
-                    previousSuggestions = JSON.parse(saved);
-                } catch (e) {
-                    previousSuggestions = [];
-                }
-            }
-        }
-
-        function saveSuggestion(suggestion) {
-            if (!previousSuggestions.includes(suggestion)) {
-                previousSuggestions.push(suggestion);
-                if (previousSuggestions.length > 50) { 
-                    previousSuggestions.shift();
-                }
-                localStorage.setItem('previousSuggestions', JSON.stringify(previousSuggestions));
-            }
-        }
-
-        suggestStepBtn.addEventListener('click', async () => {
-            suggestStepBtn.disabled = true;
-            suggestStepBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> جار إعداد النصيحة...`;
-            suggestionResultContainer.classList.add('d-none');
-            
-            const exclusionList = previousSuggestions.length > 0 
-                ? `من الضروري جدا ان تكون النصيحة جديدة تماما ومختلفة عن هذه النصائح السابقة التي تم تقديمها: "${previousSuggestions.join('" , "')}"`
-                : "";
-
-            const prompt = `
-                بصفتك ناصحا حكيما وموجها على المنهج السلفي الصالح قدم للمستخدم نصيحة فريدة لم تقدمها له من قبل.
-                يجب ان تكون النصيحة متوازنة تنفعه في دينه ودنياه وتغطي جوانب مثل العبادات والاخلاق وتزكية النفس او جوانب دنيوية من منظور شرعي مثل ادارة الوقت وتطوير الذات والتعامل مع الناس.
-                
-                الشروط الحاسمة:
-                1. الإيجاز الشديد: يجب أن تكون النصيحة موجزة ومختصرة جدا لا تتجاوز سطرين.
-                2. التنسيق: يجب ان تكون النصيحة كنص متصل واحد وبدون اي تعداد نقطي او رقمي وبدون استخدام اي حركات تشكيل على الحروف اطلاقا.
-                3. عدم التكرار: ${exclusionList}
-            `;
-            
-            const result = await callGeminiAPI(prompt);
-            
-            if (result && !result.toLowerCase().includes("خطأ")) {
-                saveSuggestion(result);
-            }
-
-            suggestionResultText.textContent = result;
-            suggestionResultContainer.classList.remove('d-none');
-            setRandomBackground(suggestionFrame, 'suggestion');
-            suggestStepBtn.disabled = false;
-            suggestStepBtn.innerHTML = '<i class="bi bi-sparkles me-2"></i>✨ اطلب تذكرة أخرى';
-        });
-
         async function initializeCalendar() {
             await getHabitData();
             await renderCalendar();
 
-            loadPreviousSuggestions(); 
-            
             setRandomBackground(analyzeFrame, 'analysis');
-            setRandomBackground(suggestionFrame, 'suggestion');
 
             prevMonthBtn.addEventListener('click', () => {
                 currentDate.setMonth(currentDate.getMonth() - 1);
@@ -1018,3 +940,4 @@
     </script>
 </body>
 </html>
+
