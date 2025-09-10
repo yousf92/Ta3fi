@@ -349,6 +349,12 @@
             background-image: linear-gradient(135deg, #0f2027, #203a43, #2c5364) !important;
         }
         /* END: Background Theme Styles */
+
+        /* START: Fix for result text color */
+        #contextual-gemini-result-text {
+            color: var(--text-color); /* Ensures the text is always white/light */
+        }
+        /* END: Fix for result text color */
     </style>
 </head>
 <body>
@@ -777,7 +783,7 @@
                     const btn = e.currentTarget;
                     btn.disabled = true;
                     btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> جاري استخلاص العبرة...`;
-                    const prompt = `بصفتك مرشد حكيم ومتعاطف، مستخدمي مر بتجربة صعبة اليوم في رحلة التعافي (زلة أو انتكاسة). مهمتك هي أن تقدم له رسالة قصيرة تساعده على تحويل هذه التجربة إلى فرصة للتعلم والنمو، وليس سببًا لليأس. لا توبخه أبداً. قدم له سؤالاً واحداً فقط يساعده على التفكير في المسبب المحتمل. اختتم الرسالة بتذكير بسيط بأن كل يوم هو فرصة جديدة. التزم باللهجة السعودية العامية، وبدون تشكيل أو علامات ترقيم.`;
+                    const prompt = `بصفتك مرشد حكيم ومتعاطف، مستخدمي مر بتجربة صعبة اليوم في رحلة التعافي (زلة أو انتكاسة). مهمتك هي أن تقدم له رسالة طويلة مرة تساعده على تحويل هذه التجربة إلى فرصة للتعلم والنمو، وليس سببًا لليأس. لا توبخه أبداً. قدم له سؤالاً واحداً فقط يساعده على التفكير في المسبب المحتمل. اختتم الرسالة بتذكير بسيط بأن كل يوم هو فرصة جديدة. التزم باللهجة السعودية العامية، وبدون تشكيل أو علامات ترقيم.`;
                     const result = await callGeminiAPI(prompt);
                     contextualResultText.textContent = result;
                     contextualResultContainer.classList.remove('d-none');
@@ -940,4 +946,3 @@
     </script>
 </body>
 </html>
-
