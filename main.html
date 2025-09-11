@@ -178,6 +178,36 @@
         .fire-alarm-base { width: 28px; height: 5px; background: linear-gradient(to top, #c00000, #e02020); position: absolute; bottom: 0; left: 0; border-radius: 0 0 4px 4px; z-index: 1; box-shadow: 0 2px 3px rgba(0,0,0,0.5); }
         @keyframes beacon-flash { 0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.5); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
         
+        .image-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            border-radius: 20px; 
+            transition: opacity 0.5s ease-in-out;
+            opacity: 0;
+        }
+        .image-background.visible {
+            opacity: 1;
+        }
+        .image-background-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.45); 
+            z-index: 2;
+            border-radius: 20px; 
+            display: none; 
+            transition: opacity 0.5s ease-in-out;
+        }
+         .image-background-overlay.visible {
+            display: block;
+        }
         #app-lock-overlay {
             position: fixed;
             top: 0;
@@ -330,22 +360,6 @@
         body.gradient-blue-bg {
             background-image: linear-gradient(135deg, #0f2027, #203a43, #2c5364) !important;
         }
-        .progress-timer-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.45); 
-            z-index: 2;
-            border-radius: 20px;
-            display: none; 
-            transition: opacity 0.5s ease-in-out;
-        }
-        .progress-timer-card.has-background::before {
-             display: block;
-        }
     </style>
 </head>
 <body style="visibility: hidden;">
@@ -377,6 +391,8 @@
             </header>
             <main class="content-area">
                 <div class="progress-timer-card">
+                    <div class="image-background-overlay"></div>
+                    <img class="image-background" id="counter-image-bg" src="" alt="Background">
                     <div class="timer-settings-icon d-none"><i class="bi bi-gear-fill"></i></div>
                     <div class="progress-rows-container">
                         <div class="progress-row">
@@ -1109,19 +1125,25 @@
                 showQuotePage();
             });
             
-            // --- START: Image Background Logic ---
+            // --- START: Background Image Logic ---
             const cardElement = document.querySelector('.progress-timer-card');
+            const imageElement = document.getElementById('counter-image-bg');
+            const overlayElement = document.querySelector('.image-background-overlay');
             const setImageButton = document.getElementById('set-image-button');
             const removeBackgroundButton = document.getElementById('remove-background-button');
             const imageFilePicker = document.getElementById('image-file-picker');
 
             function setCounterBackgroundImage(imageUrl) {
                 if (imageUrl) {
-                    cardElement.style.backgroundImage = `url('${imageUrl}')`;
-                    cardElement.classList.add('has-background');
+                    cardElement.style.background = 'none';
+                    overlayElement.classList.add('visible');
+                    imageElement.src = imageUrl;
+                    imageElement.classList.add('visible');
                 } else {
-                    cardElement.style.backgroundImage = ''; // Restore gradient
-                    cardElement.classList.remove('has-background');
+                    cardElement.style.background = ''; // Restore gradient
+                    overlayElement.classList.remove('visible');
+                    imageElement.classList.remove('visible');
+                    imageElement.src = '';
                 }
             }
             
@@ -1149,7 +1171,7 @@
                 formData.append('folder', FOLDER);
 
                 try {
-                    setImageButton.innerHTML = `<span>جاري رفع الصورة... <i class="bi bi-hourglass-split"></i></span>`;
+                    setImageButton.innerHTML = `<span>جاري الرفع... <i class="bi bi-hourglass-split"></i></span>`;
                     setImageButton.disabled = true;
                     removeBackgroundButton.disabled = true;
 
@@ -1202,7 +1224,7 @@
                     event.target.value = null; 
                 }
             });
-            // --- END: Image Background Logic ---
+            // --- END: Background Image Logic ---
 
             setupGeminiFeatures();
         });
