@@ -52,7 +52,18 @@
         .welcome-message { text-align: right; }
         .welcome-message h5 { margin: 0; font-weight: 700; color: var(--text-color);}
         .welcome-message p { margin: 0; font-size: 0.9rem; color: var(--secondary-text-color); }
-        .progress-timer-card { background: linear-gradient(135deg, #054238, #008069); color: white; border-radius: 20px; padding: 1.5rem; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0, 128, 105, 0.3); margin-bottom: 1.5rem; }
+        .progress-timer-card { 
+            background: linear-gradient(135deg, #054238, #008069); 
+            color: white; 
+            border-radius: 20px; 
+            padding: 1.5rem; 
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: 0 10px 25px rgba(0, 128, 105, 0.3); 
+            margin-bottom: 1.5rem;
+            background-size: cover;
+            background-position: center;
+        }
         .timer-settings-icon { position: absolute; top: 1rem; left: 1rem; background-color: rgba(255, 255, 255, 0.15); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; z-index: 10; }
         .progress-rows-container { position: relative; z-index: 5; margin-top: 2rem; }
         .progress-row { display: flex; align-items: center; background-color: var(--progress-bg); border-radius: 12px; padding: 0.7rem 1rem; margin-bottom: 0.8rem; position: relative; overflow: hidden; }
@@ -167,36 +178,6 @@
         .fire-alarm-base { width: 28px; height: 5px; background: linear-gradient(to top, #c00000, #e02020); position: absolute; bottom: 0; left: 0; border-radius: 0 0 4px 4px; z-index: 1; box-shadow: 0 2px 3px rgba(0,0,0,0.5); }
         @keyframes beacon-flash { 0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.5); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
         
-        .video-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 1;
-            border-radius: 20px; 
-            transition: opacity 0.5s ease-in-out;
-            opacity: 0;
-        }
-        .video-background.visible {
-            opacity: 1;
-        }
-        .video-background-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.45); 
-            z-index: 2;
-            border-radius: 20px; 
-            display: none; 
-            transition: opacity 0.5s ease-in-out;
-        }
-         .video-background-overlay.visible {
-            display: block;
-        }
         #app-lock-overlay {
             position: fixed;
             top: 0;
@@ -349,6 +330,22 @@
         body.gradient-blue-bg {
             background-image: linear-gradient(135deg, #0f2027, #203a43, #2c5364) !important;
         }
+        .progress-timer-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.45); 
+            z-index: 2;
+            border-radius: 20px;
+            display: none; 
+            transition: opacity 0.5s ease-in-out;
+        }
+        .progress-timer-card.has-background::before {
+             display: block;
+        }
     </style>
 </head>
 <body style="visibility: hidden;">
@@ -380,8 +377,6 @@
             </header>
             <main class="content-area">
                 <div class="progress-timer-card">
-                    <div class="video-background-overlay"></div>
-                    <video autoplay muted loop playsinline class="video-background" id="counter-video-bg"></video>
                     <div class="timer-settings-icon d-none"><i class="bi bi-gear-fill"></i></div>
                     <div class="progress-rows-container">
                         <div class="progress-row">
@@ -472,13 +467,13 @@
             <div class="modal-body-custom">
                 <button class="action-button" id="reset-timer-button"><span>تصفير العداد</span><div class="icon-container yellow"><i class="bi bi-arrow-counterclockwise"></i></div></button>
                 <button class="action-button" id="set-date-button"><span>تعيين تاريخ بداية جديد</span><div class="icon-container blue"><i class="bi bi-calendar-plus-fill"></i></div></button>
-                <div id="developer-video-options" class="d-none">
-                    <button class="action-button" id="set-video-button">
-                        <span>تعيين خلفية فيديو</span>
-                        <div class="icon-container green"><i class="bi bi-camera-video-fill"></i></div>
+                <div id="developer-background-options" class="d-none">
+                    <button class="action-button" id="set-image-button">
+                        <span>تعيين صورة خلفية</span>
+                        <div class="icon-container green"><i class="bi bi-image"></i></div>
                     </button>
-                    <button class="action-button" id="remove-video-button">
-                        <span>إزالة خلفية الفيديو</span>
+                    <button class="action-button" id="remove-background-button">
+                        <span>إزالة الخلفية</span>
                         <div class="icon-container red"><i class="bi bi-trash-fill"></i></div>
                     </button>
                 </div>
@@ -533,7 +528,7 @@
         </div>
     </div>
     
-    <input type="file" accept="video/*" id="video-file-picker" style="display: none;">
+    <input type="file" accept="image/*" id="image-file-picker" style="display: none;">
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
@@ -792,7 +787,7 @@
                     });
                     
                     initializeGlobalChatNotifications(user.uid);
-                    listenForBackgroundVideoChanges();
+                    listenForBackgroundImageChanges();
 
                     if (user.isAnonymous) {
                         welcomeUserEl.textContent = `مرحبا ٲيها الزائر`;
@@ -819,7 +814,7 @@
                             currentUserRole = userDoc.data().role || 'user';
                             if (currentUserRole === 'developer') { 
                                 openSendModalBtn.classList.remove('d-none'); 
-                                document.getElementById('developer-video-options').classList.remove('d-none');
+                                document.getElementById('developer-background-options').classList.remove('d-none');
                             }
                             if (userDoc.data().timerStartDate) {
                                 startTime = userDoc.data().timerStartDate.toDate();
@@ -1114,57 +1109,49 @@
                 showQuotePage();
             });
             
-            // --- START: Video Background Logic ---
-            const videoElement = document.getElementById('counter-video-bg');
-            const overlayElement = document.querySelector('.video-background-overlay');
+            // --- START: Image Background Logic ---
             const cardElement = document.querySelector('.progress-timer-card');
-            const setVideoButton = document.getElementById('set-video-button');
-            const removeVideoButton = document.getElementById('remove-video-button');
-            const videoFilePicker = document.getElementById('video-file-picker');
+            const setImageButton = document.getElementById('set-image-button');
+            const removeBackgroundButton = document.getElementById('remove-background-button');
+            const imageFilePicker = document.getElementById('image-file-picker');
 
-            function setCounterBackgroundVideo(videoUrl) {
-                if (videoUrl) {
-                    cardElement.style.background = 'none';
-                    overlayElement.classList.add('visible');
-                    videoElement.src = videoUrl;
-                    videoElement.classList.add('visible');
-                    videoElement.play().catch(e => console.error("Video play failed:", e));
+            function setCounterBackgroundImage(imageUrl) {
+                if (imageUrl) {
+                    cardElement.style.backgroundImage = `url('${imageUrl}')`;
+                    cardElement.classList.add('has-background');
                 } else {
-                    cardElement.style.background = ''; // Restore gradient
-                    overlayElement.classList.remove('visible');
-                    videoElement.classList.remove('visible');
-                    videoElement.pause();
-                    videoElement.src = '';
+                    cardElement.style.backgroundImage = ''; // Restore gradient
+                    cardElement.classList.remove('has-background');
                 }
             }
             
-            function listenForBackgroundVideoChanges() {
-                const configDocRef = doc(db, "app_config", "background_video");
+            function listenForBackgroundImageChanges() {
+                const configDocRef = doc(db, "app_config", "background_image");
                 onSnapshot(configDocRef, (doc) => {
                     if (doc.exists()) {
-                        const videoUrl = doc.data().url;
-                        setCounterBackgroundVideo(videoUrl);
+                        const imageUrl = doc.data().url;
+                        setCounterBackgroundImage(imageUrl);
                     } else {
-                        setCounterBackgroundVideo(null); // No config, reset to default
+                        setCounterBackgroundImage(null); // No config, reset to default
                     }
                 });
             }
 
-            async function uploadVideoToCloudinary(file) {
+            async function uploadImageToCloudinary(file) {
                 const CLOUD_NAME = 'dsf3gudnd';
                 const FOLDER = 'back photo';
                 const UPLOAD_PRESET = 'back photo'; 
 
-                const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`;
+                const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('upload_preset', UPLOAD_PRESET);
                 formData.append('folder', FOLDER);
 
                 try {
-                    setVideoButton.innerHTML = `<span>جاري الرفع... <i class="bi bi-hourglass-split"></i></span>`;
-                    setVideoButton.disabled = true;
-                    removeVideoButton.disabled = true;
+                    setImageButton.innerHTML = `<span>جاري رفع الصورة... <i class="bi bi-hourglass-split"></i></span>`;
+                    setImageButton.disabled = true;
+                    removeBackgroundButton.disabled = true;
 
                     const response = await fetch(url, { method: 'POST', body: formData });
                     const data = await response.json();
@@ -1173,49 +1160,49 @@
                         return data.secure_url;
                     } else {
                         console.error('Cloudinary upload error:', data);
-                        alert('حدث خطأ أثناء رفع الفيديو. تأكد من صحة اسم الإعداد المسبق (Upload Preset) في الكود.');
+                        alert('حدث خطأ أثناء رفع الصورة. تأكد من صحة اسم الإعداد المسبق (Upload Preset) في الكود.');
                         return null;
                     }
                 } catch (error) {
                     console.error('Fetch error during upload:', error);
-                    alert('فشل الاتصال لرفع الفيديو.');
+                    alert('فشل الاتصال لرفع الصورة.');
                     return null;
                 } finally {
-                    setVideoButton.innerHTML = `<span>تعيين خلفية فيديو</span><div class="icon-container green"><i class="bi bi-camera-video-fill"></i></div>`;
-                    setVideoButton.disabled = false;
-                    removeVideoButton.disabled = false;
+                    setImageButton.innerHTML = `<span>تعيين صورة خلفية</span><div class="icon-container green"><i class="bi bi-image"></i></div>`;
+                    setImageButton.disabled = false;
+                    removeBackgroundButton.disabled = false;
                 }
             }
 
-            async function updateBackgroundVideoInFirestore(url) {
-                const configDocRef = doc(db, "app_config", "background_video");
+            async function updateBackgroundImageInFirestore(url) {
+                const configDocRef = doc(db, "app_config", "background_image");
                 try {
                     await setDoc(configDocRef, { url: url }, { merge: true });
-                    console.log("Background video URL updated in Firestore.");
+                    console.log("Background image URL updated in Firestore.");
                 } catch (error) {
                     console.error("Error updating Firestore:", error);
                     alert("خطأ في تحديث قاعدة البيانات.");
                 }
             }
 
-            setVideoButton.addEventListener('click', () => videoFilePicker.click());
-            removeVideoButton.addEventListener('click', async () => {
-                await updateBackgroundVideoInFirestore(null);
+            setImageButton.addEventListener('click', () => imageFilePicker.click());
+            removeBackgroundButton.addEventListener('click', async () => {
+                await updateBackgroundImageInFirestore(null);
                 closeSettingsModal();
             });
 
-            videoFilePicker.addEventListener('change', async (event) => {
+            imageFilePicker.addEventListener('change', async (event) => {
                 const file = event.target.files[0];
                 if (file) {
-                    const videoUrl = await uploadVideoToCloudinary(file);
-                    if (videoUrl) {
-                        await updateBackgroundVideoInFirestore(videoUrl);
+                    const imageUrl = await uploadImageToCloudinary(file);
+                    if (imageUrl) {
+                        await updateBackgroundImageInFirestore(imageUrl);
                         closeSettingsModal();
                     }
                     event.target.value = null; 
                 }
             });
-            // --- END: Video Background Logic ---
+            // --- END: Image Background Logic ---
 
             setupGeminiFeatures();
         });
@@ -1235,3 +1222,4 @@
     </script>
 </body>
 </html>
+
