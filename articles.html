@@ -447,7 +447,6 @@
         }
 
         function renderHabits() {
-            // FIX 1: Get current date inside function to ensure it's always fresh
             const todayStr = new Date().toISOString().split('T')[0];
             const data = userHabitData;
             
@@ -459,7 +458,6 @@
             } else {
                 mainAddHabitBtn.style.display = 'block';
                 onboardingSection.style.display = 'none';
-                // Use the fresh todayStr to get completed habits
                 const completedToday = data.history ? (data.history[todayStr] || []) : [];
                 habitsList.innerHTML = ''; 
                 data.habits.forEach(habit => {
@@ -504,7 +502,6 @@
         }
 
         function updateSummaryStats() {
-            // FIX 1: Get current date here as well for consistency
             const todayStr = new Date().toISOString().split('T')[0];
             const data = userHabitData;
             const completedCount = data.history ? (data.history[todayStr] || []).length : 0;
@@ -513,7 +510,6 @@
         }
         
         async function toggleHabit(habitId) {
-            // FIX 1: Use a fresh date here to avoid updating yesterday's data
             const todayStr = new Date().toISOString().split('T')[0];
             const newData = JSON.parse(JSON.stringify(userHabitData));
             newData.history = newData.history || {};
@@ -640,13 +636,12 @@
             document.getElementById('stats-completion-rate').textContent = `${completionRate}%`;
             document.getElementById('stats-monthly-rate').textContent = `${monthlySuccessRate}%`;
 
-            // FIX 2: Corrected the loop for calculating weekly chart data
             const labels = [];
             const chartData = [];
-            const baseDate = new Date(); // Start from today
+            const baseDate = new Date();
             for (let i = 6; i >= 0; i--) {
-                const date = new Date(baseDate); // Create a copy of the base date
-                date.setDate(baseDate.getDate() - i); // Set it to the correct day in the past
+                const date = new Date(baseDate);
+                date.setDate(baseDate.getDate() - i); 
                 
                 const dateStr = date.toISOString().split('T')[0];
                 labels.push(date.toLocaleDateString('ar-EG', { weekday: 'short' }));
@@ -669,33 +664,42 @@
                 item.innerHTML = `<span><i class="bi ${habit.icon} me-2"></i>${habit.name}</span><span class="fw-bold">${completionCount} مرة</span>`;
                 habitBreakdownContainer.appendChild(item);
 
+                // --- STREAK LOGIC CORRECTION START ---
                 let longestHabitStreak = 0;
                 let currentHabitStreak = 0;
-                if (sortedDates.length > 0) {
-                    let lastDate = new Date(habit.createdAt);
-                    lastDate.setDate(lastDate.getDate() - 1);
-                     for (const dateStr of sortedDates) {
-                         if (dateStr < habit.createdAt) continue;
-                        const currentDate = new Date(dateStr);
-                        const isCompleted = (data.history[dateStr] || []).includes(habit.id);
-                        const diffDays = Math.round((currentDate - lastDate) / (1000 * 60 * 60 * 24));
+
+                // First, get all the dates this specific habit was completed, and make sure they're sorted.
+                const habitCompletionDates = sortedDates.filter(date =>
+                    date >= habit.createdAt && (data.history[date] || []).includes(habit.id)
+                );
+
+                if (habitCompletionDates.length > 0) {
+                    // Start the first streak. Any single completion is a streak of 1.
+                    currentHabitStreak = 1;
+                    longestHabitStreak = 1;
+
+                    // Loop through the completion dates starting from the second one.
+                    for (let i = 1; i < habitCompletionDates.length; i++) {
+                        const prevDate = new Date(habitCompletionDates[i - 1]);
+                        const currentDate = new Date(habitCompletionDates[i]);
                         
-                        if (isCompleted) {
-                            if (diffDays === 1) {
-                                currentHabitStreak++;
-                            } else {
-                                currentHabitStreak = 1;
-                            }
+                        const diffDays = Math.round((currentDate - prevDate) / (1000 * 60 * 60 * 24));
+
+                        if (diffDays === 1) {
+                            // The dates are consecutive, so the streak continues.
+                            currentHabitStreak++;
                         } else {
-                            if(diffDays === 1) {
-                                longestHabitStreak = Math.max(longestHabitStreak, currentHabitStreak);
-                                currentHabitStreak = 0;
-                            }
+                            // The streak was broken. Compare the streak that just ended with the longest one so far.
+                            longestHabitStreak = Math.max(longestHabitStreak, currentHabitStreak);
+                            // Start a new streak from 1 for the current completion day.
+                            currentHabitStreak = 1;
                         }
-                        lastDate = currentDate;
                     }
+                    // After the loop, do one last check to account for the final streak.
+                    longestHabitStreak = Math.max(longestHabitStreak, currentHabitStreak);
                 }
-                longestHabitStreak = Math.max(longestHabitStreak, currentHabitStreak);
+                // --- STREAK LOGIC CORRECTION END ---
+
                 const streakItem = document.createElement('div');
                 streakItem.className = 'habit-stat-item';
                 streakItem.innerHTML = `<span><i class="bi ${habit.icon} me-2"></i>${habit.name}</span><span class="fw-bold">${longestHabitStreak} أيام</span>`;
@@ -798,3 +802,4 @@
     </script>
 </body>
 </html>
+
