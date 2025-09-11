@@ -310,7 +310,6 @@
             height: 1rem;
         }
 
-        /* --- START: New Styles for Inspiration Display --- */
         #inspiration-display {
             position: relative;
             background-size: cover;
@@ -322,7 +321,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 150px; /* Give it some height */
+            min-height: 150px;
         }
         #inspiration-display::before {
             content: '';
@@ -331,20 +330,18 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* Dark overlay */
+            background-color: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(2px);
             -webkit-backdrop-filter: blur(2px);
             z-index: 1;
-            border-radius: 15px; /* Match parent border-radius */
+            border-radius: 15px;
         }
         #inspiration-text {
             position: relative;
-            z-index: 2; /* Text above overlay */
+            z-index: 2;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
         }
-        /* --- END: New Styles for Inspiration Display --- */
         
-        /* START: Background Theme Styles */
         body.solid-black-bg {
             background-image: none !important;
             background-color: #000000 !important;
@@ -352,7 +349,6 @@
         body.gradient-blue-bg {
             background-image: linear-gradient(135deg, #0f2027, #203a43, #2c5364) !important;
         }
-        /* END: Background Theme Styles */
     </style>
 </head>
 <body style="visibility: hidden;">
@@ -440,7 +436,7 @@
             <nav class="bottom-nav">
                 <a href="main.html" class="nav-item active"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
                 <a href="diaries.html" class="nav-item"><i class="bi bi-book-fill"></i><span>اليوميات</span></a>
-                <a href="articles.html" class="nav-item"><i class="bi bi-award-fill"></i><span>المقالات</span></a>
+                <a href="articles.html" class="nav-item"><i class="bi bi-check2-square"></i><span>العادات</span></a>
                 <a href="chat.html" class="nav-item special-item">
                     <div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div>
                     <span>دردشة</span>
@@ -615,7 +611,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // --- START: Background Theme Logic ---
             function applyBackgroundPreference() {
                 const savedTheme = localStorage.getItem('appBackgroundTheme') || 'default';
                 const body = document.body;
@@ -627,7 +622,6 @@
                 }
             }
             applyBackgroundPreference();
-            // --- END: Background Theme Logic ---
 
             let startTime = null;
             let timerInterval = null;
@@ -635,7 +629,7 @@
             let breathingTimeouts = [];
             let countdownInterval = null;
             let remainingTime = 0;
-            let lastSolution = null; // -- FIX: Changed from array to string
+            let lastSolution = null;
             const welcomeUserEl = document.getElementById('welcome-user');
             const openSendModalBtn = document.getElementById('open-send-modal-btn');
             const startTimerBtn = document.getElementById('start-timer-btn');
@@ -750,17 +744,15 @@
                         2.  **الأسلوب:** خل كلامك طبيعي كأنك تسولف مع خويك، مو كأنك آلة.
                         3.  **التنسيق:** لا تستخدم أي تشكيل (فتحة، ضمة، كسرة) ولا أي علامات ترقيم (لا فاصلة ولا نقطة).
                         4.  **الطول:** عطني جملة جدا طويلة ارجوك .
-                        5.  **التنوع:** إذا قلت لك 'أبغى حل ثاني'، عطني حل جديد ومختلف تماماً. لا تكرر نفس الكلام ارجوك اشوفك تكرر نفس الكلام وتقول قم صلي اعطني حلا اخر اذا قلت لك ابغی حل ثاني ارجوك.
+                        5.  **التنوع:** إذا قلت لك 'أبغى حل ثاني'، عطني حل جديد ومختلف تماماً. لا تكرر نفس الكلام.
                     `;
                     
-                    // -- FIX: Check for the last single solution, not an array
                     if (lastSolution) {
                         basePrompt += `\nالحل اللي عطيتني إياه قبل هو: ${lastSolution}. لا تكرره وعطني شي جديد.`;
                     }
 
                     const generatedText = await callGeminiAPI(basePrompt);
                     
-                    // -- FIX: Store only the last generated solution
                     if (generatedText && !generatedText.includes('خطأ')) {
                          lastSolution = generatedText;
                     }
@@ -781,54 +773,8 @@
                 });
             }
 
-            function setupAiAdviceFeature() {
-                const adviceCard = document.getElementById('ai-advice-card');
-                const adviceTextEl = document.getElementById('ai-advice-text');
-                const refreshBtn = document.getElementById('ai-advice-refresh-btn');
-                let isGenerating = false;
-                let previousAdvice = [];
-
-                async function generateAiAdvice() {
-                    if (isGenerating) return;
-                    isGenerating = true;
-                    
-                    adviceTextEl.innerHTML = '<div class="spinner-grow text-light spinner-grow-sm" role="status"><span class="visually-hidden">Loading...</span></div>';
-                    
-                    let prompt = ``;
-
-                    if (previousAdvice.length > 0) {
-                        const previousAdviceText = previousAdvice.join(' - ');
-                        prompt += `\n\nالنصائح السابقة التي قدمتها هي: "${previousAdviceText}". يمنع منعاً باتاً تكرار أي فكرة أو عبارة منها. قدم نصيحة جديدة ومختلفة تماماً.`;
-                    }
-
-                    const advice = await callGeminiAPI(prompt);
-                    
-                    if (advice && !advice.includes('خطأ')) {
-                        previousAdvice.push(advice);
-                         if (previousAdvice.length > 15) {
-                            previousAdvice.shift();
-                        }
-                    }
-
-                    adviceTextEl.innerHTML = advice.replace(/\n/g, '<br>');
-
-                    let newImageIndex;
-                    do {
-                        newImageIndex = Math.floor(Math.random() * natureImages.length);
-                    } while (newImageIndex === lastImageIndex && natureImages.length > 1);
-                    lastImageIndex = newImageIndex;
-                    adviceCard.style.backgroundImage = `url('${natureImages[newImageIndex]}')`;
-                    
-                    isGenerating = false;
-                }
-
-                refreshBtn.addEventListener('click', generateAiAdvice);
-                generateAiAdvice();
-            }
-
             onAuthStateChanged(auth, async (user) => {
                 if (user && (user.emailVerified || user.isAnonymous)) {
-                    // إذا كان المستخدم مسجلاً، أظهر الصفحة الرئيسية
                     document.body.style.visibility = 'visible';
                     
                     initializeAppLock();
@@ -896,7 +842,6 @@
                         loadNotifications(user.uid);
                     }
                 } else {
-                    // إذا لم يكن مسجلاً، انقله إلى صفحة تسجيل الدخول
                     window.location.href = 'index.html';
                 }
             });
@@ -1125,7 +1070,7 @@
                 quotePage.style.display = 'flex';
                 quotePage.classList.add('active');
                 
-                quoteText.textContent = "لحظة من فضلك أفكر في شيء ملهم لك";
+                quoteText.innerHTML = '<div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div>';
                 const prompt = "بصفتك ناصح أمين على منهج السلف الصالح خاطب شخص على وشك يطيح في معصية العادة السرية أو مشاهدة الإباحية عطه كلام قوي ومباشر يجمع بين العقل والترهيب والتذكير بعواقب الفعل عشان يتراجع فورا تكلم باللهجة السعودية العامية وردك لازم يكون بدون تشكيل وبدون أي علامات ترقيم نهائيا وخليه قصير ومختصر وطبيعي كأنك تكلم خويك";
                 const generatedQuote = await callGeminiAPI(prompt);
                 quoteText.innerHTML = generatedQuote;
@@ -1273,7 +1218,6 @@
             // --- END: Video Background Logic ---
 
             setupGeminiFeatures();
-            setupAiAdviceFeature();
         });
     </script>
     <script>
@@ -1287,3 +1231,4 @@
     </script>
 </body>
 </html>
+

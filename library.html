@@ -209,9 +209,8 @@
             margin-top: 1rem;
         }
 
-        /* --- START: Toast Notification Styles --- */
         .toast-container {
-            z-index: 1100; /* Ensure it's above other elements */
+            z-index: 1100;
         }
         .custom-toast {
             background-color: var(--card-background);
@@ -227,9 +226,7 @@
         .custom-toast .btn-close {
             filter: invert(1) grayscale(100%) brightness(200%);
         }
-        /* --- END: Toast Notification Styles --- */
         
-        /* START: Background Theme Styles */
         body.solid-black-bg {
             background-image: none !important;
             background-color: #000000 !important;
@@ -237,11 +234,9 @@
         body.gradient-blue-bg {
             background-image: linear-gradient(135deg, #0f2027, #203a43, #2c5364) !important;
         }
-        /* END: Background Theme Styles */
     </style>
 </head>
 <body>
-    <!-- START: Toast container for notifications -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
         <div id="app-toast" class="toast custom-toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
@@ -254,7 +249,6 @@
             </div>
         </div>
     </div>
-    <!-- END: Toast container -->
 
     <div id="app-lock-overlay">
         <div class="lock-container">
@@ -299,11 +293,9 @@
 
             <div class="pdf-controls-row">
                  <button class="btn btn-secondary btn-sm" id="display-mode-btn" title="تغيير وضع العرض"><i class="bi bi-moon-fill"></i></button>
-                 <!-- START: New Save Offline Button -->
                  <button class="btn btn-secondary btn-sm" id="save-offline-btn" title="حفظ الكتاب للقراءة بدون انترنت">
                      <i class="bi bi-cloud-arrow-down-fill"></i>
                  </button>
-                 <!-- END: New Save Offline Button -->
                 <div id="zoom-controls">
                     <button class="btn btn-secondary btn-sm" id="zoom-out-btn"><i class="bi bi-dash"></i></button>
                     <input type="range" id="zoom-range" min="0.1" max="3.0" step="0.01" value="0.8" class="form-range">
@@ -463,7 +455,7 @@
     <nav class="bottom-nav">
         <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
         <a href="diaries.html" class="nav-item"><i class="bi bi-book-fill"></i><span>اليوميات</span></a>
-        <a href="articles.html" class="nav-item"><i class="bi bi-award-fill"></i><span>المقالات</span></a>
+        <a href="articles.html" class="nav-item"><i class="bi bi-check2-square"></i><span>العادات</span></a>
         <a href="chat.html" class="nav-item special-item">
             <div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div>
             <span>دردشة</span>
@@ -728,7 +720,6 @@
             fetchSectionsAndBooks(); 
         });
 
-        // --- START: Offline Save Logic ---
         function showToast(title, body) {
             document.getElementById('toast-title').textContent = title;
             document.getElementById('toast-body').textContent = body;
@@ -737,7 +728,7 @@
 
         async function checkIfBookIsCached(url) {
             if (!('caches' in window)) return false;
-            const cache = await caches.open('unified-assets-cache-v1'); // Use the unified cache name
+            const cache = await caches.open('unified-assets-cache-v1');
             const response = await cache.match(url);
             return !!response;
         }
@@ -763,7 +754,6 @@
                 icon.className = 'spinner-border spinner-border-sm';
 
                 try {
-                    // The fetch event in sw.js will automatically cache this
                     await fetch(currentPdfUrl); 
                     showToast('نجاح', 'تم حفظ الكتاب بنجاح!');
                     updateOfflineButtonState(currentPdfUrl);
@@ -774,8 +764,7 @@
                 }
             }
         });
-        // --- END: Offline Save Logic ---
-
+        
         sectionsContainer.addEventListener('click', (e) => {
             const favoriteBtn = e.target.closest('.favorite-btn');
             if (favoriteBtn) {
@@ -1364,12 +1353,12 @@
         async function openPdfReader(bookId, pdfUrl, title) {
             if (!pdfUrl) return;
             currentBookId = bookId;
-            currentPdfUrl = pdfUrl; // Store current PDF URL
+            currentPdfUrl = pdfUrl; 
             await fetchAndApplyUserPreferences();
             libraryView.classList.add('d-none');
             pdfReaderView.classList.remove('d-none');
             pageNumSpan.textContent = 'يتم التحميل...';
-            updateOfflineButtonState(pdfUrl); // Check if cached
+            updateOfflineButtonState(pdfUrl);
             const userProgress = await getUserBookProgress(bookId);
             try {
                 const loadingTask = pdfjsLib.getDocument(pdfUrl);
@@ -1465,16 +1454,9 @@
 
     </script>
     
-    <!-- START: Service Worker Registration -->
-    <!-- تم إضافة هذا الكود وتعديله لضمان أفضل أداء وتوافق -->
     <script>
-        // تحقق مما إذا كان المتصفح يدعم Service Workers
         if ('serviceWorker' in navigator) {
-            // انتظر حتى يتم تحميل الصفحة بالكامل
             window.addEventListener('load', () => {
-                // قم بتسجيل ملف sw.js الموجود في المجلد الرئيسي (root)
-                // تحديد النطاق { scope: '/' } يضمن أن هذا الـ Service Worker
-                // سيتحكم في جميع الصفحات داخل تطبيقك.
                 navigator.serviceWorker.register('/sw.js', { scope: '/' })
                     .then(registration => {
                         console.log('Unified Service Worker registered successfully. Scope:', registration.scope);
@@ -1485,8 +1467,6 @@
             });
         }
     </script>
-    <!-- END: Service Worker Registration -->
 
 </body>
 </html>
-

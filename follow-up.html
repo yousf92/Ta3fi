@@ -449,7 +449,7 @@
         <nav class="bottom-nav">
             <a href="main.html" class="nav-item"><i class="bi bi-house-door-fill"></i><span>الرئيسية</span></a>
             <a href="diaries.html" class="nav-item"><i class="bi bi-book-fill"></i><span>اليوميات</span></a>
-            <a href="articles.html" class="nav-item"><i class="bi bi-award-fill"></i><span>المقالات</span></a>
+            <a href="articles.html" class="nav-item"><i class="bi bi-check2-square"></i><span>العادات</span></a>
             <a href="chat.html" class="nav-item special-item">
                 <div class="icon-background"><i class="bi bi-chat-dots-fill"></i></div>
                 <span>دردشة</span>
@@ -610,7 +610,6 @@
 
         function callGeminiAPI(prompt) {
             return new Promise((resolve, reject) => {
-                // هذا هو رابط الخادم الآمن
                 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw5WTzuAoDYaqGGrgVFUheHZmTtpo9n5fYw1fI-nkNuUV6VYjHt1n6cloK74oE2c1aaVQ/exec";
                 
                 const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
@@ -946,3 +945,4 @@
     </script>
 </body>
 </html>
+
