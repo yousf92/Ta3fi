@@ -377,9 +377,20 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- Global Notification & Theme Logic (No changes) ---
+        // --- Global Notification & Theme Logic ---
         function initializeGlobalChatNotifications(userId) { /* ... no changes ... */ }
-        function applyBackgroundPreference() { /* ... no changes ... */ }
+        function applyBackgroundPreference() {
+            const savedTheme = localStorage.getItem('appBackgroundTheme') || 'default';
+            const body = document.body;
+            
+            body.classList.remove('solid-black-bg', 'gradient-blue-bg');
+            
+            if (savedTheme === 'solid-black') {
+                body.classList.add('solid-black-bg');
+            } else if (savedTheme === 'gradient-blue') {
+                body.classList.add('gradient-blue-bg');
+            }
+        }
         applyBackgroundPreference();
 
         // --- App Lock Logic (No changes) ---
@@ -779,4 +790,3 @@
     </script>
 </body>
 </html>
-
