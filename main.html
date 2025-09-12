@@ -166,9 +166,9 @@
         #close-quote-btn { position: absolute; top: 20px; left: 20px; font-size: 1.8rem; cursor: pointer; z-index: 10; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
         .card-title { font-weight: 700; color: #FFFFFF; }
         .modal-title { color: #FFFFFF; }
-        #notifications-modal .modal-content, #achievementsModal .modal-content, #congratsAchievementModal .modal-content { background-color: var(--background-color); color: var(--text-color); }
-        #notifications-modal .modal-header, #achievementsModal .modal-header, #congratsAchievementModal .modal-header { border-bottom: 1px solid var(--border-color); }
-        #notifications-modal .btn-close, #achievementsModal .btn-close, #congratsAchievementModal .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+        #notifications-modal .modal-content, #achievementsModal .modal-content, #congratsAchievementModal .modal-content, #userAchievementsModal .modal-content { background-color: var(--background-color); color: var(--text-color); }
+        #notifications-modal .modal-header, #achievementsModal .modal-header, #congratsAchievementModal .modal-header, #userAchievementsModal .modal-header { border-bottom: 1px solid var(--border-color); }
+        #notifications-modal .btn-close, #achievementsModal .btn-close, #congratsAchievementModal .btn-close, #userAchievementsModal .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
         .action-button.najda-style .bi-fire { animation: fire-flicker 1.5s ease-in-out infinite alternate; position: relative; top: 3px; }
         @keyframes fire-flicker { 0% { transform: scale(1.0) translateY(0) rotate(0); color: #ffad00; text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00; } 25% { transform: scale(1.1) translateY(-2px) rotate(3deg); color: #facc15; text-shadow: 0 0 6px #ff5c5c, 0 0 10px #ff5c5c, 0 0 16px #facc15; } 50% { transform: scale(0.95) translateY(1px) rotate(-2deg); color: var(--danger-color); text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00; } 75% { transform: scale(1.05) translateY(-1px) rotate(2deg); color: #facc15; text-shadow: 0 0 6px #ff5c5c, 0 0 12px #ff5c5c, 0 0 18px #facc15; } 100% { transform: scale(1.0) translateY(0) rotate(0); color: #ffad00; text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00; } }
         .fire-alarm { width: 28px; height: 24px; position: relative; }
@@ -357,7 +357,7 @@
             background-image: linear-gradient(135deg, #0f2027, #203a43, #2c5364) !important;
         }
         /* START: Achievement Styles */
-        #achievements-grid {
+        #achievements-grid, #user-achievements-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 1rem;
@@ -818,6 +818,24 @@
     </div>
     <!-- END: Leaderboard Modal -->
 
+    <!-- START: User Achievements Modal -->
+    <div class="modal fade" id="userAchievementsModal" tabindex="-1" aria-labelledby="userAchievementsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userAchievementsModalLabel">أوسمة المستخدم</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="user-achievements-grid">
+                        <!-- User achievements will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: User Achievements Modal -->
+
 
     <input type="file" accept="image/*" id="image-file-picker" style="display: none;">
 
@@ -1050,7 +1068,7 @@
                         const deleteButtonHTML = currentUserRole === 'developer' ? `<i class="bi bi-x-circle-fill leaderboard-delete-btn" data-userid="${userDoc.id}" title="حظر من لوحة الصدارة"></i>` : '';
                         
                         leaderboardHTML += `
-                            <li class="leaderboard-item ${rankClass}" id="user-rank-${userDoc.id}">
+                            <li class="leaderboard-item ${rankClass}" id="user-rank-${userDoc.id}" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#userAchievementsModal" data-userid="${userDoc.id}">
                                 ${rankDisplay}
                                 <img src="${profilePic}" alt="User Picture" class="leaderboard-user-pic">
                                 <div class="leaderboard-user-info">
@@ -1067,6 +1085,7 @@
                 if (currentUserRole === 'developer') {
                     document.querySelectorAll('#leaderboardModal .leaderboard-delete-btn').forEach(button => {
                         button.addEventListener('click', async (event) => {
+                            event.stopPropagation(); // Prevent modal from opening
                             const userIdToBan = event.target.dataset.userid;
                             if (confirm("هل أنت متأكد من حظر هذا المستخدم من لوحة الصدارة؟")) {
                                 try {
@@ -1104,6 +1123,43 @@
             }
         }
         // END: Leaderboard Logic
+
+        // START: User Achievements Modal Logic
+        async function displayUserAchievements(userId) {
+            const grid = document.getElementById('user-achievements-grid');
+            grid.innerHTML = `<div class="loading-spinner-container w-100 d-flex justify-content-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+
+            try {
+                const achievementsRef = collection(db, "users", userId, "achievements");
+                const q = query(achievementsRef, orderBy("dateAwarded", "desc"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    grid.innerHTML = '<p class="text-center text-secondary mt-3 w-100" style="grid-column: 1 / -1;">هذا المستخدم لم يحصل على أي وسام بعد.</p>';
+                    return;
+                }
+
+                let achievementsHTML = '';
+                querySnapshot.forEach(doc => {
+                    const achievement = doc.data();
+                    const date = achievement.dateAwarded?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) || 'غير محدد';
+                    
+                    achievementsHTML += `
+                        <div class="achievement-card">
+                            <div class="achievement-card-icon"><i class="${achievement.icon || 'bi-trophy-fill'}"></i></div>
+                            <div class="achievement-card-title">${achievement.name}</div>
+                            <div class="achievement-card-date">حصل عليه في: ${date}</div>
+                        </div>
+                    `;
+                });
+                grid.innerHTML = achievementsHTML;
+
+            } catch (error) {
+                console.error("Error fetching user achievements:", error);
+                grid.innerHTML = '<p class="text-center text-danger mt-3 w-100" style="grid-column: 1 / -1;">حدث خطأ أثناء تحميل الأوسمة.</p>';
+            }
+        }
+        // END: User Achievements Modal Logic
 
 
         function initializeGlobalChatNotifications(userId) {
@@ -1212,6 +1268,22 @@
 
                 const leaderboardModalEl = document.getElementById('leaderboardModal');
                 leaderboardModalEl.addEventListener('show.bs.modal', displayLeaderboard);
+                
+                const userAchievementsModalEl = document.getElementById('userAchievementsModal');
+                userAchievementsModalEl.addEventListener('show.bs.modal', (event) => {
+                    const triggerElement = event.relatedTarget; 
+                    if (triggerElement) {
+                        const userId = triggerElement.getAttribute('data-userid');
+                        if (userId) {
+                            const userName = triggerElement.querySelector('.leaderboard-user-name').textContent;
+                            const modalTitleEl = userAchievementsModalEl.querySelector('.modal-title');
+                            if(modalTitleEl) {
+                                modalTitleEl.textContent = `أوسمة ${userName}`;
+                            }
+                            displayUserAchievements(userId);
+                        }
+                    }
+                });
                 
                 modalsInitialized = true;
             }
@@ -1648,4 +1720,3 @@
     </script>
 </body>
 </html>
-
