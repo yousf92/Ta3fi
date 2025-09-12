@@ -964,6 +964,18 @@
         // END: Achievements Logic
 
         // START: Leaderboard Logic
+        /**
+         * Normalizes a Date object to the start of its day in UTC (00:00:00).
+         * This function is crucial for timezone-independent day calculations.
+         * @param {Date} date The input date.
+         * @returns {Date} A new Date object set to the beginning of the day in UTC.
+         */
+        function getUTCDayStart(date) {
+            const d = new Date(date);
+            d.setUTCHours(0, 0, 0, 0);
+            return d;
+        }
+
         async function displayBannedList() {
             const bannedListBody = document.getElementById('banned-list-pane');
             bannedListBody.innerHTML = `<div class="loading-spinner-container"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
@@ -1068,9 +1080,18 @@
                     top100users.forEach((userDoc, index) => {
                         const userData = userDoc.data();
                         const startDate = userData.timerStartDate.toDate();
-                        const now = new Date();
-                        const diffTime = Math.abs(now - startDate);
-                        const recoveryDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                        
+                        // -- BEGIN ROBUST TIMEZONE FIX --
+                        const startDayUTC = getUTCDayStart(startDate);
+                        const todayUTC = getUTCDayStart(new Date());
+
+                        let recoveryDays = 0;
+                        if (!isNaN(startDayUTC.getTime())) {
+                            const diffTime = todayUTC.getTime() - startDayUTC.getTime();
+                            recoveryDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+                        }
+                        // -- END ROBUST TIMEZONE FIX --
+
                         const rank = index + 1;
                         const rankClass = rank <= 3 ? `rank-${rank}` : '';
                         let rankDisplay = rank <= 3 ? `<div class="leaderboard-rank-medal">${['🥇', '🥈', '🥉'][rank - 1]}</div>` : `<div class="leaderboard-rank">${rank}</div>`;
