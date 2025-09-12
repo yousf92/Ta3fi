@@ -520,6 +520,16 @@
             align-items: center;
             min-height: 200px;
         }
+        #leaderboard-footer-user-rank {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1rem;
+            font-weight: 700;
+            border-top: 1px solid var(--border-color);
+            border-bottom-left-radius: var(--bs-modal-inner-border-radius);
+            border-bottom-right-radius: var(--bs-modal-inner-border-radius);
+            margin: 0;
+        }
         /* END: Leaderboard Styles */
     </style>
 </head>
@@ -749,6 +759,9 @@
                 <div class="modal-body" id="leaderboard-body-container">
                     <!-- Leaderboard content will be injected here by JavaScript -->
                 </div>
+                <div class="modal-footer justify-content-center p-0" id="leaderboard-footer-user-rank">
+                    <!-- User's rank will be injected here by JavaScript -->
+                </div>
             </div>
         </div>
     </div>
@@ -874,25 +887,24 @@
         // START: Leaderboard Logic
         async function displayLeaderboard() {
             const leaderboardBody = document.getElementById('leaderboard-body-container');
+            const leaderboardFooter = document.getElementById('leaderboard-footer-user-rank');
             const user = auth.currentUser;
             if (!user) return;
 
-            leaderboardBody.innerHTML = `
-                <div class="loading-spinner-container">
-                    <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>`;
+            leaderboardBody.innerHTML = `<div class="loading-spinner-container"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+            leaderboardFooter.innerHTML = `<div class="spinner-border spinner-border-sm text-light" role="status"></div>`;
+            
+            let filteredTop100 = [];
 
             const renderLeaderboardList = (docs, currentUserRole) => {
-                const filteredUsers = docs.filter(doc => {
+                filteredTop100 = docs.filter(doc => {
                     const data = doc.data();
                     return data.timerStartDate &&
                            data.role !== 'developer' &&
                            data.isBannedFromLeaderboard !== true;
                 });
 
-                if (filteredUsers.length === 0) {
+                if (filteredTop100.length === 0) {
                     leaderboardBody.innerHTML = '<p class="text-center text-secondary mt-3">لا يوجد مستخدمون في لوحة الصدارة بعد.</p>';
                     return;
                 }
@@ -900,7 +912,7 @@
                 let leaderboardHTML = '<ul class="leaderboard-list">';
                 let rank = 1;
 
-                filteredUsers.forEach(userDoc => {
+                filteredTop100.forEach(userDoc => {
                     const userData = userDoc.data();
                     const startDate = userData.timerStartDate.toDate();
                     const now = new Date();
@@ -944,13 +956,45 @@
                             try {
                                 const userToUpdateRef = doc(db, "users", userIdToBan);
                                 await updateDoc(userToUpdateRef, { isBannedFromLeaderboard: true });
-                                // Remove the user from the list visually for instant feedback
                                 event.target.closest('.leaderboard-item').remove();
-                            } catch (error) {
-                                console.error("Error banning user: ", error);
-                            }
+                            } catch (error) { console.error("Error banning user: ", error); }
                         });
                     });
+                }
+            };
+
+            const findUserRank = async () => {
+                const currentUserDocSnap = await getDoc(doc(db, "users", user.uid));
+                if (!currentUserDocSnap.exists() || !currentUserDocSnap.data().timerStartDate) {
+                    leaderboardFooter.innerHTML = 'ابدأ العداد لتظهر في الترتيب';
+                    return;
+                }
+                const currentUserStartDate = currentUserDocSnap.data().timerStartDate;
+
+                let userFoundInTop100 = false;
+                for (let i = 0; i < filteredTop100.length; i++) {
+                    if (filteredTop100[i].id === user.uid) {
+                        leaderboardFooter.innerHTML = `🌟 ترتيبك الحالي: ${i + 1} 🌟`;
+                        userFoundInTop100 = true;
+                        break;
+                    }
+                }
+
+                if (!userFoundInTop100) {
+                    const rankQuery = query(
+                        collection(db, "users"),
+                        where("timerStartDate", "<", currentUserStartDate)
+                    );
+                    const rankSnapshot = await getDocs(rankQuery);
+                    let higherRankedUsers = 0;
+                    rankSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.role !== 'developer' && data.isBannedFromLeaderboard !== true) {
+                            higherRankedUsers++;
+                        }
+                    });
+                    const currentUserRank = higherRankedUsers + 1;
+                    leaderboardFooter.innerHTML = `🌟 ترتيبك الحالي: ${currentUserRank} 🌟`;
                 }
             };
 
@@ -970,10 +1014,12 @@
                 
                 const querySnapshot = await getDocs(q);
                 renderLeaderboardList(querySnapshot.docs, currentUserRole);
+                await findUserRank();
 
             } catch (error) {
                 console.error("Error fetching leaderboard: ", error);
                 leaderboardBody.innerHTML = '<p class="text-center text-danger mt-3">حدث خطأ أثناء تحميل البيانات. الرجاء المحاولة مرة أخرى.</p>';
+                leaderboardFooter.innerHTML = 'خطأ في تحميل الترتيب';
             }
         }
         // END: Leaderboard Logic
