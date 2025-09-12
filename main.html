@@ -869,14 +869,9 @@
                 grid.appendChild(card);
             });
         }
-        
-        const achievementsModalEl = document.getElementById('achievementsModal');
-        achievementsModalEl.addEventListener('show.bs.modal', displayAchievements);
         // END: Achievements Logic
 
         // START: Leaderboard Logic
-        const leaderboardModalEl = document.getElementById('leaderboardModal');
-
         async function displayLeaderboard() {
             const leaderboardBody = document.getElementById('leaderboard-body-container');
             const user = auth.currentUser;
@@ -981,8 +976,6 @@
                 leaderboardBody.innerHTML = '<p class="text-center text-danger mt-3">حدث خطأ أثناء تحميل البيانات. الرجاء المحاولة مرة أخرى.</p>';
             }
         }
-
-        leaderboardModalEl.addEventListener('show.bs.modal', displayLeaderboard);
         // END: Leaderboard Logic
 
 
@@ -1068,6 +1061,7 @@
                 'https://images.unsplash.com/photo-1507525428034-b723a996f6ea?w=800&q=80'
             ];
             let lastImageIndex = -1;
+            let modalsInitialized = false;
 
             const appLockOverlay = document.getElementById('app-lock-overlay');
             const passcodeError = document.getElementById('passcode-error');
@@ -1081,6 +1075,18 @@
                 } catch (e) {
                     return { enabled: false, passcode: null };
                 }
+            }
+
+            function initializeModalListeners() {
+                if (modalsInitialized) return;
+
+                const achievementsModalEl = document.getElementById('achievementsModal');
+                achievementsModalEl.addEventListener('show.bs.modal', displayAchievements);
+
+                const leaderboardModalEl = document.getElementById('leaderboardModal');
+                leaderboardModalEl.addEventListener('show.bs.modal', displayLeaderboard);
+                
+                modalsInitialized = true;
             }
             
             function initializeAppLock() {
@@ -1191,6 +1197,7 @@
                             updateTimerDisplay(0, 0, 0, 0);
                         }
                         loadNotifications(null);
+                        initializeModalListeners();
                     } else {
                         welcomeUserEl.textContent = `مرحبا ${user.displayName || 'المستخدم'}`;
                         const userDocRef = doc(db, "users", user.uid);
@@ -1220,6 +1227,7 @@
                             updateTimerDisplay(0,0,0,0);
                         }
                         loadNotifications(user.uid);
+                        initializeModalListeners();
                     }
                 } else {
                     window.location.href = 'index.html';
@@ -1513,3 +1521,4 @@
     </script>
 </body>
 </html>
+
