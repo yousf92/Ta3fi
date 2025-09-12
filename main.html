@@ -1367,7 +1367,7 @@
                     script.onerror = function() {
                         delete window[callbackName];
                         document.body.removeChild(script);
-                        resolve("لا تستعجل اول شي اقرا اللي ارسلته وبعدين اطلب طلب ثاني");
+                        resolve("إذا أردت إرسال طلب آخر اضغط على أيقونة الرئيسية في الشريط السفلي");
                     };
                     document.body.appendChild(script);
                 });
