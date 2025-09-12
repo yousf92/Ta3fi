@@ -999,7 +999,7 @@
             leaderboardFooter.innerHTML = `<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border spinner-border-sm text-light" role="status"></div></div>`;
             document.getElementById('banned-list-pane').innerHTML = '';
             
-            let filteredTop100 = [];
+            let allRankedUsers = [];
 
             try {
                 let currentUserRole = 'user';
@@ -1022,20 +1022,22 @@
                 }
 
                 const usersRef = collection(db, "users");
-                const q = query(usersRef, orderBy("timerStartDate", "asc"), limit(100));
+                const q = query(usersRef, orderBy("timerStartDate", "asc"));
                 
                 const querySnapshot = await getDocs(q);
                 
-                filteredTop100 = querySnapshot.docs.filter(doc => {
+                allRankedUsers = querySnapshot.docs.filter(doc => {
                     const data = doc.data();
                     return data.timerStartDate && data.role !== 'developer' && data.isBannedFromLeaderboard !== true;
                 });
+                
+                const top100users = allRankedUsers.slice(0, 100);
 
-                if (filteredTop100.length === 0) {
+                if (top100users.length === 0) {
                     leaderboardListPane.innerHTML = '<p class="text-center text-secondary mt-3">لا يوجد مستخدمون في لوحة الصدارة بعد.</p>';
                 } else {
                     let leaderboardHTML = '<ul class="leaderboard-list">';
-                    filteredTop100.forEach((userDoc, index) => {
+                    top100users.forEach((userDoc, index) => {
                         const userData = userDoc.data();
                         const startDate = userData.timerStartDate.toDate();
                         const now = new Date();
@@ -1078,43 +1080,22 @@
                 }
 
                 // Inner function to calculate and display user's rank
-                const findUserRank = async () => {
-                    const currentUserDocSnap = await getDoc(doc(db, "users", user.uid));
-                    if (!currentUserDocSnap.exists() || !currentUserDocSnap.data().timerStartDate) {
+                const findUserRank = () => {
+                    if (!currentUserDoc.exists() || !currentUserDoc.data().timerStartDate) {
                         leaderboardFooter.innerHTML = 'ابدأ العداد لتظهر في الترتيب';
                         return;
                     }
-                    const currentUserStartDate = currentUserDocSnap.data().timerStartDate;
 
-                    let userFoundInTop100 = false;
-                    for (let i = 0; i < filteredTop100.length; i++) {
-                        if (filteredTop100[i].id === user.uid) {
-                            leaderboardFooter.innerHTML = `🌟 ترتيبك الحالي: ${i + 1} 🌟`;
-                            userFoundInTop100 = true;
-                            break;
-                        }
-                    }
+                    const userRankIndex = allRankedUsers.findIndex(doc => doc.id === user.uid);
 
-                    if (!userFoundInTop100) {
-                        const rankQuery = query(
-                            collection(db, "users"),
-                            where("timerStartDate", "<", currentUserStartDate)
-                        );
-                        const rankSnapshot = await getDocs(rankQuery);
-                        
-                        let higherRankedUsers = 0;
-                        rankSnapshot.forEach(doc => {
-                            const data = doc.data();
-                            if (data.role !== 'developer' && data.isBannedFromLeaderboard !== true) {
-                                higherRankedUsers++;
-                            }
-                        });
-                        const currentUserRank = higherRankedUsers + 1;
-                        leaderboardFooter.innerHTML = `🌟 ترتيبك الحالي: ${currentUserRank} 🌟`;
+                    if (userRankIndex !== -1) {
+                        leaderboardFooter.innerHTML = `🌟 ترتيبك الحالي: ${userRankIndex + 1} 🌟`;
+                    } else {
+                        leaderboardFooter.innerHTML = 'أنت غير مُصنّف حاليًا';
                     }
                 };
 
-                await findUserRank();
+                findUserRank();
 
             } catch (error) {
                 console.error("Error fetching leaderboard: ", error);
@@ -1367,7 +1348,7 @@
                                 updateTimerDisplay(0,0,0,0); 
                             }
                         } else {
-                            await setDoc(userDocRef, { role: 'user', lastSeenNotificationTimestamp: new Date(0) }, { merge: true });
+                            await setDoc(userDocRef, { role: 'user', lastSeenNotificationTimestamp: new Date(0), displayName: user.displayName, photoURL: user.photoURL }, { merge: true });
                             startTimerBtn.classList.remove('d-none');
                             timerSettingsIcon.classList.add('d-none');
                             updateTimerDisplay(0,0,0,0);
