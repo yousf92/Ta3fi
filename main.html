@@ -166,9 +166,9 @@
         #close-quote-btn { position: absolute; top: 20px; left: 20px; font-size: 1.8rem; cursor: pointer; z-index: 10; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
         .card-title { font-weight: 700; color: #FFFFFF; }
         .modal-title { color: #FFFFFF; }
-        #notifications-modal .modal-content { background-color: var(--background-color); color: var(--text-color); }
-        #notifications-modal .modal-header { border-bottom: 1px solid var(--border-color); }
-        #notifications-modal .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+        #notifications-modal .modal-content, #achievementsModal .modal-content, #congratsAchievementModal .modal-content { background-color: var(--background-color); color: var(--text-color); }
+        #notifications-modal .modal-header, #achievementsModal .modal-header, #congratsAchievementModal .modal-header { border-bottom: 1px solid var(--border-color); }
+        #notifications-modal .btn-close, #achievementsModal .btn-close, #congratsAchievementModal .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
         .action-button.najda-style .bi-fire { animation: fire-flicker 1.5s ease-in-out infinite alternate; position: relative; top: 3px; }
         @keyframes fire-flicker { 0% { transform: scale(1.0) translateY(0) rotate(0); color: #ffad00; text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00; } 25% { transform: scale(1.1) translateY(-2px) rotate(3deg); color: #facc15; text-shadow: 0 0 6px #ff5c5c, 0 0 10px #ff5c5c, 0 0 16px #facc15; } 50% { transform: scale(0.95) translateY(1px) rotate(-2deg); color: var(--danger-color); text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00; } 75% { transform: scale(1.05) translateY(-1px) rotate(2deg); color: #facc15; text-shadow: 0 0 6px #ff5c5c, 0 0 12px #ff5c5c, 0 0 18px #facc15; } 100% { transform: scale(1.0) translateY(0) rotate(0); color: #ffad00; text-shadow: 0 0 4px #ff5c5c, 0 0 8px #ff5c5c, 0 0 12px #ffad00; } }
         .fire-alarm { width: 28px; height: 24px; position: relative; }
@@ -177,7 +177,6 @@
         .fire-alarm-dome::after { content: ''; position: absolute; top: 50%; left: 50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,220,150,0.9) 0%, rgba(255,100,100,0) 35%); border-radius: 50%; transform: translate(-50%, -50%); animation: beacon-flash 1.2s infinite ease-in-out; z-index: 4; }
         .fire-alarm-base { width: 28px; height: 5px; background: linear-gradient(to top, #c00000, #e02020); position: absolute; bottom: 0; left: 0; border-radius: 0 0 4px 4px; z-index: 1; box-shadow: 0 2px 3px rgba(0,0,0,0.5); }
         @keyframes beacon-flash { 0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.5); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
-        
         .image-background {
             position: absolute;
             top: 0;
@@ -255,7 +254,6 @@
             font-size: 0.9rem;
             margin-top: 1rem;
         }
-
         #ai-advice-card {
             position: relative;
             background-size: cover;
@@ -320,7 +318,6 @@
             width: 1rem;
             height: 1rem;
         }
-
         #inspiration-display {
             position: relative;
             background-size: cover;
@@ -352,7 +349,6 @@
             z-index: 2;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
         }
-        
         body.solid-black-bg {
             background-image: none !important;
             background-color: #000000 !important;
@@ -360,6 +356,171 @@
         body.gradient-blue-bg {
             background-image: linear-gradient(135deg, #0f2027, #203a43, #2c5364) !important;
         }
+        /* START: Achievement Styles */
+        #achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+        .achievement-card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.4s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+        .achievement-card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #facc15; /* Gold */
+            text-shadow: 0 0 15px rgba(250, 204, 21, 0.5);
+        }
+        .achievement-card-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            color: var(--text-color);
+        }
+        .achievement-card-date {
+            font-size: 0.75rem;
+            color: var(--secondary-text-color);
+        }
+        .achievement-card.locked {
+            background-color: rgba(30, 30, 30, 0.7);
+            border-color: #383838;
+            color: #888;
+            box-shadow: none;
+            filter: grayscale(80%);
+        }
+        .achievement-card.locked .achievement-card-icon {
+            color: #555;
+            text-shadow: none;
+        }
+        #congrats-modal-body {
+            text-align: center;
+            padding: 2rem 1.5rem;
+        }
+        #congrats-icon {
+            font-size: 5rem;
+            color: #facc15; /* Gold color */
+            margin-bottom: 1rem;
+            animation: tada 1.5s ease-in-out;
+        }
+        @keyframes tada {
+            from { transform: scale3d(1, 1, 1); }
+            10%, 20% { transform: scale3d(0.9, 0.9, 0.9) rotate3d(0, 0, 1, -3deg); }
+            30%, 50%, 70%, 90% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, 3deg); }
+            40%, 60%, 80% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, -3deg); }
+            to { transform: scale3d(1, 1, 1); }
+        }
+        #congrats-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        #congrats-user-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        /* END: Achievement Styles */
+        
+        /* START: Leaderboard Styles */
+        #leaderboardModal .modal-content {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        #leaderboardModal .modal-header {
+            border-bottom: 1px solid var(--border-color);
+        }
+        #leaderboardModal .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+        .leaderboard-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--card-background);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .leaderboard-item:hover {
+            transform: translateY(-2px);
+        }
+        .leaderboard-rank {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--secondary-text-color);
+            width: 35px;
+            text-align: center;
+        }
+        .leaderboard-user-pic {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 1rem;
+            border: 2px solid var(--border-color);
+        }
+        .leaderboard-user-info {
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        .leaderboard-user-name {
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .leaderboard-user-days {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .leaderboard-delete-btn {
+            color: var(--danger-color);
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 5px;
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+        }
+        .leaderboard-delete-btn:hover {
+            opacity: 1;
+        }
+        .leaderboard-item.rank-1, .leaderboard-item.rank-2, .leaderboard-item.rank-3 {
+            border-width: 2px;
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .leaderboard-item.rank-1 { border-color: #FFD700; background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), var(--card-background)); }
+        .leaderboard-item.rank-2 { border-color: #C0C0C0; background: linear-gradient(135deg, rgba(192, 192, 192, 0.1), var(--card-background)); }
+        .leaderboard-item.rank-3 { border-color: #CD7F32; background: linear-gradient(135deg, rgba(205, 127, 50, 0.1), var(--card-background)); }
+        .leaderboard-rank-medal {
+            font-size: 2rem;
+            width: 35px;
+            text-align: center;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+        }
+        .loading-spinner-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+        /* END: Leaderboard Styles */
     </style>
 </head>
 <body style="visibility: hidden;">
@@ -378,6 +539,8 @@
         <div class="home-container">
             <header class="top-header">
                 <div class="header-icons">
+                    <i class="bi bi-trophy-fill" data-bs-toggle="modal" data-bs-target="#achievementsModal"></i>
+                    <i class="bi bi-bar-chart-steps" data-bs-toggle="modal" data-bs-target="#leaderboardModal"></i>
                     <div class="notification-icon-wrapper" data-bs-toggle="modal" data-bs-target="#notifications-modal">
                         <i class="bi bi-bell-fill"></i>
                         <span class="notification-badge"></span>
@@ -499,7 +662,7 @@
     </div>
     <div class="modal-overlay" id="confirm-reset-modal">
         <div class="modal-content-custom">
-            <div class="confirm-modal-body"><div class="confirm-icon"><i class="bi bi-arrow-counterclockwise"></i></div><p>هل أنت متأكد من تصفير العداد؟</p></div>
+            <div class="confirm-modal-body"><div class="confirm-icon"><i class="bi bi-arrow-counterclockwise"></i></div><p>هل أنت متأكد من تصفير العداد؟ سيتم حذف جميع الأوسمة التي حصلت عليها.</p></div>
             <div class="confirm-modal-footer"><button class="confirm-btn confirm-btn-cancel" id="cancel-reset-button">رجوع</button><button class="confirm-btn confirm-btn-accept" id="confirm-reset-action-button">تصفير</button></div>
         </div>
     </div>
@@ -544,6 +707,54 @@
         </div>
     </div>
     
+    <!-- START: Achievements Modals -->
+    <div class="modal fade" id="achievementsModal" tabindex="-1" aria-labelledby="achievementsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="achievementsModalLabel">سجل الأوسمة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="achievements-grid">
+                        <!-- Achievement cards will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="congratsAchievementModal" tabindex="-1" aria-labelledby="congratsAchievementModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body" id="congrats-modal-body">
+                    <div id="congrats-icon"><i class="bi bi-trophy-fill"></i></div>
+                    <h5 id="congrats-user-text" class="mb-1"></h5>
+                    <p id="congrats-text" class="text-secondary"></p>
+                    <button type="button" class="btn btn-primary mt-3" data-bs-dismiss="modal">رائع!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Achievements Modals -->
+
+    <!-- START: Leaderboard Modal -->
+    <div class="modal fade" id="leaderboardModal" tabindex="-1" aria-labelledby="leaderboardModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="leaderboardModalLabel">🏆 لوحة الصدارة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="leaderboard-body-container">
+                    <!-- Leaderboard content will be injected here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Leaderboard Modal -->
+
+
     <input type="file" accept="image/*" id="image-file-picker" style="display: none;">
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -565,14 +776,222 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
+        // START: Achievements Logic
+        const milestones = [
+            { days: 1, name: "وسام البداية القوية", icon: "bi-rocket-takeoff-fill" },
+            { days: 3, name: "وسام الصمود لـ 3 أيام", icon: "bi-shield-check" },
+            { days: 7, name: "وسام الأسبوع الأول", icon: "bi-calendar-check-fill" },
+            { days: 14, name: "وسام الصبر لأسبوعين", icon: "bi-award-fill" },
+            { days: 30, name: "وسام الإنجاز الشهري", icon: "bi-star-fill" },
+            { days: 60, name: "وسام العزيمة لشهرين", icon: "bi-moon-stars-fill" },
+            { days: 90, name: "وسام الربع السنوي", icon: "bi-gem" },
+            { days: 180, name: "وسام نصف الطريق", icon: "bi-signpost-split-fill" },
+            { days: 365, name: "وسام الإنجاز السنوي", icon: "bi-sun-fill" },
+            { days: 500, name: "وسام القوة الفائقة", icon: "bi-lightning-charge-fill" },
+            { days: 750, name: "وسام الأسطورة", icon: "bi-person-vcard-fill" },
+            { days: 1000, name: "وسام الألفية", icon: "bi-trophy-fill" }
+        ];
+        let lastCheckedDay = -1; 
+        const congratsModalEl = document.getElementById('congratsAchievementModal');
+        const congratsModal = new bootstrap.Modal(congratsModalEl);
+
+        async function resetAchievements() {
+            const user = auth.currentUser;
+            if (!user || user.isAnonymous) return;
+            const achievementsColRef = collection(db, "users", user.uid, "achievements");
+            try {
+                const querySnapshot = await getDocs(achievementsColRef);
+                const deletePromises = [];
+                querySnapshot.forEach((doc) => {
+                    deletePromises.push(deleteDoc(doc.ref));
+                });
+                await Promise.all(deletePromises);
+            } catch (error) {
+                console.error("Error resetting achievements:", error);
+            }
+        }
+
+        async function checkAndAwardAchievements(days) {
+            const user = auth.currentUser;
+            if (!user || user.isAnonymous || days < 1) return;
+            for (const milestone of milestones) {
+                if (days >= milestone.days) {
+                    const achievementRef = doc(db, "users", user.uid, "achievements", String(milestone.days));
+                    try {
+                        const achievementSnap = await getDoc(achievementRef);
+                        if (!achievementSnap.exists()) {
+                            await setDoc(achievementRef, {
+                                name: milestone.name,
+                                icon: milestone.icon,
+                                dateAwarded: serverTimestamp()
+                            });
+                            const userName = user.displayName || 'يا بطل';
+                            document.getElementById('congrats-user-text').textContent = `مبارك يا ${userName}!`;
+                            document.getElementById('congrats-text').textContent = `لقد حصلت على "${milestone.name}"`;
+                            document.getElementById('congrats-icon').innerHTML = `<i class="${milestone.icon}"></i>`;
+                            congratsModal.show();
+                        }
+                    } catch (error) {
+                        console.error(`Error checking achievement for ${milestone.days} days:`, error);
+                    }
+                } else {
+                    break; 
+                }
+            }
+        }
+
+        async function displayAchievements() {
+            const grid = document.getElementById('achievements-grid');
+            const currentDays = window.currentStreakDays || 0;
+            grid.innerHTML = ''; 
+
+            milestones.forEach(milestone => {
+                const requiredDays = milestone.days;
+                const card = document.createElement('div');
+                card.classList.add('achievement-card');
+                let iconClass, cardTitle = milestone.name, cardSubText;
+
+                if (currentDays >= requiredDays) {
+                    card.classList.remove('locked');
+                    iconClass = milestone.icon;
+                    cardSubText = `أكملت ${requiredDays} أيام بنجاح!`;
+                } else {
+                    card.classList.add('locked');
+                    iconClass = 'bi bi-lock-fill';
+                    cardSubText = `أكمل ${requiredDays} يوماً لفتحه`;
+                }
+                
+                card.innerHTML = `
+                    <div class="achievement-card-icon"><i class="${iconClass}"></i></div>
+                    <div class="achievement-card-title">${cardTitle}</div>
+                    <div class="achievement-card-date">${cardSubText}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        
+        const achievementsModalEl = document.getElementById('achievementsModal');
+        achievementsModalEl.addEventListener('show.bs.modal', displayAchievements);
+        // END: Achievements Logic
+
+        // START: Leaderboard Logic
+        const leaderboardModalEl = document.getElementById('leaderboardModal');
+
+        async function displayLeaderboard() {
+            const leaderboardBody = document.getElementById('leaderboard-body-container');
+            const user = auth.currentUser;
+            if (!user) return;
+
+            leaderboardBody.innerHTML = `
+                <div class="loading-spinner-container">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>`;
+
+            const renderLeaderboardList = (docs, currentUserRole) => {
+                const filteredUsers = docs.filter(doc => {
+                    const data = doc.data();
+                    return data.timerStartDate &&
+                           data.role !== 'developer' &&
+                           data.isBannedFromLeaderboard !== true;
+                });
+
+                if (filteredUsers.length === 0) {
+                    leaderboardBody.innerHTML = '<p class="text-center text-secondary mt-3">لا يوجد مستخدمون في لوحة الصدارة بعد.</p>';
+                    return;
+                }
+
+                let leaderboardHTML = '<ul class="leaderboard-list">';
+                let rank = 1;
+
+                filteredUsers.forEach(userDoc => {
+                    const userData = userDoc.data();
+                    const startDate = userData.timerStartDate.toDate();
+                    const now = new Date();
+                    const diffTime = Math.abs(now - startDate);
+                    const recoveryDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                    const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                    let rankDisplay;
+                    if (rank <= 3) {
+                        const medals = ['🥇', '🥈', '🥉'];
+                        rankDisplay = `<div class="leaderboard-rank-medal">${medals[rank - 1]}</div>`;
+                    } else {
+                        rankDisplay = `<div class="leaderboard-rank">${rank}</div>`;
+                    }
+
+                    const profilePic = userData.photoURL || 'https://placehold.co/100x100/1e1e1e/fafafa?text=?';
+                    const deleteButtonHTML = currentUserRole === 'developer' 
+                        ? `<i class="bi bi-x-circle-fill leaderboard-delete-btn" data-userid="${userDoc.id}" title="حظر من لوحة الصدارة"></i>` 
+                        : '';
+                    
+                    leaderboardHTML += `
+                        <li class="leaderboard-item ${rankClass}" id="user-rank-${userDoc.id}">
+                            ${rankDisplay}
+                            <img src="${profilePic}" alt="User Picture" class="leaderboard-user-pic">
+                            <div class="leaderboard-user-info">
+                                <h6 class="leaderboard-user-name">${userData.displayName || 'مستخدم'}</h6>
+                                <p class="leaderboard-user-days">${recoveryDays} يوم</p>
+                            </div>
+                            ${deleteButtonHTML}
+                        </li>`;
+                    rank++;
+                });
+
+                leaderboardHTML += '</ul>';
+                leaderboardBody.innerHTML = leaderboardHTML;
+                
+                if (currentUserRole === 'developer') {
+                    document.querySelectorAll('#leaderboardModal .leaderboard-delete-btn').forEach(button => {
+                        button.addEventListener('click', async (event) => {
+                            const userIdToBan = event.target.dataset.userid;
+                            try {
+                                const userToUpdateRef = doc(db, "users", userIdToBan);
+                                await updateDoc(userToUpdateRef, { isBannedFromLeaderboard: true });
+                                // Remove the user from the list visually for instant feedback
+                                event.target.closest('.leaderboard-item').remove();
+                            } catch (error) {
+                                console.error("Error banning user: ", error);
+                            }
+                        });
+                    });
+                }
+            };
+
+            try {
+                let currentUserRole = 'user';
+                const currentUserDoc = await getDoc(doc(db, "users", user.uid));
+                if (currentUserDoc.exists()) {
+                    currentUserRole = currentUserDoc.data().role || 'user';
+                }
+
+                const usersRef = collection(db, "users");
+                const q = query(
+                    usersRef,
+                    orderBy("timerStartDate", "asc"),
+                    limit(100)
+                );
+                
+                const querySnapshot = await getDocs(q);
+                renderLeaderboardList(querySnapshot.docs, currentUserRole);
+
+            } catch (error) {
+                console.error("Error fetching leaderboard: ", error);
+                leaderboardBody.innerHTML = '<p class="text-center text-danger mt-3">حدث خطأ أثناء تحميل البيانات. الرجاء المحاولة مرة أخرى.</p>';
+            }
+        }
+
+        leaderboardModalEl.addEventListener('show.bs.modal', displayLeaderboard);
+        // END: Leaderboard Logic
+
+
         function initializeGlobalChatNotifications(userId) {
             const chatBadge = document.querySelector('.chat-notification-badge');
             if (!chatBadge) return;
 
             let publicUnreadCount = 0;
             let privateUnreadCount = 0;
-            let publicListenerUnsubscribe = null;
-            let privateListenerUnsubscribe = null;
 
             function updateBadge() {
                 const totalUnread = publicUnreadCount + privateUnreadCount;
@@ -592,11 +1011,7 @@
             const publicQuery = query(messagesRef, where("createdAt", ">", Timestamp.fromMillis(lastReadTimestamp)));
             window.publicListenerUnsubscribe = onSnapshot(publicQuery, (snapshot) => {
                 let count = 0;
-                snapshot.forEach(doc => {
-                    if (doc.data().senderId !== userId) {
-                        count++;
-                    }
-                });
+                snapshot.forEach(doc => { if (doc.data().senderId !== userId) count++; });
                 publicUnreadCount = count;
                 updateBadge();
             });
@@ -608,9 +1023,7 @@
                     let count = 0;
                     snapshot.forEach(doc => {
                         const data = doc.data();
-                        if (!data[`hidden_for_${userId}`]) {
-                            count += (data[`unread_count_${userId}`] || 0);
-                        }
+                        if (!data[`hidden_for_${userId}`]) count += (data[`unread_count_${userId}`] || 0);
                     });
                     privateUnreadCount = count;
                     updateBadge();
@@ -636,10 +1049,10 @@
 
             let startTime = null;
             let timerInterval = null;
+            window.currentStreakDays = 0;
             let currentUserRole = 'user';
             let breathingTimeouts = [];
             let countdownInterval = null;
-            let remainingTime = 0;
             let lastSolution = null;
             const welcomeUserEl = document.getElementById('welcome-user');
             const openSendModalBtn = document.getElementById('open-send-modal-btn');
@@ -670,17 +1083,11 @@
                 }
             }
             
-            function syncLockState() {
-            }
-
             function initializeAppLock() {
-                syncLockState();
                 const lockData = getLockData();
                 if (!lockData.enabled) return;
-                
                 const lastUnlock = localStorage.getItem('app_last_unlock') || 0;
                 const timeSinceUnlock = Date.now() - lastUnlock;
-
                 if (timeSinceUnlock >= RELOCK_TIME) {
                     appLockOverlay.style.display = 'flex';
                 }
@@ -705,34 +1112,27 @@
             passcodeInput.addEventListener('keyup', (event) => {
                 if (event.key === 'Enter') handleUnlock();
             });
-            window.addEventListener('storage', syncLockState);
 
             function callGeminiAPI(prompt) {
                 return new Promise((resolve, reject) => {
                     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyYn_lPlFg25E8QTJQGie4ams49eYQekl-qZ9mm9oB4BkLyBtuTS2ZX9pw6D5mfj1Io/exec";
-                    
                     const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-
                     window[callbackName] = function(data) {
                         delete window[callbackName];
                         document.body.removeChild(script);
                         if (data.error) {
-                            console.error("Error from Apps Script:", data.error);
                             resolve("عفوًا، حدثت مشكلة مؤقتة. يرجى المحاولة مرة أخرى لاحقًا.");
                         } else {
                             resolve(data.text);
                         }
                     };
-
                     const script = document.createElement('script');
                     script.src = WEB_APP_URL + '?callback=' + callbackName + '&prompt=' + encodeURIComponent(prompt);
-                    
                     script.onerror = function() {
                         delete window[callbackName];
                         document.body.removeChild(script);
                         resolve("لا تستعجل اول شي اقرا اللي ارسلته وبعدين اطلب طلب ثاني");
                     };
-
                     document.body.appendChild(script);
                 });
             }
@@ -746,37 +1146,16 @@
                     inspirationBtn.disabled = true;
                     inspirationBtn.innerHTML = `<span>لحظة أفكر لك بحل... <i class="bi bi-hourglass-split"></i></span>`;
                     
-                    let basePrompt = `
-                        أنا عندي رغبة قوية مرة إني أشوف مقاطع إباحية وأبغى حل جذري وفوري.
-                        بصفتك ناصح أمين وفاهم على منهج السلف الصالح، عطني نصيحة عملية ومباشرة أقدر أسويها الحين عشان أتجاوز هذي الرغبة.
-
-                        التزم بالقواعد التالية بدقة:
-                        1.  **اللهجة:** تكلم باللهجة السعودية العامية (نجدية أو حجازية).
-                        2.  **الأسلوب:** خل كلامك طبيعي كأنك تسولف مع خويك، مو كأنك آلة.
-                        3.  **التنسيق:** لا تستخدم أي تشكيل (فتحة، ضمة، كسرة) ولا أي علامات ترقيم (لا فاصلة ولا نقطة).
-                        4.  **الطول:** عطني جملة جدا طويلة ارجوك .
-                        5.  **التنوع:** إذا قلت لك 'أبغى حل ثاني'، عطني حل جديد ومختلف تماماً. لا تكرر نفس الكلام.
-                    `;
-                    
-                    if (lastSolution) {
-                        basePrompt += `\nالحل اللي عطيتني إياه قبل هو: ${lastSolution}. لا تكرره وعطني شي جديد.`;
-                    }
+                    let basePrompt = `أنا عندي رغبة قوية مرة إني أشوف مقاطع إباحية وأبغى حل جذري وفوري. بصفتك ناصح أمين وفاهم على منهج السلف الصالح، عطني نصيحة عملية ومباشرة أقدر أسويها الحين عشان أتجاوز هذي الرغبة. التزم بالقواعد التالية بدقة: 1. **اللهجة:** تكلم باللهجة السعودية العامية (نجدية أو حجازية). 2. **الأسلوب:** خل كلامك طبيعي كأنك تسولف مع خويك، مو كأنك آلة. 3. **التنسيق:** لا تستخدم أي تشكيل (فتحة، ضمة، كسرة) ولا أي علامات ترقيم (لا فاصلة ولا نقطة). 4. **الطول:** عطني جملة جدا طويلة ارجوك . 5. **التنوع:** إذا قلت لك 'أبغى حل ثاني'، عطني حل جديد ومختلف تماماً. لا تكرر نفس الكلام.`;
+                    if (lastSolution) basePrompt += `\nالحل اللي عطيتني إياه قبل هو: ${lastSolution}. لا تكرره وعطني شي جديد.`;
 
                     const generatedText = await callGeminiAPI(basePrompt);
-                    
-                    if (generatedText && !generatedText.includes('خطأ')) {
-                         lastSolution = generatedText;
-                    }
+                    if (generatedText && !generatedText.includes('خطأ')) lastSolution = generatedText;
                     
                     let newImageIndex;
-                    do {
-                        newImageIndex = Math.floor(Math.random() * natureImages.length);
-                    } while (newImageIndex === lastImageIndex && natureImages.length > 1);
+                    do { newImageIndex = Math.floor(Math.random() * natureImages.length); } while (newImageIndex === lastImageIndex && natureImages.length > 1);
                     lastImageIndex = newImageIndex; 
                     inspirationDisplay.style.backgroundImage = `url('${natureImages[newImageIndex]}')`;
-                    inspirationDisplay.style.backgroundColor = 'transparent';
-
-
                     inspirationText.innerHTML = generatedText.replace(/\n/g, '<br>');
                     inspirationDisplay.classList.remove('d-none');
                     inspirationBtn.disabled = false;
@@ -787,20 +1166,10 @@
             onAuthStateChanged(auth, async (user) => {
                 if (user && (user.emailVerified || user.isAnonymous)) {
                     document.body.style.visibility = 'visible';
-                    
                     initializeAppLock();
 
-                    setInterval(() => {
-                        if (document.visibilityState === 'visible') {
-                            localStorage.setItem('app_last_unlock', Date.now());
-                        }
-                    }, 60 * 1000); 
-
-                    document.addEventListener('visibilitychange', () => {
-                        if (document.visibilityState === 'visible') {
-                            initializeAppLock();
-                        }
-                    });
+                    setInterval(() => { if (document.visibilityState === 'visible') localStorage.setItem('app_last_unlock', Date.now()); }, 60 * 1000); 
+                    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') initializeAppLock(); });
                     
                     initializeGlobalChatNotifications(user.uid);
                     listenForBackgroundImageChanges();
@@ -878,8 +1247,7 @@
                 let lastSeenTimestamp = new Date(0);
 
                 if (userId) {
-                    const userDocRef = doc(db, "users", userId);
-                    const userDoc = await getDoc(userDocRef);
+                    const userDoc = await getDoc(doc(db, "users", userId));
                     lastSeenTimestamp = userDoc.data()?.lastSeenNotificationTimestamp?.toDate() || new Date(0);
                 }
 
@@ -893,13 +1261,8 @@
                     }
 
                     if (userId) {
-                        const firstDoc = snapshot.docs[0];
-                        latestNotificationTimestamp = firstDoc.data().createdAt?.toDate();
-                        if (latestNotificationTimestamp && latestNotificationTimestamp > lastSeenTimestamp) {
-                            notificationBadge.style.display = 'block';
-                        } else {
-                            notificationBadge.style.display = 'none';
-                        }
+                        latestNotificationTimestamp = snapshot.docs[0].data().createdAt?.toDate();
+                        notificationBadge.style.display = latestNotificationTimestamp > lastSeenTimestamp ? 'block' : 'none';
                     } else {
                          notificationBadge.style.display = 'none';
                     }
@@ -909,10 +1272,7 @@
                         const date = notification.createdAt?.toDate().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }) || '';
                         const item = document.createElement('div');
                         item.className = 'notification-item';
-                        let deleteIconHTML = '';
-                        if (currentUserRole === 'developer' && userId) {
-                            deleteIconHTML = `<i class="bi bi-trash delete-notification-btn" data-id="${docSnapshot.id}" style="display: inline-block;"></i>`;
-                        }
+                        const deleteIconHTML = (currentUserRole === 'developer' && userId) ? `<i class="bi bi-trash delete-notification-btn" data-id="${docSnapshot.id}" style="display: inline-block;"></i>` : '';
                         item.innerHTML = `${deleteIconHTML}<div class="d-flex justify-content-between align-items-center"><h6 class="notification-title mb-1">${notification.title}</h6><span class="notification-date">${date}</span></div><p class="notification-body mb-0">${notification.message}</p>`;
                         notificationsList.appendChild(item);
                     });
@@ -921,9 +1281,8 @@
                         document.querySelectorAll('.delete-notification-btn').forEach(button => {
                             button.addEventListener('click', async (e) => {
                                 e.stopPropagation();
-                                const notifId = e.target.getAttribute('data-id');
                                 if (confirm('هل أنت متأكد من حذف هذا الإشعار؟')) {
-                                    try { await deleteDoc(doc(db, "notifications", notifId)); } catch (error) { console.error("Error deleting notification: ", error); alert('حدث خطأ أثناء حذف الإشعار.'); }
+                                    await deleteDoc(doc(db, "notifications", e.target.getAttribute('data-id')));
                                 }
                             });
                         });
@@ -935,139 +1294,98 @@
                 const user = auth.currentUser;
                 if (user && !user.isAnonymous && latestNotificationTimestamp) {
                     notificationBadge.style.display = 'none';
-                    const userDocRef = doc(db, "users", user.uid);
-                    try { await updateDoc(userDocRef, { lastSeenNotificationTimestamp: latestNotificationTimestamp }); } catch (error) { console.error("Error updating last seen timestamp: ", error); }
+                    await updateDoc(doc(db, "users", user.uid), { lastSeenNotificationTimestamp: latestNotificationTimestamp });
                 }
             });
             
-            const sendNotificationBtn = document.getElementById('send-notification-btn');
             const sendNotificationModal = new bootstrap.Modal(document.getElementById('send-notification-modal'));
-            sendNotificationBtn.addEventListener('click', async () => {
+            document.getElementById('send-notification-btn').addEventListener('click', async () => {
                 const title = document.getElementById('notification-title').value.trim();
                 const message = document.getElementById('notification-message').value.trim();
-                if (!title || !message) { alert('الرجاء ملء جميع الحقول.'); return; }
-                try {
-                    await addDoc(collection(db, "notifications"), { title: title, message: message, createdAt: serverTimestamp() });
-                    alert('تم إرسال الإشعار بنجاح.');
-                    document.getElementById('notification-title').value = '';
-                    document.getElementById('notification-message').value = '';
-                    sendNotificationModal.hide();
-                } catch (error) { console.error("Error sending notification: ", error); alert('حدث خطأ أثناء إرسال الإشعار.'); }
+                if (!title || !message) return;
+                await addDoc(collection(db, "notifications"), { title, message, createdAt: serverTimestamp() });
+                document.getElementById('notification-title').value = '';
+                document.getElementById('notification-message').value = '';
+                sendNotificationModal.hide();
             });
 
             const dateElement = document.getElementById('current-date');
-            const daysValueEl = document.getElementById('days-value');
-            const hoursValueEl = document.getElementById('hours-value');
-            const minutesValueEl = document.getElementById('minutes-value');
-            const secondsValueEl = document.getElementById('seconds-value');
-            const daysFillEl = document.getElementById('days-fill');
-            const hoursFillEl = document.getElementById('hours-fill');
-            const minutesFillEl = document.getElementById('minutes-fill');
-            const secondsFillEl = document.getElementById('seconds-fill');
-
-            function updateLiveDate() {
-                const today = new Date();
-                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                dateElement.textContent = today.toLocaleDateString('ar-EG', options);
-            }
-            updateLiveDate();
+            const [daysValueEl, hoursValueEl, minutesValueEl, secondsValueEl] = ['days-value', 'hours-value', 'minutes-value', 'seconds-value'].map(id => document.getElementById(id));
+            const [daysFillEl, hoursFillEl, minutesFillEl, secondsFillEl] = ['days-fill', 'hours-fill', 'minutes-fill', 'seconds-fill'].map(id => document.getElementById(id));
+            
+            dateElement.textContent = new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
             function updateTimerDisplay(d, h, m, s) {
                 daysValueEl.textContent = d; hoursValueEl.textContent = h; minutesValueEl.textContent = m; secondsValueEl.textContent = s;
-                const daysPercent = d > 0 ? ((d % 30) / 29) * 100 : 0;
-                const hoursPercent = h > 0 ? (h / 23) * 100 : 0;
-                const minutesPercent = m > 0 ? (m / 59) * 100 : 0;
-                const secondsPercent = s > 0 ? (s / 59) * 100 : 0;
-                daysFillEl.style.width = `${Math.min(daysPercent, 100)}%`;
-                hoursFillEl.style.width = `${Math.min(hoursPercent, 100)}%`;
-                minutesFillEl.style.width = `${Math.min(minutesPercent, 100)}%`;
-                secondsFillEl.style.width = `${Math.min(secondsPercent, 100)}%`;
+                daysFillEl.style.width = `${Math.min(d > 0 ? ((d % 30) / 29) * 100 : 0, 100)}%`;
+                hoursFillEl.style.width = `${Math.min(h > 0 ? (h / 23) * 100 : 0, 100)}%`;
+                minutesFillEl.style.width = `${Math.min(m > 0 ? (m / 59) * 100 : 0, 100)}%`;
+                secondsFillEl.style.width = `${Math.min(s > 0 ? (s / 59) * 100 : 0, 100)}%`;
             }
 
             function updateTimer() {
                 if (!startTime) { updateTimerDisplay(0,0,0,0); return; };
-                const now = new Date();
-                const difference = now - startTime;
+                const difference = new Date() - startTime;
                 if (difference < 0) { updateTimerDisplay(0,0,0,0); return; }
-                const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+                const days = Math.floor(difference / 86400000);
+                const hours = Math.floor((difference % 86400000) / 3600000);
+                const minutes = Math.floor((difference % 3600000) / 60000);
+                const seconds = Math.floor((difference % 60000) / 1000);
                 updateTimerDisplay(days, hours, minutes, seconds);
+
+                window.currentStreakDays = days;
+                if (days > lastCheckedDay) {
+                    checkAndAwardAchievements(days);
+                    lastCheckedDay = days;
+                }
             }
 
-            const settingsIcon = document.querySelector('.timer-settings-icon');
             const settingsModalOverlay = document.getElementById('settings-modal-overlay');
-            const closeSettingsButton = document.getElementById('close-settings-button');
-            const resetTimerButton = document.getElementById('reset-timer-button');
-            const setDateButton = document.getElementById('set-date-button');
-            const dateTimePicker = document.getElementById('date-time-picker');
             const confirmResetModal = document.getElementById('confirm-reset-modal');
-            const cancelResetButton = document.getElementById('cancel-reset-button');
-            const confirmResetActionButton = document.getElementById('confirm-reset-action-button');
-
-            settingsIcon.addEventListener('click', () => settingsModalOverlay.classList.add('show'));
             const closeSettingsModal = () => settingsModalOverlay.classList.remove('show');
-            closeSettingsButton.addEventListener('click', closeSettingsModal);
-            settingsModalOverlay.addEventListener('click', (e) => { if (e.target === settingsModalOverlay) closeSettingsModal(); });
-            setDateButton.addEventListener('click', () => dateTimePicker.showPicker());
+            document.querySelector('.timer-settings-icon').addEventListener('click', () => settingsModalOverlay.classList.add('show'));
+            document.getElementById('close-settings-button').addEventListener('click', closeSettingsModal);
+            document.getElementById('set-date-button').addEventListener('click', () => document.getElementById('date-time-picker').showPicker());
             
-            dateTimePicker.addEventListener('change', async (e) => {
-                const user = auth.currentUser;
+            document.getElementById('date-time-picker').addEventListener('change', async (e) => {
                 if (!e.target.value) return;
-
                 const newStartTime = new Date(e.target.value);
                 if (isNaN(newStartTime.getTime())) return;
-
+                
+                const user = auth.currentUser;
                 if (user && !user.isAnonymous) {
-                    const userDocRef = doc(db, "users", user.uid);
-                    await setDoc(userDocRef, { timerStartDate: newStartTime }, { merge: true });
+                    await resetAchievements();
+                    await setDoc(doc(db, "users", user.uid), { timerStartDate: newStartTime }, { merge: true });
                 } else {
                      localStorage.setItem('visitorTimerStart', newStartTime.getTime());
                 }
                 location.reload();
             });
 
-            resetTimerButton.addEventListener('click', () => { closeSettingsModal(); setTimeout(() => confirmResetModal.classList.add('show'), 300); });
+            document.getElementById('reset-timer-button').addEventListener('click', () => { closeSettingsModal(); setTimeout(() => confirmResetModal.classList.add('show'), 300); });
             const closeConfirmModal = () => confirmResetModal.classList.remove('show');
-            cancelResetButton.addEventListener('click', closeConfirmModal);
-            confirmResetModal.addEventListener('click', (e) => { if (e.target === confirmResetModal) closeConfirmModal(); });
+            document.getElementById('cancel-reset-button').addEventListener('click', closeConfirmModal);
             
-            confirmResetActionButton.addEventListener('click', async () => {
+            document.getElementById('confirm-reset-action-button').addEventListener('click', async () => {
                 const user = auth.currentUser;
+                if (user && !user.isAnonymous) await resetAchievements(); 
                 const newStartTime = new Date();
                 if (user && !user.isAnonymous) {
-                    const userDocRef = doc(db, "users", user.uid);
-                    await setDoc(userDocRef, { timerStartDate: newStartTime }, { merge: true });
+                    await setDoc(doc(db, "users", user.uid), { timerStartDate: newStartTime }, { merge: true });
                 } else {
                     localStorage.setItem('visitorTimerStart', newStartTime.getTime());
                 }
                 location.reload();
             });
 
-            const najdaButton = document.getElementById('najda-button');
+
             const breathingPage = document.getElementById('breathing-page');
-            const closeBreathingBtn = document.getElementById('close-breathing-btn');
-            const breathingText = document.getElementById('breathing-text');
             const homePage = document.getElementById('home-page');
             const quotePage = document.getElementById('quote-page');
-            const quoteText = document.getElementById('quote-text');
-            const closeQuoteBtn = document.getElementById('close-quote-btn');
-            const skipToQuoteBtn = document.getElementById('skip-to-quote-btn');
             
             function stopBreathingCycle() {
-                breathingTimeouts.forEach(clearTimeout); 
-                breathingTimeouts = [];
-                if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
-            }
-
-            function startBreathingCycle() {
-                breathingTimeouts.forEach(clearTimeout);
-                breathingTimeouts = [];
-                breathingText.textContent = 'شهيق';
-                breathingTimeouts.push(setTimeout(() => { breathingText.textContent = 'حبس النفس'; }, 4000));
-                breathingTimeouts.push(setTimeout(() => { breathingText.textContent = 'زفير'; }, 11000));
-                breathingTimeouts.push(setTimeout(startBreathingCycle, 19000));
+                breathingTimeouts.forEach(clearTimeout); breathingTimeouts = [];
+                if (countdownInterval) clearInterval(countdownInterval);
             }
 
             async function showQuotePage() {
@@ -1077,55 +1395,49 @@
                 quotePage.style.backgroundImage = `url('${natureImages[newImageIndex]}')`;
                 
                 breathingPage.classList.remove('active');
-                breathingPage.style.display = 'none';
-                quotePage.style.display = 'flex';
                 quotePage.classList.add('active');
                 
-                quoteText.innerHTML = '<div class="spinner-border text-light" role="status"><span class="visually-hidden">Loading...</span></div>';
+                document.getElementById('quote-text').innerHTML = '<div class="spinner-border text-light"></div>';
                 const prompt = "بصفتك ناصح أمين على منهج السلف الصالح خاطب شخص على وشك يطيح في معصية العادة السرية أو مشاهدة الإباحية عطه كلام قوي ومباشر يجمع بين العقل والترهيب والتذكير بعواقب الفعل عشان يتراجع فورا تكلم باللهجة السعودية العامية وردك لازم يكون بدون تشكيل وبدون أي علامات ترقيم نهائيا وخليه قصير ومختصر وطبيعي كأنك تكلم خويك";
-                const generatedQuote = await callGeminiAPI(prompt);
-                quoteText.innerHTML = generatedQuote;
+                document.getElementById('quote-text').innerHTML = await callGeminiAPI(prompt);
             }
 
-            function startBreathingExperience() {
+            document.getElementById('najda-button').addEventListener('click', () => {
                 stopBreathingCycle();
                 homePage.classList.remove('active');
-                breathingPage.style.display = 'flex';
                 breathingPage.classList.add('active');
+                let remainingTime = 57;
                 const breathingTimerEl = document.getElementById('breathing-timer');
-                remainingTime = 57;
-                breathingTimerEl.textContent = `الوقت المتبقي: ${remainingTime} ثانية`;
                 countdownInterval = setInterval(() => {
                     remainingTime--;
-                    if (remainingTime >= 0) {
-                        breathingTimerEl.textContent = `الوقت المتبقي: ${remainingTime} ثانية`;
-                    }
-                    if (remainingTime < 0) {
-                        stopBreathingCycle();
-                        showQuotePage();
-                    }
+                    breathingTimerEl.textContent = `الوقت المتبقي: ${remainingTime} ثانية`;
+                    if (remainingTime < 0) { stopBreathingCycle(); showQuotePage(); }
                 }, 1000);
-                startBreathingCycle();
-            }
+                
+                const breathingTextEl = document.getElementById('breathing-text');
+                function cycle() {
+                    breathingTextEl.textContent = 'شهيق';
+                    breathingTimeouts.push(setTimeout(() => { breathingTextEl.textContent = 'حبس النفس'; }, 4000));
+                    breathingTimeouts.push(setTimeout(() => { breathingTextEl.textContent = 'زفير'; }, 11000));
+                    breathingTimeouts.push(setTimeout(cycle, 19000));
+                }
+                cycle();
+            });
 
-            najdaButton.addEventListener('click', startBreathingExperience);
-            closeBreathingBtn.addEventListener('click', () => {
+            document.getElementById('close-breathing-btn').addEventListener('click', () => {
                 stopBreathingCycle();
                 breathingPage.classList.remove('active');
-                breathingPage.style.display = 'none';
                 homePage.classList.add('active');
             });
-            closeQuoteBtn.addEventListener('click', () => {
+            document.getElementById('close-quote-btn').addEventListener('click', () => {
                 quotePage.classList.remove('active');
-                quotePage.style.display = 'none';
                 homePage.classList.add('active');
             });
-            skipToQuoteBtn.addEventListener('click', () => {
+            document.getElementById('skip-to-quote-btn').addEventListener('click', () => {
                 stopBreathingCycle();
                 showQuotePage();
             });
             
-            // --- START: Background Image Logic ---
             const cardElement = document.querySelector('.progress-timer-card');
             const imageElement = document.getElementById('counter-image-bg');
             const overlayElement = document.querySelector('.image-background-overlay');
@@ -1140,71 +1452,38 @@
                     imageElement.src = imageUrl;
                     imageElement.classList.add('visible');
                 } else {
-                    cardElement.style.background = ''; // Restore gradient
+                    cardElement.style.background = '';
                     overlayElement.classList.remove('visible');
                     imageElement.classList.remove('visible');
-                    imageElement.src = '';
                 }
             }
             
             function listenForBackgroundImageChanges() {
-                const configDocRef = doc(db, "app_config", "background_image");
-                onSnapshot(configDocRef, (doc) => {
-                    if (doc.exists()) {
-                        const imageUrl = doc.data().url;
-                        setCounterBackgroundImage(imageUrl);
-                    } else {
-                        setCounterBackgroundImage(null); // No config, reset to default
-                    }
+                onSnapshot(doc(db, "app_config", "background_image"), (doc) => {
+                    setCounterBackgroundImage(doc.exists() ? doc.data().url : null);
                 });
             }
 
             async function uploadImageToCloudinary(file) {
-                const CLOUD_NAME = 'dsf3gudnd';
-                const FOLDER = 'back photo';
-                const UPLOAD_PRESET = 'back photo'; 
-
-                const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
                 const formData = new FormData();
                 formData.append('file', file);
-                formData.append('upload_preset', UPLOAD_PRESET);
-                formData.append('folder', FOLDER);
-
+                formData.append('upload_preset', 'back photo');
+                formData.append('folder', 'back photo'); 
                 try {
-                    setImageButton.innerHTML = `<span>جاري الرفع... <i class="bi bi-hourglass-split"></i></span>`;
+                    setImageButton.innerHTML = `<span>جاري الرفع...</span>`;
                     setImageButton.disabled = true;
-                    removeBackgroundButton.disabled = true;
-
-                    const response = await fetch(url, { method: 'POST', body: formData });
+                    const response = await fetch(`https://api.cloudinary.com/v1_1/dsf3gudnd/image/upload`, { method: 'POST', body: formData });
                     const data = await response.json();
-
-                    if (data.secure_url) {
-                        return data.secure_url;
-                    } else {
-                        console.error('Cloudinary upload error:', data);
-                        alert('حدث خطأ أثناء رفع الصورة. تأكد من صحة اسم الإعداد المسبق (Upload Preset) في الكود.');
-                        return null;
-                    }
-                } catch (error) {
-                    console.error('Fetch error during upload:', error);
-                    alert('فشل الاتصال لرفع الصورة.');
-                    return null;
-                } finally {
-                    setImageButton.innerHTML = `<span>تعيين صورة خلفية</span><div class="icon-container green"><i class="bi bi-image"></i></div>`;
-                    setImageButton.disabled = false;
-                    removeBackgroundButton.disabled = false;
+                    return data.secure_url || null;
+                } catch (error) { return null; }
+                finally {
+                     setImageButton.innerHTML = `<span>تعيين صورة خلفية</span><div class="icon-container green"><i class="bi bi-image"></i></div>`;
+                     setImageButton.disabled = false;
                 }
             }
-
+            
             async function updateBackgroundImageInFirestore(url) {
-                const configDocRef = doc(db, "app_config", "background_image");
-                try {
-                    await setDoc(configDocRef, { url: url }, { merge: true });
-                    console.log("Background image URL updated in Firestore.");
-                } catch (error) {
-                    console.error("Error updating Firestore:", error);
-                    alert("خطأ في تحديث قاعدة البيانات.");
-                }
+                await setDoc(doc(db, "app_config", "background_image"), { url: url }, { merge: true });
             }
 
             setImageButton.addEventListener('click', () => imageFilePicker.click());
@@ -1217,14 +1496,10 @@
                 const file = event.target.files[0];
                 if (file) {
                     const imageUrl = await uploadImageToCloudinary(file);
-                    if (imageUrl) {
-                        await updateBackgroundImageInFirestore(imageUrl);
-                        closeSettingsModal();
-                    }
-                    event.target.value = null; 
+                    if (imageUrl) await updateBackgroundImageInFirestore(imageUrl);
+                    closeSettingsModal();
                 }
             });
-            // --- END: Background Image Logic ---
 
             setupGeminiFeatures();
         });
@@ -1232,16 +1507,9 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => {
-                        console.log('Service Worker registered successfully.');
-                    })
-                    .catch(error => {
-                        console.error('Service Worker registration failed:', error);
-                    });
+                navigator.serviceWorker.register('./sw.js').catch(console.error);
             });
         }
     </script>
 </body>
 </html>
-
