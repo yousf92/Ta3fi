@@ -500,6 +500,17 @@
         .leaderboard-delete-btn:hover {
             opacity: 1;
         }
+        .leaderboard-restore-btn {
+            color: var(--day-color); /* Greenish color */
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 5px;
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+        }
+        .leaderboard-restore-btn:hover {
+            opacity: 1;
+        }
         .leaderboard-item.rank-1, .leaderboard-item.rank-2, .leaderboard-item.rank-3 {
             border-width: 2px;
             transform: scale(1.02);
@@ -529,6 +540,27 @@
             border-bottom-left-radius: var(--bs-modal-inner-border-radius);
             border-bottom-right-radius: var(--bs-modal-inner-border-radius);
             margin: 0;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+        }
+        #leaderboardModal .nav-tabs {
+            border-bottom: none;
+        }
+        #leaderboardModal .nav-link {
+            border: none;
+            background: none;
+            color: var(--secondary-text-color);
+            width: 50%;
+            text-align: center;
+            font-size: 0.9rem;
+            padding: 0.75rem 0.5rem;
+        }
+        #leaderboardModal .nav-link.active {
+            background-color: var(--card-background);
+            color: var(--primary-color);
+            font-weight: 700;
+            border-radius: 8px;
         }
         /* END: Leaderboard Styles */
     </style>
@@ -752,15 +784,34 @@
     <div class="modal fade" id="leaderboardModal" tabindex="-1" aria-labelledby="leaderboardModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="leaderboardModalLabel">🏆 لوحة الصدارة</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header flex-column align-items-stretch p-2">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <h5 class="modal-title" id="leaderboardModalLabel">🏆 لوحة الصدارة</h5>
+                        <button type="button" class="btn-close m-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div id="leaderboard-tabs-container" class="d-none w-100 mt-2">
+                        <ul class="nav nav-tabs" id="leaderboardTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="leaderboard-list-tab" data-bs-toggle="tab" data-bs-target="#leaderboard-list-pane" type="button" role="tab" aria-controls="leaderboard-list-pane" aria-selected="true">لوحة الصدارة</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="banned-list-tab" data-bs-toggle="tab" data-bs-target="#banned-list-pane" type="button" role="tab" aria-controls="banned-list-pane" aria-selected="false">المحظورون</button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="modal-body" id="leaderboard-body-container">
-                    <!-- Leaderboard content will be injected here by JavaScript -->
+                <div class="modal-body p-0" id="leaderboard-body-container">
+                     <div class="tab-content" id="leaderboardTabContent">
+                        <div class="tab-pane fade show active p-3" id="leaderboard-list-pane" role="tabpanel" tabindex="0">
+                            <!-- Leaderboard content will be injected here -->
+                        </div>
+                        <div class="tab-pane fade p-3" id="banned-list-pane" role="tabpanel" tabindex="0">
+                            <!-- Banned users list will be injected here -->
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer justify-content-center p-0" id="leaderboard-footer-user-rank">
-                    <!-- User's rank will be injected here by JavaScript -->
+                    <!-- User's rank will be injected here -->
                 </div>
             </div>
         </div>
@@ -885,118 +936,70 @@
         // END: Achievements Logic
 
         // START: Leaderboard Logic
+        async function displayBannedList() {
+            const bannedListBody = document.getElementById('banned-list-pane');
+            bannedListBody.innerHTML = `<div class="loading-spinner-container"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+
+            try {
+                const usersRef = collection(db, "users");
+                const q = query(usersRef, where("isBannedFromLeaderboard", "==", true));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    bannedListBody.innerHTML = '<p class="text-center text-secondary mt-3">قائمة المحظورين فارغة.</p>';
+                    return;
+                }
+
+                let bannedListHTML = '<ul class="leaderboard-list">';
+                querySnapshot.forEach(userDoc => {
+                    const userData = userDoc.data();
+                    const profilePic = userData.photoURL || 'https://placehold.co/100x100/1e1e1e/fafafa?text=?';
+                    const restoreButtonHTML = `<i class="bi bi-arrow-counterclockwise leaderboard-restore-btn" data-userid="${userDoc.id}" title="إلغاء الحظر"></i>`;
+
+                    bannedListHTML += `
+                        <li class="leaderboard-item" id="banned-user-${userDoc.id}">
+                            <img src="${profilePic}" alt="User Picture" class="leaderboard-user-pic" style="margin-left: 1rem; margin-right: 0;">
+                            <div class="leaderboard-user-info">
+                                <h6 class="leaderboard-user-name">${userData.displayName || 'مستخدم'}</h6>
+                            </div>
+                            ${restoreButtonHTML}
+                        </li>`;
+                });
+                bannedListHTML += '</ul>';
+                bannedListBody.innerHTML = bannedListHTML;
+
+                document.querySelectorAll('#leaderboardModal .leaderboard-restore-btn').forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        const userIdToRestore = event.target.dataset.userid;
+                        if (confirm('هل أنت متأكد من إلغاء حظر هذا المستخدم؟')) {
+                            try {
+                                const userToUpdateRef = doc(db, "users", userIdToRestore);
+                                await updateDoc(userToUpdateRef, { isBannedFromLeaderboard: false });
+                                event.target.closest('.leaderboard-item').remove();
+                            } catch (error) { console.error("Error unbanning user: ", error); }
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error("Error fetching banned list: ", error);
+                bannedListBody.innerHTML = '<p class="text-center text-danger mt-3">حدث خطأ أثناء تحميل القائمة.</p>';
+            }
+        }
+
         async function displayLeaderboard() {
-            const leaderboardBody = document.getElementById('leaderboard-body-container');
+            const leaderboardListPane = document.getElementById('leaderboard-list-pane');
             const leaderboardFooter = document.getElementById('leaderboard-footer-user-rank');
+            const tabsContainer = document.getElementById('leaderboard-tabs-container');
+            const modalTitle = document.getElementById('leaderboardModalLabel');
             const user = auth.currentUser;
             if (!user) return;
 
-            leaderboardBody.innerHTML = `<div class="loading-spinner-container"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
-            leaderboardFooter.innerHTML = `<div class="spinner-border spinner-border-sm text-light" role="status"></div>`;
+            leaderboardListPane.innerHTML = `<div class="loading-spinner-container"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+            leaderboardFooter.innerHTML = `<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border spinner-border-sm text-light" role="status"></div></div>`;
+            document.getElementById('banned-list-pane').innerHTML = '';
             
             let filteredTop100 = [];
-
-            const renderLeaderboardList = (docs, currentUserRole) => {
-                filteredTop100 = docs.filter(doc => {
-                    const data = doc.data();
-                    return data.timerStartDate &&
-                           data.role !== 'developer' &&
-                           data.isBannedFromLeaderboard !== true;
-                });
-
-                if (filteredTop100.length === 0) {
-                    leaderboardBody.innerHTML = '<p class="text-center text-secondary mt-3">لا يوجد مستخدمون في لوحة الصدارة بعد.</p>';
-                    return;
-                }
-
-                let leaderboardHTML = '<ul class="leaderboard-list">';
-                let rank = 1;
-
-                filteredTop100.forEach(userDoc => {
-                    const userData = userDoc.data();
-                    const startDate = userData.timerStartDate.toDate();
-                    const now = new Date();
-                    const diffTime = Math.abs(now - startDate);
-                    const recoveryDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-                    const rankClass = rank <= 3 ? `rank-${rank}` : '';
-                    let rankDisplay;
-                    if (rank <= 3) {
-                        const medals = ['🥇', '🥈', '🥉'];
-                        rankDisplay = `<div class="leaderboard-rank-medal">${medals[rank - 1]}</div>`;
-                    } else {
-                        rankDisplay = `<div class="leaderboard-rank">${rank}</div>`;
-                    }
-
-                    const profilePic = userData.photoURL || 'https://placehold.co/100x100/1e1e1e/fafafa?text=?';
-                    const deleteButtonHTML = currentUserRole === 'developer' 
-                        ? `<i class="bi bi-x-circle-fill leaderboard-delete-btn" data-userid="${userDoc.id}" title="حظر من لوحة الصدارة"></i>` 
-                        : '';
-                    
-                    leaderboardHTML += `
-                        <li class="leaderboard-item ${rankClass}" id="user-rank-${userDoc.id}">
-                            ${rankDisplay}
-                            <img src="${profilePic}" alt="User Picture" class="leaderboard-user-pic">
-                            <div class="leaderboard-user-info">
-                                <h6 class="leaderboard-user-name">${userData.displayName || 'مستخدم'}</h6>
-                                <p class="leaderboard-user-days">${recoveryDays} يوم</p>
-                            </div>
-                            ${deleteButtonHTML}
-                        </li>`;
-                    rank++;
-                });
-
-                leaderboardHTML += '</ul>';
-                leaderboardBody.innerHTML = leaderboardHTML;
-                
-                if (currentUserRole === 'developer') {
-                    document.querySelectorAll('#leaderboardModal .leaderboard-delete-btn').forEach(button => {
-                        button.addEventListener('click', async (event) => {
-                            const userIdToBan = event.target.dataset.userid;
-                            try {
-                                const userToUpdateRef = doc(db, "users", userIdToBan);
-                                await updateDoc(userToUpdateRef, { isBannedFromLeaderboard: true });
-                                event.target.closest('.leaderboard-item').remove();
-                            } catch (error) { console.error("Error banning user: ", error); }
-                        });
-                    });
-                }
-            };
-
-            const findUserRank = async () => {
-                const currentUserDocSnap = await getDoc(doc(db, "users", user.uid));
-                if (!currentUserDocSnap.exists() || !currentUserDocSnap.data().timerStartDate) {
-                    leaderboardFooter.innerHTML = 'ابدأ العداد لتظهر في الترتيب';
-                    return;
-                }
-                const currentUserStartDate = currentUserDocSnap.data().timerStartDate;
-
-                let userFoundInTop100 = false;
-                for (let i = 0; i < filteredTop100.length; i++) {
-                    if (filteredTop100[i].id === user.uid) {
-                        leaderboardFooter.innerHTML = `🌟 ترتيبك الحالي: ${i + 1} 🌟`;
-                        userFoundInTop100 = true;
-                        break;
-                    }
-                }
-
-                if (!userFoundInTop100) {
-                    const rankQuery = query(
-                        collection(db, "users"),
-                        where("timerStartDate", "<", currentUserStartDate)
-                    );
-                    const rankSnapshot = await getDocs(rankQuery);
-                    let higherRankedUsers = 0;
-                    rankSnapshot.forEach(doc => {
-                        const data = doc.data();
-                        if (data.role !== 'developer' && data.isBannedFromLeaderboard !== true) {
-                            higherRankedUsers++;
-                        }
-                    });
-                    const currentUserRank = higherRankedUsers + 1;
-                    leaderboardFooter.innerHTML = `🌟 ترتيبك الحالي: ${currentUserRank} 🌟`;
-                }
-            };
 
             try {
                 let currentUserRole = 'user';
@@ -1005,20 +1008,117 @@
                     currentUserRole = currentUserDoc.data().role || 'user';
                 }
 
+                if (currentUserRole === 'developer') {
+                    tabsContainer.classList.remove('d-none');
+                    modalTitle.classList.add('d-none');
+                    const bannedTab = document.getElementById('banned-list-tab');
+                    if (!bannedTab.hasAttribute('data-listener-added')) {
+                        bannedTab.addEventListener('click', displayBannedList);
+                        bannedTab.setAttribute('data-listener-added', 'true');
+                    }
+                } else {
+                    tabsContainer.classList.add('d-none');
+                    modalTitle.classList.remove('d-none');
+                }
+
                 const usersRef = collection(db, "users");
-                const q = query(
-                    usersRef,
-                    orderBy("timerStartDate", "asc"),
-                    limit(100)
-                );
+                const q = query(usersRef, orderBy("timerStartDate", "asc"), limit(100));
                 
                 const querySnapshot = await getDocs(q);
-                renderLeaderboardList(querySnapshot.docs, currentUserRole);
+                
+                filteredTop100 = querySnapshot.docs.filter(doc => {
+                    const data = doc.data();
+                    return data.timerStartDate && data.role !== 'developer' && data.isBannedFromLeaderboard !== true;
+                });
+
+                if (filteredTop100.length === 0) {
+                    leaderboardListPane.innerHTML = '<p class="text-center text-secondary mt-3">لا يوجد مستخدمون في لوحة الصدارة بعد.</p>';
+                } else {
+                    let leaderboardHTML = '<ul class="leaderboard-list">';
+                    filteredTop100.forEach((userDoc, index) => {
+                        const userData = userDoc.data();
+                        const startDate = userData.timerStartDate.toDate();
+                        const now = new Date();
+                        const diffTime = Math.abs(now - startDate);
+                        const recoveryDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                        const rank = index + 1;
+                        const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                        let rankDisplay = rank <= 3 ? `<div class="leaderboard-rank-medal">${['🥇', '🥈', '🥉'][rank - 1]}</div>` : `<div class="leaderboard-rank">${rank}</div>`;
+                        const profilePic = userData.photoURL || 'https://placehold.co/100x100/1e1e1e/fafafa?text=?';
+                        const deleteButtonHTML = currentUserRole === 'developer' ? `<i class="bi bi-x-circle-fill leaderboard-delete-btn" data-userid="${userDoc.id}" title="حظر من لوحة الصدارة"></i>` : '';
+                        
+                        leaderboardHTML += `
+                            <li class="leaderboard-item ${rankClass}" id="user-rank-${userDoc.id}">
+                                ${rankDisplay}
+                                <img src="${profilePic}" alt="User Picture" class="leaderboard-user-pic">
+                                <div class="leaderboard-user-info">
+                                    <h6 class="leaderboard-user-name">${userData.displayName || 'مستخدم'}</h6>
+                                    <p class="leaderboard-user-days">${recoveryDays} يوم</p>
+                                </div>
+                                ${deleteButtonHTML}
+                            </li>`;
+                    });
+                    leaderboardHTML += '</ul>';
+                    leaderboardListPane.innerHTML = leaderboardHTML;
+                }
+                
+                if (currentUserRole === 'developer') {
+                    document.querySelectorAll('#leaderboardModal .leaderboard-delete-btn').forEach(button => {
+                        button.addEventListener('click', async (event) => {
+                            const userIdToBan = event.target.dataset.userid;
+                            if (confirm("هل أنت متأكد من حظر هذا المستخدم من لوحة الصدارة؟")) {
+                                try {
+                                    const userToUpdateRef = doc(db, "users", userIdToBan);
+                                    await updateDoc(userToUpdateRef, { isBannedFromLeaderboard: true });
+                                    event.target.closest('.leaderboard-item').remove();
+                                } catch (error) { console.error("Error banning user: ", error); }
+                            }
+                        });
+                    });
+                }
+
+                // Inner function to calculate and display user's rank
+                const findUserRank = async () => {
+                    const currentUserDocSnap = await getDoc(doc(db, "users", user.uid));
+                    if (!currentUserDocSnap.exists() || !currentUserDocSnap.data().timerStartDate) {
+                        leaderboardFooter.innerHTML = 'ابدأ العداد لتظهر في الترتيب';
+                        return;
+                    }
+                    const currentUserStartDate = currentUserDocSnap.data().timerStartDate;
+
+                    let userFoundInTop100 = false;
+                    for (let i = 0; i < filteredTop100.length; i++) {
+                        if (filteredTop100[i].id === user.uid) {
+                            leaderboardFooter.innerHTML = `🌟 ترتيبك الحالي: ${i + 1} 🌟`;
+                            userFoundInTop100 = true;
+                            break;
+                        }
+                    }
+
+                    if (!userFoundInTop100) {
+                        const rankQuery = query(
+                            collection(db, "users"),
+                            where("timerStartDate", "<", currentUserStartDate)
+                        );
+                        const rankSnapshot = await getDocs(rankQuery);
+                        
+                        let higherRankedUsers = 0;
+                        rankSnapshot.forEach(doc => {
+                            const data = doc.data();
+                            if (data.role !== 'developer' && data.isBannedFromLeaderboard !== true) {
+                                higherRankedUsers++;
+                            }
+                        });
+                        const currentUserRank = higherRankedUsers + 1;
+                        leaderboardFooter.innerHTML = `🌟 ترتيبك الحالي: ${currentUserRank} 🌟`;
+                    }
+                };
+
                 await findUserRank();
 
             } catch (error) {
                 console.error("Error fetching leaderboard: ", error);
-                leaderboardBody.innerHTML = '<p class="text-center text-danger mt-3">حدث خطأ أثناء تحميل البيانات. الرجاء المحاولة مرة أخرى.</p>';
+                leaderboardListPane.innerHTML = '<p class="text-center text-danger mt-3">حدث خطأ أثناء تحميل البيانات. الرجاء المحاولة مرة أخرى.</p>';
                 leaderboardFooter.innerHTML = 'خطأ في تحميل الترتيب';
             }
         }
