@@ -675,30 +675,26 @@
 
             <!-- START: Main View (Tabs) -->
             <div id="main-view" class="chat-view active">
-                 <div class="chat-header">
-                    <div class="d-flex justify-content-between align-items: center w-100">
-                        <div>
-                            <h5 class="mb-0">الدردشة</h5>
-                            <small id="user-display-name" class="text-muted"></small>
-                        </div>
-                        <a href="./main.html" class="btn text-white fs-4"><i class="bi bi-arrow-right"></i></a>
+                <div class="d-flex align-items-center p-1 px-2 border-bottom" style="border-color: var(--border-color) !important;">
+                    <div class="flex-grow-1">
+                        <ul class="nav nav-pills nav-fill">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-bs-toggle="pill" href="#group-chat-tab">الدردشة الجماعية</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link position-relative" data-bs-toggle="pill" href="#users-list-tab" id="users-tab-link">
+                                    المستخدمون
+                                    <span id="private-chat-notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="pill" href="#groups-tab">المجموعات</a>
+                            </li>
+                        </ul>
                     </div>
+                    <a href="./main.html" class="btn text-white fs-4 ms-2"><i class="bi bi-arrow-right"></i></a>
                 </div>
-                <ul class="nav nav-pills nav-fill mt-3 p-2">
-                    <li class="nav-item">
-                        <a class="nav-link active" data-bs-toggle="pill" href="#group-chat-tab">الدردشة الجماعية</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link position-relative" data-bs-toggle="pill" href="#users-list-tab" id="users-tab-link">
-                            المستخدمون
-                            <span id="private-chat-notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
-                            </span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="pill" href="#groups-tab">المجموعات</a>
-                    </li>
-                </ul>
                 <div class="tab-content flex-grow-1">
                     <div class="tab-pane fade show active h-100" id="group-chat-tab" style="display: flex; flex-direction: column;">
                          <!-- Group chat content is built by JS -->
@@ -2361,7 +2357,9 @@
                 let roleText = '';
                 if (currentUserRole === 'developer') roleText = '⭐ (مطور)';
                 else if (currentUserRole === 'admin') roleText = '🛡️ (مشرف)';
-                userDisplayName.textContent = `مرحبا، ${currentDisplayName} ${roleText}`;
+                if(userDisplayName) { // Check if element exists before updating
+                    userDisplayName.textContent = `مرحبا، ${currentDisplayName} ${roleText}`;
+                }
             }
 
             document.querySelectorAll('#messages-box .message').forEach(msgEl => {
