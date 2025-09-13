@@ -321,7 +321,7 @@
         }
         #user-search-input::placeholder, #group-search-input::placeholder { color: var(--secondary-text-color); }
 
-        #users-list-container, #my-groups-list-container {
+        #users-list-container, #my-groups-list-container, #discover-groups-list-container {
             flex-grow: 1;
             overflow-y: auto;
             background-color: rgba(18, 18, 18, 0.6);
@@ -1008,14 +1008,23 @@
                         <i class="bi bi-plus-circle-fill me-2"></i> إنشاء مجموعة جديدة
                     </button>
                 </div>
-                <div class="p-2 flex-shrink: 0;">
-                    <input type="search" id="group-search-input" placeholder="اكتشف مجموعات...">
-                </div>
-                <div id="group-search-results" class="p-2 flex-shrink: 0;" style="overflow-y: auto; max-height: 250px;"></div>
-                <div id="my-groups-list-container" class="flex-grow-1" style="overflow-y: auto; display: flex; flex-direction: column;">
-                    <h6 class="text-muted p-2 flex-shrink: 0;" id="my-groups-title">مجموعاتي</h6>
+                
+                <!-- My Groups Section -->
+                <div id="my-groups-list-container" class="flex-grow-1" style="overflow-y: auto; display: flex; flex-direction: column; min-height: 40%;">
+                    <h6 class="text-muted p-2 flex-shrink: 0;">مجموعاتي</h6>
                     <div id="my-groups-list" class="flex-grow-1">
-                        <p class="text-center text-muted p-3">أنت لست عضواً في أي مجموعة بعد</p>
+                        <!-- My groups will be populated here -->
+                    </div>
+                </div>
+                
+                <!-- Divider -->
+                <hr class="my-1" style="border-color: var(--border-color);">
+
+                <!-- Discover Groups Section -->
+                <div id="discover-groups-list-container" class="flex-grow-1" style="overflow-y: auto; display: flex; flex-direction: column;">
+                    <h6 class="text-muted p-2 flex-shrink: 0;">اكتشف مجموعات</h6>
+                    <div id="discover-groups-list" class="flex-grow-1">
+                        <!-- Discoverable groups will be populated here -->
                     </div>
                 </div>
             </div>
@@ -1051,10 +1060,10 @@
         const createGroupModal = new bootstrap.Modal(document.getElementById('create-group-modal'));
         const groupMembersModalEl = document.getElementById('group-members-modal');
         const groupMembersModal = new bootstrap.Modal(groupMembersModalEl);
-        const myGroupsList = document.getElementById('my-groups-list');
-        const myGroupsTitle = document.getElementById('my-groups-title');
-        const groupSearchInput = document.getElementById('group-search-input');
-        const groupSearchResults = document.getElementById('group-search-results');
+        // const myGroupsList = document.getElementById('my-groups-list');
+        // const myGroupsTitle = document.getElementById('my-groups-title');
+        // const groupSearchInput = document.getElementById('group-search-input');
+        // const groupSearchResults = document.getElementById('group-search-results');
         const backToMainFromGroupBtn = document.getElementById('back-to-main-from-group');
         const groupChatHeaderClickable = document.getElementById('group-chat-header-clickable');
         const groupAvatarHeader = document.getElementById('group-avatar-header');
@@ -1482,45 +1491,86 @@
         function listenForMyGroups() {
             if (unsubscribeMyGroups) unsubscribeMyGroups();
             
-            myGroupsTitle.textContent = "كل المجموعات";
+            const myGroupsList = document.getElementById('my-groups-list');
+            const discoverGroupsList = document.getElementById('discover-groups-list');
+
             const q = query(collection(db, "groups"), orderBy("createdAt", "desc"));
             
             unsubscribeMyGroups = onSnapshot(q, (snapshot) => {
-                const groups = [];
+                const myGroups = [];
+                const otherGroups = [];
+
                 snapshot.forEach(doc => {
-                    groups.push({ id: doc.id, ...doc.data() });
+                    const groupData = { id: doc.id, ...doc.data() };
+                    if (groupData.members && groupData.members[currentUserId]) {
+                        myGroups.push(groupData);
+                    } else {
+                        otherGroups.push(groupData);
+                    }
                 });
 
-                if (groups.length === 0) {
-                    myGroupsList.innerHTML = '<p class="text-center text-muted p-3">لا توجد مجموعات</p>';
-                    return;
+                // --- Render My Groups ---
+                if (!myGroupsList) return;
+                if (myGroups.length === 0) {
+                    myGroupsList.innerHTML = '<p class="text-center text-muted p-3">أنت لست عضواً في أي مجموعة بعد</p>';
+                } else {
+                    myGroupsList.innerHTML = '';
+                    myGroups.forEach(group => {
+                        const escapedGroupName = group.groupName.replace(/'/g, "\\'");
+                        let deleteBtnHtml = '';
+                        if (currentUserRole === 'developer' || group.ownerId === currentUserId) {
+                            deleteBtnHtml = `<button class="delete-group-btn" onclick="event.stopPropagation(); window.deleteGroup('${group.id}', '${escapedGroupName}')"><i class="bi bi-trash-fill"></i></button>`;
+                        }
+
+                        const groupEl = document.createElement('div');
+                        groupEl.className = 'group-list-item';
+                        const groupPhoto = group.groupPhotoURL || `https://placehold.co/100x100/00a884/FFFFFF?text=${group.groupName.charAt(0)}`;
+                        
+                        groupEl.innerHTML = `
+                            <img src="${groupPhoto}" alt="Group Icon">
+                            <div class="group-info">
+                                <div class="group-name">${group.groupName}</div>
+                                <div class="group-description">${group.description || 'لا يوجد وصف'}</div>
+                            </div>
+                            ${deleteBtnHtml}
+                        `;
+                        groupEl.addEventListener('click', () => showGroupChatView(group.id, group.groupName));
+                        myGroupsList.appendChild(groupEl);
+                    });
                 }
 
-                myGroupsList.innerHTML = '';
-                groups.forEach(group => {
-                    const escapedGroupName = group.groupName.replace(/'/g, "\\'");
-                    let deleteBtnHtml = '';
-                    if (currentUserRole === 'developer') {
-                        deleteBtnHtml = `<button class="delete-group-btn" onclick="event.stopPropagation(); window.deleteGroup('${group.id}', '${escapedGroupName}')"><i class="bi bi-trash-fill"></i></button>`;
-                    }
+                // --- Render Discover Groups ---
+                if (!discoverGroupsList) return;
+                if (otherGroups.length === 0) {
+                    discoverGroupsList.innerHTML = '<p class="text-center text-muted p-3">لا توجد مجموعات أخرى لاكتشافها</p>';
+                } else {
+                    discoverGroupsList.innerHTML = '';
+                    otherGroups.forEach(group => {
+                        const escapedGroupName = group.groupName.replace(/'/g, "\\'");
+                        let deleteBtnHtml = '';
+                        if (currentUserRole === 'developer') {
+                            deleteBtnHtml = `<button class="delete-group-btn" onclick="event.stopPropagation(); window.deleteGroup('${group.id}', '${escapedGroupName}')"><i class="bi bi-trash-fill"></i></button>`;
+                        }
 
-                    const groupEl = document.createElement('div');
-                    groupEl.className = 'group-list-item';
-                    const groupPhoto = group.groupPhotoURL || `https://placehold.co/100x100/00a884/FFFFFF?text=${group.groupName.charAt(0)}`;
-                    
-                    groupEl.innerHTML = `
-                        <img src="${groupPhoto}" alt="Group Icon">
-                        <div class="group-info">
-                            <div class="group-name">${group.groupName}</div>
-                            <div class="group-description">${group.description || 'لا يوجد وصف'}</div>
-                        </div>
-                        ${deleteBtnHtml}
-                    `;
-                    groupEl.addEventListener('click', () => showGroupChatView(group.id, group.groupName));
-                    myGroupsList.appendChild(groupEl);
-                });
+                        const groupEl = document.createElement('div');
+                        groupEl.className = 'group-list-item';
+                        const groupPhoto = group.groupPhotoURL || `https://placehold.co/100x100/00a884/FFFFFF?text=${group.groupName.charAt(0)}`;
+                        
+                        groupEl.innerHTML = `
+                            <img src="${groupPhoto}" alt="Group Icon">
+                            <div class="group-info">
+                                <div class="group-name">${group.groupName}</div>
+                                <div class="group-description">${group.description || 'لا يوجد وصف'}</div>
+                            </div>
+                            ${deleteBtnHtml}
+                        `;
+                        groupEl.addEventListener('click', () => showGroupChatView(group.id, group.groupName));
+                        discoverGroupsList.appendChild(groupEl);
+                    });
+                }
+
             }, (error) => {
-                console.error("Error listening for groups:", error);
+                console.error("Error listening for all groups:", error);
             });
         }
         
@@ -1642,7 +1692,7 @@
             );
         };
         
-        groupSearchInput.addEventListener('input', async (e) => {
+        /* groupSearchInput.addEventListener('input', async (e) => {
             const searchTerm = e.target.value.trim().toLowerCase();
             if (searchTerm.length < 1) {
                 groupSearchResults.innerHTML = '';
@@ -1695,7 +1745,7 @@
                 `;
                 groupSearchResults.appendChild(resultEl);
             });
-        });
+        }); */
         
         window.requestToJoinGroup = async (groupId, btn) => {
             btn.disabled = true;
