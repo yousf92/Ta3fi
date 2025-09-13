@@ -528,6 +528,12 @@
         /* START: Group Styles */
         .group-list-item .group-info {
             flex-grow: 1;
+            overflow: hidden; /* Added to contain children */
+        }
+        /* START: Accordion styles for group search */
+        #group-search-results .group-list-item {
+            cursor: pointer;
+            align-items: flex-start; /* Align items to top */
         }
         .group-list-item .group-description {
             font-size: 0.85rem;
@@ -535,9 +541,24 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            transition: all 0.3s ease-in-out; /* Smooth transition */
         }
+        .group-list-item.expanded .group-description {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip; /* Or 'initial' */
+        }
+        .group-actions-container {
+            display: none; /* Hidden by default */
+            margin-top: 10px;
+        }
+        .group-list-item.expanded .group-actions-container {
+            display: block; /* Shown when expanded */
+        }
+        /* END: Accordion styles for group search */
+
         .request-join-btn {
-            margin-inline-start: auto;
+            /* margin-inline-start: auto; no longer needed */
         }
         #group-chat-view {
             background-color: #0d1418;
@@ -1220,64 +1241,119 @@
             loadPrivateMessages();
         }
         
+        // --- START: MODIFIED FUNCTION ---
         async function showGroupChatView(groupId, groupName) {
             const groupDocRef = doc(db, "groups", groupId);
             const groupDocSnap = await getDoc(groupDocRef);
             if (!groupDocSnap.exists()) {
-                alert("المجموعة غير موجودة.");
+                showCustomConfirm("المجموعة غير موجودة.", "bi bi-exclamation-circle-fill", () => {});
                 return;
             }
             
             currentGroupData = groupDocSnap.data();
             let isMember = currentGroupData.members && currentGroupData.members[currentUserId];
 
-            // Developer auto-join logic
+            // Developer auto-join logic remains for convenience
             if (currentUserRole === 'developer' && !isMember) {
                 await updateDoc(groupDocRef, { [`members.${currentUserId}`]: 'member' });
-                // Re-fetch data after joining
                 const updatedGroupSnap = await getDoc(groupDocRef);
                 currentGroupData = updatedGroupSnap.data();
                 isMember = true;
             }
             
-            if (!isMember) {
-                alert("ليس لديك صلاحية لدخول هذه المجموعة.");
-                return;
-            }
-            
-            currentGroupId = groupId;
-            groupChatNameEl.textContent = groupName;
-            groupAvatarHeader.src = currentGroupData.groupPhotoURL || `https://placehold.co/100x100/00a884/FFFFFF?text=${groupName.charAt(0)}`;
-            
-            const currentUserRoleInGroup = currentGroupData.members[currentUserId];
+            const groupChatFooter = document.getElementById('group-chat-footer');
 
-            // Show upload/delete buttons only for owner
-            if (currentGroupData.ownerId === currentUserId) {
-                uploadGroupPhotoContainer.style.display = 'flex';
-                uploadGroupPhotoBtn.onclick = () => uploadGroupPhoto(groupId);
-                deleteGroupPhotoBtn.style.display = currentGroupData.groupPhotoURL ? 'flex' : 'none';
-                deleteGroupPhotoBtn.onclick = () => deleteGroupPhoto(groupId);
+            if (isMember) {
+                // Behavior for group members (original logic)
+                groupChatFooter.innerHTML = `
+                     <div id="group-reply-preview" class="reply-preview">
+                        <div id="cancel-group-reply" style="position: absolute; top: 5px; right: 10px; cursor: pointer; font-size: 1.5rem; line-height: 1;">&times;</div>
+                        <div class="reply-preview-sender" id="group-reply-preview-sender"></div>
+                        <div id="group-reply-preview-text" class="reply-preview-text"></div>
+                    </div>
+                     <div class="card-footer p-3">
+                        <div class="input-group">
+                            <textarea id="group-message-input" class="form-control" placeholder="اكتب رسالتك في المجموعة..." rows="1"></textarea>
+                            <button id="group-send-button" class="btn"><i class="bi bi-send-fill"></i></button>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('group-send-button').addEventListener('click', sendGroupMessage);
+                const groupMessageInputNew = document.getElementById('group-message-input');
+                groupMessageInputNew.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendGroupMessage(); } });
+                groupMessageInputNew.addEventListener('input', () => { groupMessageInputNew.style.height = 'auto'; groupMessageInputNew.style.height = (groupMessageInputNew.scrollHeight) + 'px'; });
+                document.getElementById('cancel-group-reply').addEventListener('click', cancelGroupReply);
+
+                currentGroupId = groupId;
+                groupChatNameEl.textContent = groupName;
+                groupAvatarHeader.src = currentGroupData.groupPhotoURL || `https://placehold.co/100x100/00a884/FFFFFF?text=${groupName.charAt(0)}`;
+                
+                const currentUserRoleInGroup = currentGroupData.members[currentUserId];
+                if (currentGroupData.ownerId === currentUserId) {
+                    uploadGroupPhotoContainer.style.display = 'flex';
+                    uploadGroupPhotoBtn.onclick = () => uploadGroupPhoto(groupId);
+                    deleteGroupPhotoBtn.style.display = currentGroupData.groupPhotoURL ? 'flex' : 'none';
+                    deleteGroupPhotoBtn.onclick = () => deleteGroupPhoto(groupId);
+                } else {
+                    uploadGroupPhotoContainer.style.display = 'none';
+                }
+                if (currentUserRoleInGroup === 'owner' || currentUserRoleInGroup === 'admin') {
+                    joinRequestsContainer.style.display = 'block';
+                    loadJoinRequests(groupId);
+                } else {
+                    joinRequestsContainer.style.display = 'none';
+                }
+                groupChatHeaderClickable.onclick = () => showGroupMembers(groupId);
+                loadGroupPinnedMessage(groupId);
+                loadGroupMessages(groupId);
+
             } else {
+                // Behavior for non-members (new logic)
+                currentGroupId = groupId;
+                groupChatNameEl.textContent = groupName;
+                groupAvatarHeader.src = currentGroupData.groupPhotoURL || `https://placehold.co/100x100/00a884/FFFFFF?text=${groupName.charAt(0)}`;
+                
+                groupMessagesBox.innerHTML = `
+                    <div class="text-center p-5 text-muted d-flex flex-column justify-content-center align-items-center h-100">
+                        <i class="bi bi-people-fill" style="font-size: 4rem;"></i>
+                        <h4 class="mt-3">${groupName}</h4>
+                        <p class="lead">${currentGroupData.description || 'انضم إلى هذه المجموعة لعرض الرسائل والدردشة.'}</p>
+                    </div>
+                `;
+
+                groupChatFooter.innerHTML = `
+                    <div class="card-footer p-3">
+                        <button id="request-to-join-from-view-btn" class="btn btn-success w-100">
+                            <i class="bi bi-person-plus-fill me-2"></i> طلب انضمام
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('request-to-join-from-view-btn').addEventListener('click', (e) => {
+                    if (isVisitor) {
+                         showCustomConfirm("يجب عليك تسجيل الدخول أولاً لإرسال طلب انضمام.", "bi bi-box-arrow-in-right", () => {
+                             window.location.href = 'index.html';
+                        });
+                        return;
+                    }
+                    window.requestToJoinGroup(groupId, e.currentTarget);
+                });
+
                 uploadGroupPhotoContainer.style.display = 'none';
-            }
-
-            if (currentUserRoleInGroup === 'owner' || currentUserRoleInGroup === 'admin') {
-                joinRequestsContainer.style.display = 'block';
-                loadJoinRequests(groupId);
-            } else {
                 joinRequestsContainer.style.display = 'none';
+                groupPinnedMessageContainer.style.display = 'none';
+                groupChatHeaderClickable.onclick = null;
+                if (unsubscribeGroupMessages) { unsubscribeGroupMessages(); unsubscribeGroupMessages = null; }
+                if (unsubscribeGroupDoc) { unsubscribeGroupDoc(); unsubscribeGroupDoc = null; }
+                if (unsubscribeJoinRequests) { unsubscribeJoinRequests(); unsubscribeJoinRequests = null; }
             }
-
+            
             mainView.classList.remove('active');
             privateChatView.classList.remove('active');
             groupChatView.classList.add('active');
-
-            groupChatHeaderClickable.onclick = () => showGroupMembers(groupId);
-            
-            loadGroupPinnedMessage(groupId);
-            loadGroupMessages(groupId);
         }
         window.showGroupChatView = showGroupChatView;
+        // --- END: MODIFIED FUNCTION ---
 
 
         backToMainViewBtn.addEventListener('click', showMainView);
@@ -1399,32 +1475,21 @@
                 createGroupModal.hide();
             } catch (error) {
                 console.error("Error creating group:", error);
-                alert("حدث خطأ أثناء إنشاء المجموعة.");
+                showCustomConfirm("حدث خطأ أثناء إنشاء المجموعة.", "bi bi-exclamation-triangle-fill", () => {});
             }
         });
 
         function listenForMyGroups() {
             if (unsubscribeMyGroups) unsubscribeMyGroups();
-            if (!currentUserId) return;
             
-            let q;
-            if (currentUserRole === 'developer') {
-                myGroupsTitle.textContent = "جميع المجموعات (وضع المطور)";
-                q = query(collection(db, "groups"), orderBy("createdAt", "desc"));
-            } else {
-                myGroupsTitle.textContent = "مجموعاتي";
-                q = query(collection(db, "groups"), where(`members.${currentUserId}`, 'in', ['owner', 'admin', 'member']));
-            }
+            myGroupsTitle.textContent = "كل المجموعات";
+            const q = query(collection(db, "groups"), orderBy("createdAt", "desc"));
             
             unsubscribeMyGroups = onSnapshot(q, (snapshot) => {
                 const groups = [];
                 snapshot.forEach(doc => {
                     groups.push({ id: doc.id, ...doc.data() });
                 });
-                
-                if(currentUserRole !== 'developer'){
-                     groups.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
-                }
 
                 if (groups.length === 0) {
                     myGroupsList.innerHTML = '<p class="text-center text-muted p-3">لا توجد مجموعات</p>';
@@ -1551,7 +1616,7 @@
                 editGroupDescriptionModal.hide();
             } catch (error) {
                 console.error("Error updating description:", error);
-                alert("فشل تحديث الوصف.");
+                showCustomConfirm("فشل تحديث الوصف.", "bi bi-exclamation-triangle-fill", () => {});
             }
         });
 
@@ -1599,24 +1664,34 @@
 
                 const resultEl = document.createElement('div');
                 resultEl.className = 'group-list-item';
+                
+                resultEl.addEventListener('click', (event) => {
+                    if (event.target.closest('button, a')) {
+                        return;
+                    }
+                    resultEl.classList.toggle('expanded');
+                });
+
                 const groupPhoto = group.groupPhotoURL || `https://placehold.co/100x100/00a884/FFFFFF?text=${group.groupName.charAt(0)}`;
                 
                 let buttonHtml = '';
                 if (currentUserRole === 'developer') {
-                    buttonHtml = `<button class="btn btn-sm btn-info request-join-btn" onclick="window.showGroupChatView('${doc.id}', '${escapedGroupName}')">دخول</button>`;
+                    buttonHtml = `<button class="btn btn-sm btn-info request-join-btn" onclick="event.stopPropagation(); window.showGroupChatView('${doc.id}', '${escapedGroupName}')">دخول</button>`;
                 } else if (isMember) {
-                     buttonHtml = `<button class="btn btn-sm btn-info request-join-btn" onclick="window.showGroupChatView('${doc.id}', '${escapedGroupName}')">دخول</button>`;
+                     buttonHtml = `<button class="btn btn-sm btn-info request-join-btn" onclick="event.stopPropagation(); window.showGroupChatView('${doc.id}', '${escapedGroupName}')">دخول</button>`;
                 } else {
-                    buttonHtml = `<button class="btn btn-sm btn-success request-join-btn" onclick="window.requestToJoinGroup('${doc.id}', this)">طلب انضمام</button>`;
+                    buttonHtml = `<button class="btn btn-sm btn-success request-join-btn" onclick="event.stopPropagation(); window.requestToJoinGroup('${doc.id}', this)">طلب انضمام</button>`;
                 }
                 
                 resultEl.innerHTML = `
                     <img src="${groupPhoto}" alt="Group Icon">
                     <div class="group-info">
                         <div class="group-name">${group.groupName}</div>
-                        <div class="group-description">${group.description || ''}</div>
+                        <div class="group-description">${group.description || 'لا يوجد وصف'}</div>
+                        <div class="group-actions-container">
+                            ${buttonHtml}
+                        </div>
                     </div>
-                    ${buttonHtml}
                 `;
                 groupSearchResults.appendChild(resultEl);
             });
@@ -1630,7 +1705,7 @@
             const q = query(requestRef, where('groupId', '==', groupId), where('userId', '==', currentUserId));
             const existingRequests = await getDocs(q);
             if(!existingRequests.empty) {
-                alert("لقد أرسلت طلب انضمام بالفعل لهذه المجموعة.");
+                showCustomConfirm("لقد أرسلت طلب انضمام بالفعل لهذه المجموعة.", "bi bi-info-circle-fill", () => {});
                 btn.textContent = 'الطلب مرسل';
                 return;
             }
@@ -1684,7 +1759,7 @@
         };
 
         async function sendGroupMessage() {
-            const text = groupMessageInput.value.trim();
+            const text = document.getElementById('group-message-input').value.trim();
             if (!text || !currentUserId || !currentGroupId) return;
             
             const messagesRef = collection(db, "groups", currentGroupId, "messages");
@@ -1693,8 +1768,8 @@
 
             await addDoc(messagesRef, messageData);
             
-            groupMessageInput.value = "";
-            groupMessageInput.style.height = 'auto';
+            document.getElementById('group-message-input').value = "";
+            document.getElementById('group-message-input').style.height = 'auto';
             cancelGroupReply();
         }
 
@@ -1811,16 +1886,15 @@
                 groupReplyToMessage = { messageId: msgId, senderName, senderId, text: firstLine };
                 document.getElementById('group-reply-preview-sender').textContent = `الرد على ${senderName}`;
                 document.getElementById('group-reply-preview-text').textContent = firstLine;
-                groupReplyPreview.style.display = 'block';
-                groupMessageInput.focus();
+                document.getElementById('group-reply-preview').style.display = 'block';
+                document.getElementById('group-message-input').focus();
             }
         }
 
         function cancelGroupReply() {
             groupReplyToMessage = null;
-            groupReplyPreview.style.display = 'none';
+            document.getElementById('group-reply-preview').style.display = 'none';
         }
-        cancelGroupReplyBtn.addEventListener('click', cancelGroupReply);
         
         window.toggleGroupReaction = async (msgId, emoji) => {
             if (!currentUserId || !currentGroupId) return;
@@ -1879,9 +1953,6 @@
             );
         }
         
-        groupSendButton.addEventListener('click', sendGroupMessage);
-        groupMessageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendGroupMessage(); } });
-        groupMessageInput.addEventListener('input', () => { groupMessageInput.style.height = 'auto'; groupMessageInput.style.height = (groupMessageInput.scrollHeight) + 'px'; });
         // --- END: Group System Logic ---
 
         // --- START: Group Message Actions ---
@@ -2300,7 +2371,7 @@
                     const currentUserRef = doc(db, "users", currentUserId);
                     const userUpdate = { blockedUsers: shouldBlock ? arrayUnion(recipientId) : arrayRemove(recipientId) };
                     await updateDoc(currentUserRef, userUpdate);
-                    alert(shouldBlock ? "تم حظر المستخدم بنجاح." : "تم إلغاء حظر المستخدم بنجاح.");
+                    showCustomConfirm(shouldBlock ? "تم حظر المستخدم بنجاح." : "تم إلغاء حظر المستخدم بنجاح.", "bi bi-check-circle-fill", () => {});
                 }
             );
         }
@@ -2317,6 +2388,7 @@
             if (textElement) {
                 try {
                     await navigator.clipboard.writeText(textElement.innerText);
+                    // This is a small notification, so a native alert is acceptable here for simplicity.
                     alert("تم نسخ النص!");
                 } catch (err) {
                     console.error('Failed to copy text: ', err);
@@ -2401,7 +2473,7 @@
         async function sendMessage() {
             const text = messageInput.value.trim();
             if (!text || !auth.currentUser) return;
-            if (!isVisitor) { const userStatus = await checkUserStatus(auth.currentUser.uid); if (userStatus === 'muted') { alert("أنت مكتوم حاليا ولا يمكنك إرسال رسائل."); return; } }
+            if (!isVisitor) { const userStatus = await checkUserStatus(auth.currentUser.uid); if (userStatus === 'muted') { showCustomConfirm("أنت مكتوم حاليا ولا يمكنك إرسال رسائل.", "bi bi-mic-mute-fill", () => {}); return; } }
             const messageData = { text, senderName: currentDisplayName, senderId: auth.currentUser.uid, senderRole: currentUserRole, createdAt: serverTimestamp() };
             if (replyToMessage) { messageData.replyTo = replyToMessage; }
             await addDoc(collection(db, "messages"), messageData);
@@ -2496,8 +2568,8 @@
         pinnedMessageClickableArea.addEventListener('click', () => { const messageId = pinnedMessageContainer.dataset.messageId; if (!messageId) return; const messageElement = document.getElementById(`message-${messageId}`); if (messageElement) { messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); messageElement.style.transition = 'background-color 0.5s'; messageElement.style.backgroundColor = 'rgba(255, 255, 0, 0.3)'; setTimeout(() => { messageElement.style.backgroundColor = ''; }, 2000); } });
         window.toggleMuteDropdown = (id) => { event.stopPropagation(); document.querySelectorAll(".mute-dropdown").forEach(d => { if(d.id !== id) d.classList.remove('show-dropdown'); }); document.getElementById(id).classList.toggle("show-dropdown"); }
         window.onclick = (e) => { if (!e.target.matches('.bi-bell-slash-fill')) { document.querySelectorAll(".mute-dropdown.show-dropdown").forEach(d => d.classList.remove('show-dropdown')); } }
-        window.muteUser = async (uid, name, min) => { if (!['developer', 'admin'].includes(currentUserRole)) return; await setDoc(doc(db, "users", uid), { mutedUntil: new Date(Date.now() + min * 60000) }, { merge: true }); alert(`تم كتم ${name} لمدة ${min} دقيقة.`); };
-        window.unmuteUser = async (uid, name) => { if (!['developer', 'admin'].includes(currentUserRole)) return; await setDoc(doc(db, "users", uid), { mutedUntil: null }, { merge: true }); alert(`تم إلغاء كتم ${name}.`); };
+        window.muteUser = async (uid, name, min) => { if (!['developer', 'admin'].includes(currentUserRole)) return; await setDoc(doc(db, "users", uid), { mutedUntil: new Date(Date.now() + min * 60000) }, { merge: true }); showCustomConfirm(`تم كتم ${name} لمدة ${min} دقيقة.`, "bi bi-mic-mute-fill", () => {}); };
+        window.unmuteUser = async (uid, name) => { if (!['developer', 'admin'].includes(currentUserRole)) return; await setDoc(doc(db, "users", uid), { mutedUntil: null }, { merge: true }); showCustomConfirm(`تم إلغاء كتم ${name}.`, "bi bi-mic-fill", () => {}); };
         function setReplyFromElement(el) { const msgId = el.id.replace('message-', ''); const senderName = el.dataset.senderName; const senderId = el.dataset.senderId; const text = el.dataset.text; const firstLine = text.split('\n')[0]; if(senderName && senderId && text){ replyToMessage = { messageId: msgId, senderName, senderId, text: firstLine }; document.getElementById('reply-preview-sender').textContent = `الرد على ${senderName}`; document.getElementById('reply-preview-text').textContent = firstLine; replyPreview.style.display = 'block'; messageInput.focus(); } }
         window.setReplyWrapper = (msgId) => { event.stopPropagation(); const el = document.getElementById(`message-${msgId}`); if (el) setReplyFromElement(el); };
         window.copyMessageText = async (msgId) => { const textElement = document.querySelector(`#message-${msgId} .message-text`); if (textElement) { try { await navigator.clipboard.writeText(textElement.innerText); alert("تم نسخ النص!"); } catch (err) { console.error('Failed to copy text: ', err); alert("فشل نسخ النص."); } } };
@@ -2546,8 +2618,8 @@
         window.toggleReaction = async (msgId, emoji) => { if (!auth.currentUser) return; const msgRef = doc(db, "messages", msgId); const msgDoc = await getDoc(msgRef); const msgData = msgDoc.data(); const uid = auth.currentUser.uid; const existing = msgData.reactions?.find(r => r.userId === uid); if (existing) { await updateDoc(msgRef, { reactions: arrayRemove(existing) }); if (existing.emoji !== emoji) { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } } else { await updateDoc(msgRef, { reactions: arrayUnion({ userId: uid, emoji }) }); } };
         window.deleteOwnMessage = async (id) => { showCustomConfirm("هل أنت متأكد من حذف رسالتك؟", "bi bi-trash-fill", async () => await deleteDoc(doc(db, "messages", id))); };
         window.deleteOtherMessage = async (id) => { if (isVisitor || !['developer', 'admin'].includes(currentUserRole)) return; showCustomConfirm("هل أنت متأكد من حذف هذه الرسالة؟", "bi bi-trash-fill", async () => await deleteDoc(doc(db, "messages", id))); };
-        window.banUser = async (uid, name) => { if (isVisitor || !['developer', 'admin'].includes(currentUserRole)) return; const userToBan = await getDoc(doc(db, "users", uid)); if (userToBan.exists() && (userToBan.data().role === 'admin' || userToBan.data().role === 'developer')) { alert("لا يمكنك حظر مشرف آخر."); return; } showCustomConfirm(`هل أنت متأكد من حظر ${name}؟`, "bi bi-slash-circle-fill", async () => { await setDoc(doc(db, "users", uid), { isBanned: true }, { merge: true }); alert(`تم حظر ${name}.`); })};
-        window.toggleAdminRole = async (uid, name) => { if (isVisitor || currentUserRole !== 'developer') return; try { const userDocRef = doc(db, "users", uid); const userDoc = await getDoc(userDocRef); const currentRole = userDoc.exists() ? userDoc.data().role || 'user' : 'user'; const isCurrentlyAdmin = currentRole === 'admin'; const newRole = isCurrentlyAdmin ? 'user' : 'admin'; const confirmationMessage = isCurrentlyAdmin ? `هل تريد إزالة ${name} من الإشراف؟` : `هل تريد ترقية ${name} إلى مشرف؟`; showCustomConfirm(confirmationMessage, "bi bi-shield-shaded", async () => { await setDoc(userDocRef, { role: newRole }, { merge: true }); alert(isCurrentlyAdmin ? `تمت إزالة ${name} من الإشراف.` : `تمت ترقية ${name} إلى مشرف.`); }) } catch (error) { console.error("Error toggling admin role: ", error); } };
+        window.banUser = async (uid, name) => { if (isVisitor || !['developer', 'admin'].includes(currentUserRole)) return; const userToBan = await getDoc(doc(db, "users", uid)); if (userToBan.exists() && (userToBan.data().role === 'admin' || userToBan.data().role === 'developer')) { showCustomConfirm("لا يمكنك حظر مشرف آخر.", "bi bi-shield-exclamation", () => {}); return; } showCustomConfirm(`هل أنت متأكد من حظر ${name}؟`, "bi bi-slash-circle-fill", async () => { await setDoc(doc(db, "users", uid), { isBanned: true }, { merge: true }); showCustomConfirm(`تم حظر ${name}.`, "bi bi-check-circle-fill", () => {}); })};
+        window.toggleAdminRole = async (uid, name) => { if (isVisitor || currentUserRole !== 'developer') return; try { const userDocRef = doc(db, "users", uid); const userDoc = await getDoc(userDocRef); const currentRole = userDoc.exists() ? userDoc.data().role || 'user' : 'user'; const isCurrentlyAdmin = currentRole === 'admin'; const newRole = isCurrentlyAdmin ? 'user' : 'admin'; const confirmationMessage = isCurrentlyAdmin ? `هل تريد إزالة ${name} من الإشراف؟` : `هل تريد ترقية ${name} إلى مشرف؟`; showCustomConfirm(confirmationMessage, "bi bi-shield-shaded", async () => { await setDoc(userDocRef, { role: newRole }, { merge: true }); showCustomConfirm(isCurrentlyAdmin ? `تمت إزالة ${name} من الإشراف.` : `تمت ترقية ${name} إلى مشرف.`, "bi bi-person-check-fill", () => {}); }) } catch (error) { console.error("Error toggling admin role: ", error); } };
         // --- END: Public Chat Logic ---
         
         // --- START: App Lock Logic ---
@@ -2561,4 +2633,3 @@
     </script>
 </body>
 </html>
-
