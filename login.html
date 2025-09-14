@@ -31,7 +31,7 @@
             color: var(--text-color);
         }
         .form-container {
-            background: rgba(30, 30, 30, 0.7); /* زيادة شفافية الخلفية */
+            background: rgba(3, 30, 30, 0.7); /* زيادة شفافية الخلفية */
             backdrop-filter: blur(10px); /* إضافة تأثير بلور للخلفية */
             -webkit-backdrop-filter: blur(10px);
             border-radius: 20px;
@@ -150,7 +150,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signInAnonymously, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        // START: تعديل - استيراد دوال استمرارية الجلسة
+        import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged, signInAnonymously, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        // END: تعديل
 
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -170,28 +172,23 @@
         const showEmailLoginBtn = document.getElementById('show-email-login-btn');
         const backToInitialViewLink = document.getElementById('back-to-initial-view');
         
-        // START: Reset Password Elements
         const resetPasswordView = document.getElementById('reset-password-view');
         const forgotPasswordLink = document.getElementById('forgot-password-link');
         const backToLoginViewLink = document.getElementById('back-to-login-view');
         const resetPasswordButton = document.getElementById('reset-password-button');
         const resetMessage = document.getElementById('reset-message');
-        // END: Reset Password Elements
 
-        // Function to switch to email login view
         showEmailLoginBtn.addEventListener('click', () => {
             initialView.classList.add('d-none');
             emailLoginView.classList.remove('d-none');
         });
 
-        // Function to switch back to initial view
         backToInitialViewLink.addEventListener('click', (e) => {
             e.preventDefault();
             emailLoginView.classList.add('d-none');
             initialView.classList.remove('d-none');
         });
 
-        // START: View switching for password reset
         forgotPasswordLink.addEventListener('click', (e) => {
             e.preventDefault();
             emailLoginView.classList.add('d-none');
@@ -203,27 +200,21 @@
             resetPasswordView.classList.add('d-none');
             emailLoginView.classList.remove('d-none');
         });
-        // END: View switching for password reset
-
 
         function showAuthMessage(message, isError = true) {
             authMessage.textContent = message;
             authMessage.className = `alert mt-3 ${isError ? 'alert-danger' : 'alert-success'}`;
         }
         
-        // START: Function to show reset password messages
         function showResetMessage(message, isError = true) {
             resetMessage.textContent = message;
             resetMessage.className = `alert mt-3 ${isError ? 'alert-danger' : 'alert-success'}`;
         }
-        // END: Function to show reset password messages
 
         onAuthStateChanged(auth, user => {
             if (user && (user.emailVerified || user.isAnonymous)) {
-                // إذا كان المستخدم مسجلاً، انقله مباشرة إلى main.html
                 window.location.href = 'main.html';
             } else {
-                // إذا لم يكن مسجلاً، أظهر صفحة تسجيل الدخول
                 document.body.style.visibility = 'visible';
             }
         });
@@ -237,37 +228,50 @@
             }
             signinButton.disabled = true;
             signinButton.textContent = 'جاري التحقق...';
-            signInWithEmailAndPassword(auth, email, password)
+
+            // START: تعديل - تعيين استمرارية الجلسة قبل تسجيل الدخول
+            setPersistence(auth, browserLocalPersistence)
+                .then(() => {
+                    // بعد تعيين الاستمرارية، قم بتسجيل الدخول
+                    return signInWithEmailAndPassword(auth, email, password);
+                })
                 .then(userCredential => {
                     if (!userCredential.user.emailVerified) {
                         showAuthMessage("حسابك غير مفعل. الرجاء التحقق من بريدك الإلكتروني.");
                         signinButton.disabled = false;
                         signinButton.textContent = 'تسجيل الدخول';
                     }
-                    // onAuthStateChanged will handle the redirect on success
+                    // onAuthStateChanged سوف تتعامل مع إعادة التوجيه عند النجاح
                 })
                 .catch(error => {
+                    console.error("Sign-in or persistence failed:", error);
                     showAuthMessage("خطأ: البريد الإلكتروني أو كلمة المرور غير صحيحة.");
                     signinButton.disabled = false;
                     signinButton.textContent = 'تسجيل الدخول';
                 });
+            // END: تعديل
         });
 
         const guestSigninButton = document.getElementById('guest-signin-button');
         guestSigninButton.addEventListener('click', () => {
             guestSigninButton.disabled = true;
             guestSigninButton.textContent = 'جاري الدخول...';
-            signInAnonymously(auth)
+            
+            // START: تعديل - تعيين استمرارية الجلسة للزائر
+            setPersistence(auth, browserLocalPersistence)
+                .then(() => {
+                    return signInAnonymously(auth);
+                })
                 .catch((error) => {
-                    console.error("Anonymous sign-in failed:", error);
+                    console.error("Anonymous sign-in or persistence failed:", error);
                     showAuthMessage("فشل تسجيل الدخول كزائر. الرجاء المحاولة مرة أخرى.");
                     guestSigninButton.disabled = false;
                     guestSigninButton.textContent = 'الدخول كزائر';
                 });
-            // onAuthStateChanged will handle the redirect on success
+            // onAuthStateChanged سوف تتعامل مع إعادة التوجيه عند النجاح
+            // END: تعديل
         });
 
-        // START: Password Reset Logic
         resetPasswordButton.addEventListener('click', () => {
             const email = document.getElementById('reset-email').value.trim();
             if (!email) {
@@ -287,7 +291,6 @@
                     resetPasswordButton.textContent = 'إرسال رابط إعادة التعيين';
                 });
         });
-        // END: Password Reset Logic
 
     </script>
 
