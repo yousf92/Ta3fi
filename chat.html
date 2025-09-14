@@ -675,7 +675,48 @@
             margin-inline-start: 8px;
         }
         /* END: Group Styles */
-
+        
+        /* START: Floating Scroll Button Styles */
+        .chat-floating-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            background-color: #2a3942;
+            color: white;
+            border-radius: 50%;
+            display: none; /* Initially hidden */
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+            opacity: 0;
+            visibility: hidden;
+        }
+        .chat-floating-btn.visible {
+            display: flex;
+            opacity: 1;
+            visibility: visible;
+        }
+        .chat-floating-btn:hover {
+            transform: scale(1.1);
+            background-color: #3a4a55;
+        }
+        #new-messages-counter {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            font-size: 0.7rem;
+            line-height: 1;
+            padding: 4px 7px;
+            background-color: var(--primary-color);
+            display: none; /* Hidden by default, shown by JS */
+        }
+        /* END: Floating Scroll Button Styles */
 
     </style>
 </head>
@@ -968,6 +1009,12 @@
                     <div id="messages-box"></div>
                     <div id="mention-notification">@</div>
                 </div>
+                 <!-- START: New Floating Button -->
+                <div id="scroll-to-bottom-btn" class="chat-floating-btn">
+                    <span id="new-messages-counter" class="badge rounded-pill"></span>
+                    <i class="bi bi-chevron-down"></i>
+                </div>
+                <!-- END: New Floating Button -->
             </div>
             <div id="chat-footer">
                 <div id="reply-preview" class="reply-preview">
@@ -1043,6 +1090,8 @@
         const pinnedMessageText = document.getElementById('pinned-message-text');
         const unpinButton = document.getElementById('unpin-button');
         const pinnedMessageClickableArea = document.getElementById('pinned-message-clickable-area');
+        const scrollToBottomBtn = document.getElementById('scroll-to-bottom-btn');
+        const newMessagesCounter = document.getElementById('new-messages-counter');
         
         // Private Chat References
         const usersListContainer = document.getElementById('users-list-container').querySelector('#conversation-list');
@@ -1115,6 +1164,7 @@
         let privateChatRoomId = null;
         let currentGroupId = null;
         let currentGroupData = null; // To store current group info
+        let newMessagesWhileScrolledUp = 0;
         
         let unsubscribePrivateChat = null;
         let unsubscribeConversations = null;
@@ -1250,7 +1300,6 @@
             loadPrivateMessages();
         }
         
-        // --- START: MODIFIED FUNCTION ---
         async function showGroupChatView(groupId, groupName) {
             const groupDocRef = doc(db, "groups", groupId);
             const groupDocSnap = await getDoc(groupDocRef);
@@ -1362,7 +1411,6 @@
             groupChatView.classList.add('active');
         }
         window.showGroupChatView = showGroupChatView;
-        // --- END: MODIFIED FUNCTION ---
 
 
         backToMainViewBtn.addEventListener('click', showMainView);
@@ -1376,7 +1424,6 @@
 
             if (user) {
                 // User is signed in.
-                localStorage.setItem('lastReadTimestamp', Date.now().toString());
                 currentUserId = user.uid;
                 
                 const userDocRef = doc(db, "users", user.uid);
@@ -2537,8 +2584,18 @@
 
         function loadMessages() {
             const q = query(collection(db, "messages"), orderBy("createdAt"));
+            let initialLoad = true;
             onSnapshot(q, (snapshot) => {
                 const wasScrolledToBottom = messagesBox.scrollHeight - messagesBox.clientHeight <= messagesBox.scrollTop + 150;
+                
+                if (!initialLoad && !wasScrolledToBottom) {
+                    snapshot.docChanges().forEach(change => {
+                        if (change.type === 'added') {
+                            newMessagesWhileScrolledUp++;
+                        }
+                    });
+                }
+                
                 messagesBox.innerHTML = "";
                 snapshot.forEach(messageDoc => {
                     const msg = messageDoc.data(); const msgId = messageDoc.id; const isOwn = msg.senderId === auth.currentUser?.uid;
@@ -2607,7 +2664,12 @@
                     messageBubble.innerHTML = messageContentHtml + controls;
                     msgDiv.innerHTML = avatarHtml; msgDiv.appendChild(messageBubble); messagesBox.appendChild(msgDiv);
                 });
-                if (wasScrolledToBottom) { messagesBox.scrollTop = messagesBox.scrollHeight; }
+                
+                if (wasScrolledToBottom) {
+                    messagesBox.scrollTop = messagesBox.scrollHeight;
+                }
+                updateScrollToBottomButton();
+                initialLoad = false;
             });
         }
         window.startPrivateChatFromGroup = (targetUserId, targetUserName, targetUserAvatar) => { showPrivateChatView(targetUserId, targetUserName, targetUserAvatar); };
@@ -2680,6 +2742,38 @@
         passcodeInput.addEventListener('keyup', (event) => { if (event.key === 'Enter') handleUnlock(); });
         // --- END: App Lock Logic ---
 
+        // --- START: Scroll To Bottom Logic ---
+        function updateScrollToBottomButton() {
+            if (!messagesBox || !scrollToBottomBtn) return;
+            const isScrolledUp = messagesBox.scrollHeight - messagesBox.clientHeight > messagesBox.scrollTop + 150;
+
+            if (isScrolledUp) {
+                scrollToBottomBtn.classList.add('visible');
+                if (newMessagesWhileScrolledUp > 0) {
+                    newMessagesCounter.style.display = 'block';
+                    newMessagesCounter.textContent = newMessagesWhileScrolledUp > 99 ? '99+' : newMessagesWhileScrolledUp;
+                } else {
+                    newMessagesCounter.style.display = 'none';
+                }
+            } else {
+                scrollToBottomBtn.classList.remove('visible');
+                newMessagesWhileScrolledUp = 0; // Reset counter when user is at the bottom
+            }
+        }
+
+        if (messagesBox) {
+            messagesBox.addEventListener('scroll', updateScrollToBottomButton);
+        }
+        
+        if (scrollToBottomBtn) {
+            scrollToBottomBtn.addEventListener('click', () => {
+                messagesBox.scrollTo({
+                    top: messagesBox.scrollHeight,
+                    behavior: 'smooth'
+                });
+            });
+        }
+        // --- END: Scroll To Bottom Logic ---
     </script>
 </body>
 </html>
