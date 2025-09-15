@@ -129,6 +129,14 @@
         #logout-btn i {
             color: var(--danger-color);
         }
+        /* START: Delete account button style */
+        .delete-account-btn {
+            color: var(--danger-color) !important;
+        }
+        .delete-account-btn i {
+            color: var(--danger-color) !important;
+        }
+        /* END: Delete account button style */
         .modal-content {
             background-color: var(--card-background);
             border: 1px solid var(--border-color);
@@ -326,6 +334,12 @@
                             <div><i class="bi bi-box-arrow-right fs-5"></i><span>تسجيل الخروج</span></div>
                             <i class="bi bi-chevron-left"></i>
                         </li>
+                        <!-- START: Delete Account Button -->
+                        <li class="list-group-item actionable delete-account-btn" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                            <div><i class="bi bi-trash-fill fs-5"></i><span>حذف الحساب</span></div>
+                            <i class="bi bi-chevron-left"></i>
+                        </li>
+                        <!-- END: Delete Account Button -->
                     </ul>
                 </div>
             </div>
@@ -401,6 +415,51 @@
       </div>
     </div>
 
+    <!-- START: Delete Account Modals -->
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">تأكيد حذف الحساب</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-danger fw-bold">تحذير: هذا الإجراء نهائي ولا يمكن التراجع عنه!</p>
+            <p>سيتم حذف جميع بياناتك بشكل دائم، بما في ذلك اليوميات، العادات، والمحادثات.</p>
+            <p>للتأكيد، يرجى كتابة كلمة "<strong class="text-danger">حذف</strong>" في الحقل أدناه:</p>
+            <input type="text" class="form-control" id="delete-confirm-input" placeholder="اكتب 'حذف' هنا">
+            <div id="delete-account-status" class="form-text mt-2 text-center"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+            <button type="button" class="btn btn-danger" id="confirm-delete-btn" disabled>تأكيد الحذف</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="reauthPasswordModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">إجراء أمني مطلوب</h5>
+             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p>لحماية حسابك، يرجى إعادة إدخال كلمة المرور للمتابعة.</p>
+            <input type="password" class="form-control" id="reauth-password-input" placeholder="كلمة المرور">
+            <div id="reauth-error" class="form-text text-danger mt-2 text-center" style="display: none;"></div>
+          </div>
+          <div class="modal-footer">
+             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+            <button type="button" class="btn btn-primary" id="submit-reauth-btn">متابعة</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END: Delete Account Modals -->
+
+
     <div class="modal fade" id="setPasscodeModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -429,8 +488,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut, updateProfile, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, onSnapshot, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyAGgZmhJ_mMezlf7xElisvzJ8l9D758d4g",
@@ -547,6 +606,17 @@
         const logoutModalLabel = document.getElementById('logoutModalLabel');
         const logoutModalMessage = document.getElementById('logoutModalMessage');
         let selectedFile = null;
+
+        // START: Delete Account Elements
+        const deleteConfirmInput = document.getElementById('delete-confirm-input');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const deleteAccountStatus = document.getElementById('delete-account-status');
+        const reauthPasswordInput = document.getElementById('reauth-password-input');
+        const submitReauthBtn = document.getElementById('submit-reauth-btn');
+        const reauthError = document.getElementById('reauth-error');
+        const deleteAccountModal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
+        const reauthPasswordModal = new bootstrap.Modal(document.getElementById('reauthPasswordModal'));
+        // END: Delete Account Elements
 
         const CLOUDINARY_CLOUD_NAME = "du78yafrn";
         const CLOUDINARY_UPLOAD_PRESET = "profile_photo";
@@ -742,6 +812,83 @@
                 alert('حدث خطأ أثناء محاولة الخروج.');
             });
         });
+        
+        // START: Delete Account Logic
+        deleteConfirmInput.addEventListener('input', () => {
+            const typedText = deleteConfirmInput.value.trim().toLowerCase();
+            if (typedText === 'حذف' || typedText === 'delete') {
+                confirmDeleteBtn.disabled = false;
+            } else {
+                confirmDeleteBtn.disabled = true;
+            }
+        });
+
+        confirmDeleteBtn.addEventListener('click', () => {
+             // For visitors or users signed in with providers other than email/password
+            if (isVisitor || currentUser.providerData.some(p => p.providerId !== 'password')) {
+                deleteAccountStatus.textContent = 'لا يمكن حذف حسابات الزوار أو الحسابات المرتبطة بوسائل تواصل اجتماعي من هنا.';
+                deleteAccountStatus.className = 'form-text mt-2 text-center text-warning';
+                return;
+            }
+            deleteAccountModal.hide();
+            reauthPasswordModal.show();
+        });
+
+        submitReauthBtn.addEventListener('click', () => {
+            const password = reauthPasswordInput.value;
+            if (!password) {
+                reauthError.textContent = 'الرجاء إدخال كلمة المرور.';
+                reauthError.style.display = 'block';
+                return;
+            }
+            reauthError.style.display = 'none';
+            handleDeleteAccount(password);
+        });
+
+        async function handleDeleteAccount(password) {
+            submitReauthBtn.disabled = true;
+            submitReauthBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> جاري التحقق...';
+
+            try {
+                const user = auth.currentUser;
+                const credential = EmailAuthProvider.credential(user.email, password);
+                
+                // Re-authenticate the user
+                await reauthenticateWithCredential(user, credential);
+                
+                // If re-authentication is successful, proceed with deletion
+                // 1. Delete Firestore document
+                const userDocRef = doc(db, "users", user.uid);
+                await deleteDoc(userDocRef);
+
+                // 2. Delete user from Firebase Auth
+                await deleteUser(user);
+
+                // 3. Redirect to login page
+                alert("تم حذف حسابك بنجاح.");
+                window.location.href = './login.html';
+
+            } catch (error) {
+                console.error("Delete account error:", error);
+                reauthPasswordModal.hide(); // Hide re-auth modal on failure
+                deleteAccountModal.show(); // Show the initial delete modal again
+                
+                if (error.code === 'auth/wrong-password') {
+                    deleteAccountStatus.textContent = 'كلمة المرور غير صحيحة. فشلت عملية الحذف.';
+                } else if (error.code === 'auth/requires-recent-login') {
+                     deleteAccountStatus.textContent = 'انتهت صلاحية جلسة الدخول. الرجاء تسجيل الخروج ثم الدخول مرة أخرى والمحاولة مجدداً.';
+                } else {
+                    deleteAccountStatus.textContent = 'حدث خطأ غير متوقع أثناء محاولة حذف الحساب.';
+                }
+                deleteAccountStatus.className = 'form-text mt-2 text-center text-danger';
+
+            } finally {
+                submitReauthBtn.disabled = false;
+                submitReauthBtn.innerHTML = 'متابعة';
+                reauthPasswordInput.value = ''; // Clear password field
+            }
+        }
+        // END: Delete Account Logic
 
         const appLockSwitch = document.getElementById('app-lock-switch');
         const setPasscodeModalEl = document.getElementById('setPasscodeModal');
