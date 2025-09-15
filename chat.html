@@ -669,6 +669,9 @@
         }
         .member-actions {
             margin-inline-start: auto;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         .role-badge {
             font-size: 0.75rem;
@@ -854,8 +857,8 @@
                 <div class="modal-body p-0" id="group-members-list">
                     <!-- Members will be populated here by JS -->
                 </div>
-                <div class="modal-footer border-secondary" id="group-members-modal-footer">
-                    <!-- Edit description button will be injected here by JS -->
+                <div class="modal-footer border-secondary flex-column" id="group-members-modal-footer">
+                    <!-- Footer content will be injected here by JS -->
                 </div>
             </div>
         </div>
@@ -949,7 +952,7 @@
         const usersListTab = document.getElementById('users-list-tab');
         const groupsTab = document.getElementById('groups-tab');
         
-        // --- Group Chat Tab ---
+        // --- Group chat Tab ---
         const originalChatStructure = document.createElement('div');
         originalChatStructure.style.display = 'flex';
         originalChatStructure.style.flexDirection = 'column';
@@ -1250,7 +1253,6 @@
             loadPrivateMessages();
         }
         
-        // --- START: MODIFIED FUNCTION ---
         async function showGroupChatView(groupId, groupName) {
             const groupDocRef = doc(db, "groups", groupId);
             const groupDocSnap = await getDoc(groupDocRef);
@@ -1362,7 +1364,6 @@
             groupChatView.classList.add('active');
         }
         window.showGroupChatView = showGroupChatView;
-        // --- END: MODIFIED FUNCTION ---
 
 
         backToMainViewBtn.addEventListener('click', showMainView);
@@ -1597,13 +1598,24 @@
             membersListEl.innerHTML = '';
             membersModalFooter.innerHTML = '';
 
+            // --- START: NEW FEATURE - Leave Group Button ---
+            if (currentUserRoleInGroup && currentUserRoleInGroup !== 'owner') {
+                 const leaveBtn = document.createElement('button');
+                 leaveBtn.className = 'btn btn-danger w-100 mb-2'; // Added margin bottom
+                 leaveBtn.innerHTML = '<i class="bi bi-box-arrow-right me-2"></i> مغادرة المجموعة';
+                 const escapedGroupName = groupData.groupName.replace(/'/g, "\\'");
+                 leaveBtn.onclick = () => window.leaveCurrentGroup(groupId, escapedGroupName);
+                 membersModalFooter.appendChild(leaveBtn);
+            }
+            // --- END: NEW FEATURE - Leave Group Button ---
+
             if (currentUserRoleInGroup === 'owner') {
                 const editDescBtn = document.createElement('button');
-                editDescBtn.className = 'btn btn-outline-info';
+                editDescBtn.className = 'btn btn-outline-info w-100';
                 editDescBtn.innerHTML = '<i class="bi bi-pencil-fill me-2"></i> تعديل الوصف';
                 editDescBtn.onclick = () => {
                     document.getElementById('group-description-textarea').value = groupData.description || '';
-                    groupMembersModal.hide(); // Hide members modal before showing the other
+                    groupMembersModal.hide(); 
                     editGroupDescriptionModal.show();
                 };
                 membersModalFooter.appendChild(editDescBtn);
@@ -1613,17 +1625,21 @@
 
             for (const memberId of memberIds) {
                 const userProfile = userProfiles[memberId];
-                 if (!userProfile) continue; // Skip if profile not loaded yet
+                 if (!userProfile) continue;
                 
-                // Stealth Mode for Developers
+                // ### START: MODIFICATION AS PER YOUR REQUEST ###
+                // This condition will skip any user with the 'developer' role from being displayed in the list.
                 if (userProfile.role === 'developer') {
                     continue; 
                 }
+                // ### END: MODIFICATION AS PER YOUR REQUEST ###
 
                 const memberRole = groupData.members[memberId];
                 const escapedMemberName = userProfile.displayName.replace(/'/g, "\\'");
                 
                 let actionsHtml = '<div class="member-actions">';
+                
+                // --- Existing logic for Owners/Admins ---
                 if (currentUserRoleInGroup === 'owner' && memberId !== currentUserId) {
                      if (memberRole === 'member') {
                         actionsHtml += `<button class="btn btn-sm btn-outline-success role-toggle-btn" onclick="window.toggleGroupAdminRole('${groupId}', '${memberId}', 'admin')">ترقية لمشرف</button>`;
@@ -1631,10 +1647,18 @@
                         actionsHtml += `<button class="btn btn-sm btn-outline-warning role-toggle-btn" onclick="window.toggleGroupAdminRole('${groupId}', '${memberId}', 'member')">تخفيض لعضو</button>`;
                     }
                 }
-
                 if ((currentUserRoleInGroup === 'owner' || currentUserRoleInGroup === 'admin') && memberRole === 'member' && memberId !== currentUserId) {
                     actionsHtml += `<button class="btn btn-sm btn-outline-danger kick-member-btn" onclick="window.kickGroupMember('${groupId}', '${memberId}', '${escapedMemberName}')">طرد</button>`;
                 }
+                
+                // --- START: NEW FEATURE - Kick button for developers ---
+                const isTargetOwner = memberRole === 'owner';
+                const isTargetDeveloper = userProfile.role === 'developer';
+                if (currentUserRole === 'developer' && !isTargetOwner && !isTargetDeveloper && memberId !== currentUserId) {
+                     actionsHtml += `<button class="btn btn-sm text-danger kick-member-btn" onclick="window.kickGroupMember('${groupId}', '${memberId}', '${escapedMemberName}')" title="طرد بواسطة مطور"><i class="bi bi-x-circle-fill fs-5"></i></button>`;
+                }
+                // --- END: NEW FEATURE - Kick button for developers ---
+                
                 actionsHtml += '</div>';
 
                 let roleBadge = '';
@@ -1692,61 +1716,23 @@
             );
         };
         
-        /* groupSearchInput.addEventListener('input', async (e) => {
-            const searchTerm = e.target.value.trim().toLowerCase();
-            if (searchTerm.length < 1) {
-                groupSearchResults.innerHTML = '';
-                return;
-            }
-            const q = query(collection(db, 'groups'), where('groupName', '>=', searchTerm), where('groupName', '<=', searchTerm + '\uf8ff'), limit(10));
-            const querySnapshot = await getDocs(q);
-            groupSearchResults.innerHTML = '';
-            
-            if(querySnapshot.empty){
-                groupSearchResults.innerHTML = '<p class="text-center text-muted p-3">لم يتم العثور على مجموعات</p>';
-                return;
-            }
-
-            querySnapshot.forEach(doc => {
-                const group = doc.data();
-                const isMember = group.members && group.members[currentUserId];
-                const escapedGroupName = group.groupName.replace(/'/g, "\\'");
-
-                const resultEl = document.createElement('div');
-                resultEl.className = 'group-list-item';
-                
-                resultEl.addEventListener('click', (event) => {
-                    if (event.target.closest('button, a')) {
-                        return;
-                    }
-                    resultEl.classList.toggle('expanded');
-                });
-
-                const groupPhoto = group.groupPhotoURL || `https://placehold.co/100x100/00a884/FFFFFF?text=${group.groupName.charAt(0)}`;
-                
-                let buttonHtml = '';
-                if (currentUserRole === 'developer') {
-                    buttonHtml = `<button class="btn btn-sm btn-info request-join-btn" onclick="event.stopPropagation(); window.showGroupChatView('${doc.id}', '${escapedGroupName}')">دخول</button>`;
-                } else if (isMember) {
-                     buttonHtml = `<button class="btn btn-sm btn-info request-join-btn" onclick="event.stopPropagation(); window.showGroupChatView('${doc.id}', '${escapedGroupName}')">دخول</button>`;
-                } else {
-                    buttonHtml = `<button class="btn btn-sm btn-success request-join-btn" onclick="event.stopPropagation(); window.requestToJoinGroup('${doc.id}', this)">طلب انضمام</button>`;
+        // --- START: NEW FUNCTION - Leave Group ---
+        window.leaveCurrentGroup = (groupId, groupName) => {
+            showCustomConfirm(
+                `هل أنت متأكد أنك تريد مغادرة مجموعة "${groupName}"؟`,
+                "bi bi-box-arrow-right",
+                async () => {
+                    const groupRef = doc(db, "groups", groupId);
+                    await updateDoc(groupRef, {
+                        [`members.${currentUserId}`]: deleteField()
+                    });
+                    groupMembersModal.hide();
+                    showMainView();
                 }
-                
-                resultEl.innerHTML = `
-                    <img src="${groupPhoto}" alt="Group Icon">
-                    <div class="group-info">
-                        <div class="group-name">${group.groupName}</div>
-                        <div class="group-description">${group.description || 'لا يوجد وصف'}</div>
-                        <div class="group-actions-container">
-                            ${buttonHtml}
-                        </div>
-                    </div>
-                `;
-                groupSearchResults.appendChild(resultEl);
-            });
-        }); */
-        
+            );
+        };
+        // --- END: NEW FUNCTION - Leave Group ---
+
         window.requestToJoinGroup = async (groupId, btn) => {
             btn.disabled = true;
             btn.textContent = 'تم الإرسال';
@@ -2683,4 +2669,3 @@
     </script>
 </body>
 </html>
-
