@@ -1340,15 +1340,12 @@
                     </div>
                 `;
                 
+                // START: MODIFICATION AS PER YOUR REQUEST
+                // Removed the isVisitor check to allow visitors to request to join.
                 document.getElementById('request-to-join-from-view-btn').addEventListener('click', (e) => {
-                    if (isVisitor) {
-                         showCustomConfirm("يجب عليك تسجيل الدخول أولاً لإرسال طلب انضمام.", "bi bi-box-arrow-in-right", () => {
-                             window.location.href = 'index.html';
-                        });
-                        return;
-                    }
                     window.requestToJoinGroup(groupId, e.currentTarget);
                 });
+                // END: MODIFICATION AS PER YOUR REQUEST
 
                 uploadGroupPhotoContainer.style.display = 'none';
                 joinRequestsContainer.style.display = 'none';
@@ -1394,7 +1391,10 @@
                 // Set global user state
                 currentDisplayName = userData.displayName || `زائر-${user.uid.substring(0, 5)}`;
                 currentUserRole = userData.role || 'user';
-                isVisitor = user.isAnonymous || !userData.displayName;
+                // ### START: BUG FIX ###
+                // Changed the condition to only consider anonymous users as visitors.
+                isVisitor = user.isAnonymous;
+                // ### END: BUG FIX ###
 
                 if (isVisitor && !userData.displayName) {
                     await setDoc(userDocRef, { displayName: currentDisplayName, isVisitor: true, role: 'user' }, { merge: true });
@@ -1465,6 +1465,18 @@
         // --- START: Group System Logic ---
         createGroupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // START: MODIFICATION AS PER YOUR REQUEST
+            // Prevent visitors from creating new groups.
+            if (isVisitor) {
+                showCustomConfirm("يجب عليك تسجيل الدخول لإنشاء مجموعة جديدة.", "bi bi-box-arrow-in-right", () => {
+                    window.location.href = 'index.html';
+                });
+                createGroupModal.hide();
+                return;
+            }
+            // END: MODIFICATION AS PER YOUR REQUEST
+
             const groupName = document.getElementById('group-name-input').value.trim();
             const description = document.getElementById('group-description-input').value.trim();
             
