@@ -1295,13 +1295,11 @@
                     return data.timerStartDate && data.role !== 'developer' && data.isBannedFromLeaderboard !== true;
                 });
                 
-                const top100users = allRankedUsers.slice(0, 100);
-
-                if (top100users.length === 0) {
+                if (allRankedUsers.length === 0) {
                     leaderboardListPane.innerHTML = '<p class="text-center text-secondary mt-3">لا يوجد مستخدمون في لوحة الصدارة بعد.</p>';
                 } else {
                     let leaderboardHTML = '<ul class="leaderboard-list">';
-                    top100users.forEach((userDoc, index) => {
+                    allRankedUsers.forEach((userDoc, index) => {
                         const userData = userDoc.data();
                         const startDate = userData.timerStartDate.toDate();
                         
