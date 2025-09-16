@@ -129,10 +129,12 @@
         .mute-dropdown a:hover { background-color: #2a3942; }
         .show-dropdown { display: block; }
         #chat-footer { flex-shrink: 0; }
-        #chat-footer .card-footer, #private-chat-footer .card-footer, #group-chat-footer .card-footer { background-color: #1e1e1e; border-top: 1px solid var(--border-color); padding: 10px 15px; }
+        #chat-footer .card-footer, #private-chat-footer .card-footer, #group-chat-footer .card-footer { background-color: #1e1e1e; border-top: 1px solid var(--border-color); padding: 10px 15px; position: relative; }
+        .input-group-wrapper, .recording-ui { width: 100%; }
+        .input-group-wrapper.hidden { display: none; }
         #chat-footer .input-group, #private-chat-footer .input-group, #group-chat-footer .input-group { background-color: #2a3942; border-radius: 25px; padding: 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         #message-input, #private-message-input, #group-message-input { resize: none; overflow-y: auto; max-height: 120px; border: none; box-shadow: none; background-color: transparent; color: var(--text-color); }
-        #send-button, #private-send-button, #group-send-button { background-color: #009688; border-radius: 50%; width: 45px; height: 45px; border: none; display: flex; align-items: center; justify-content: center; }
+        #send-button, #private-send-button, #group-send-button, .mic-button { background-color: #009688; border-radius: 50%; width: 45px; height: 45px; border: none; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; margin: 0 5px;}
         #mention-notification { position: absolute; bottom: 15px; right: 20px; width: 40px; height: 40px; background-color: #53bdeb; color: white; border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: bold; cursor: pointer; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         .edit-modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1050; }
         .edit-modal-backdrop.show { display: flex; }
@@ -679,6 +681,92 @@
         }
         /* END: Group Styles */
 
+        /* START: Voice Message Styles */
+        .recording-ui {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            height: 55px;
+        }
+        .recording-dot {
+            width: 12px;
+            height: 12px;
+            background-color: var(--danger-color);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        #recording-timer, #private-recording-timer, #group-recording-timer, #locked-recording-timer, #private-locked-recording-timer, #group-locked-recording-timer {
+            font-size: 1.1rem;
+            color: var(--secondary-text-color);
+            direction: ltr; /* Ensure timer is LTR */
+        }
+        .message-content .message-text { /* Ensure text messages wrap correctly */
+             white-space: pre-wrap;
+             word-break: break-word;
+        }
+        .audio-player {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px;
+            border-radius: 15px;
+            width: 250px;
+            max-width: 100%;
+        }
+        .message.own .audio-player { direction: ltr; }
+        .message.other .audio-player { direction: ltr; }
+        .private-message-wrapper .audio-player { direction: ltr; }
+
+        .play-pause-btn {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .progress-bar-container {
+            flex-grow: 1;
+            height: 5px;
+            background-color: #555;
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--primary-color);
+            border-radius: 5px;
+        }
+        .duration-text {
+            font-size: 0.85rem;
+            color: var(--secondary-text-color);
+            flex-shrink: 0;
+        }
+        .audio-player-placeholder {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            min-width: 150px;
+            color: var(--secondary-text-color);
+            justify-content: center;
+        }
+        /* END: Voice Message Styles */
+
 
     </style>
 </head>
@@ -763,9 +851,26 @@
                      <div id="block-notification" class="text-center p-3" style="display: none; background-color: #2a3942; color: var(--secondary-text-color);">
                      </div>
                      <div class="card-footer p-3" id="private-input-area">
-                        <div class="input-group">
-                            <textarea id="private-message-input" class="form-control" placeholder="اكتب رسالتك..." rows="1"></textarea>
-                            <button id="private-send-button" class="btn"><i class="bi bi-send-fill"></i></button>
+                        <div class="input-group-wrapper">
+                            <div class="input-group">
+                                <textarea id="private-message-input" class="form-control" placeholder="اكتب رسالتك..." rows="1"></textarea>
+                                <button id="private-mic-button" class="mic-button"><i class="bi bi-mic-fill"></i></button>
+                                <button id="private-send-button" class="btn"><i class="bi bi-send-fill"></i></button>
+                            </div>
+                        </div>
+                        <!-- START: Locked Recording UI -->
+                        <div id="private-locked-recording-ui" class="recording-ui" style="display: none; justify-content: space-between; width: 100%;">
+                            <button id="private-cancel-recording-btn" class="btn btn-lg text-danger"><i class="bi bi-trash-fill"></i></button>
+                            <div class="d-flex align-items: center gap-2">
+                                <span class="recording-dot"></span>
+                                <span id="private-locked-recording-timer">00:00</span>
+                            </div>
+                            <button id="private-send-recording-btn" class="mic-button"><i class="bi bi-send-fill"></i></button>
+                        </div>
+                        <!-- END: Locked Recording UI -->
+                        <div id="private-recording-ui" class="recording-ui" style="display: none;">
+                            <span class="recording-dot"></span>
+                            <span id="private-recording-timer">00:00</span>
                         </div>
                     </div>
                 </div>
@@ -808,9 +913,26 @@
                         <div id="group-reply-preview-text" class="reply-preview-text"></div>
                     </div>
                      <div class="card-footer p-3">
-                        <div class="input-group">
-                            <textarea id="group-message-input" class="form-control" placeholder="اكتب رسالتك في المجموعة..." rows="1"></textarea>
-                            <button id="group-send-button" class="btn"><i class="bi bi-send-fill"></i></button>
+                        <div class="input-group-wrapper">
+                            <div class="input-group">
+                                <textarea id="group-message-input" class="form-control" placeholder="اكتب رسالتك في المجموعة..." rows="1"></textarea>
+                                <button id="group-mic-button" class="mic-button"><i class="bi bi-mic-fill"></i></button>
+                                <button id="group-send-button" class="btn"><i class="bi bi-send-fill"></i></button>
+                            </div>
+                        </div>
+                        <!-- START: Locked Recording UI -->
+                        <div id="group-locked-recording-ui" class="recording-ui" style="display: none; justify-content: space-between; width: 100%;">
+                            <button id="group-cancel-recording-btn" class="btn btn-lg text-danger"><i class="bi bi-trash-fill"></i></button>
+                            <div class="d-flex align-items: center gap-2">
+                                <span class="recording-dot"></span>
+                                <span id="group-locked-recording-timer">00:00</span>
+                            </div>
+                            <button id="group-send-recording-btn" class="mic-button"><i class="bi bi-send-fill"></i></button>
+                        </div>
+                        <!-- END: Locked Recording UI -->
+                        <div id="group-recording-ui" class="recording-ui" style="display: none;">
+                            <span class="recording-dot"></span>
+                            <span id="group-recording-timer">00:00</span>
                         </div>
                     </div>
                 </div>
@@ -979,9 +1101,26 @@
                     <div id="reply-preview-text" class="reply-preview-text"></div>
                 </div>
                 <div class="card-footer p-3">
-                    <div class="input-group">
-                        <textarea id="message-input" class="form-control" placeholder="اكتب رسالتك..." rows="1"></textarea>
-                        <button id="send-button" class="btn"><i class="bi bi-send-fill"></i></button>
+                    <div class="input-group-wrapper">
+                        <div class="input-group">
+                            <textarea id="message-input" class="form-control" placeholder="اكتب رسالتك..." rows="1"></textarea>
+                            <button id="mic-button" class="mic-button"><i class="bi bi-mic-fill"></i></button>
+                            <button id="send-button" class="btn"><i class="bi bi-send-fill"></i></button>
+                        </div>
+                    </div>
+                    <!-- START: Locked Recording UI -->
+                    <div id="locked-recording-ui" class="recording-ui" style="display: none; justify-content: space-between; width: 100%;">
+                        <button id="cancel-recording-btn" class="btn btn-lg text-danger"><i class="bi bi-trash-fill"></i></button>
+                        <div class="d-flex align-items: center gap-2">
+                            <span class="recording-dot"></span>
+                            <span id="locked-recording-timer">00:00</span>
+                        </div>
+                        <button id="send-recording-btn" class="mic-button"><i class="bi bi-send-fill"></i></button>
+                    </div>
+                    <!-- END: Locked Recording UI -->
+                    <div id="recording-ui" class="recording-ui" style="display: none;">
+                        <span class="recording-dot"></span>
+                        <span id="recording-timer">00:00</span>
                     </div>
                 </div>
             </div>
@@ -1063,10 +1202,6 @@
         const createGroupModal = new bootstrap.Modal(document.getElementById('create-group-modal'));
         const groupMembersModalEl = document.getElementById('group-members-modal');
         const groupMembersModal = new bootstrap.Modal(groupMembersModalEl);
-        // const myGroupsList = document.getElementById('my-groups-list');
-        // const myGroupsTitle = document.getElementById('my-groups-title');
-        // const groupSearchInput = document.getElementById('group-search-input');
-        // const groupSearchResults = document.getElementById('group-search-results');
         const backToMainFromGroupBtn = document.getElementById('back-to-main-from-group');
         const groupChatHeaderClickable = document.getElementById('group-chat-header-clickable');
         const groupAvatarHeader = document.getElementById('group-avatar-header');
@@ -1130,6 +1265,18 @@
         let unsubscribeJoinRequests = null;
 
         const RELOCK_TIME = 3 * 60 * 1000;
+
+        // --- Voice Recording State ---
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordingStartTime;
+        let recordingTimerInterval;
+        let activeRecordingContext = null; // 'public', 'private', or 'group'
+        let pressTimer = null;
+        let isLongPress = false;
+        const LONG_PRESS_DURATION = 200; // 200ms to trigger long press
+        let shouldDiscardRecording = false; // For cancelling a recording
+        let isSending = false;
         
         // --- START: Custom Confirm Modal Logic ---
         const confirmModalEl = document.getElementById('custom-confirm-modal');
@@ -1159,7 +1306,338 @@
             confirmCallback = null;
         });
         // --- END: Custom Confirm Modal Logic ---
+
+        // --- START: Audio Player Logic ---
+        const activeAudioPlayers = {}; // Keep track of active Audio objects to ensure only one plays at a time
+
+        function stopAllOtherPlayers(exceptId) {
+            for (const id in activeAudioPlayers) {
+                if (id !== exceptId) {
+                    const player = activeAudioPlayers[id];
+                    player.audio.pause();
+                    player.playBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
+                }
+            }
+        }
+
+        function initializeAudioPlayer(uniqueId) {
+            const playerEl = document.getElementById(`player-${uniqueId}`);
+            if (!playerEl || playerEl.dataset.initialized) return;
+
+            const audioSrc = playerEl.dataset.audioSrc;
+            const playBtn = playerEl.querySelector('.play-pause-btn');
+            const progressBar = playerEl.querySelector('.progress-bar');
+            const progressBarContainer = playerEl.querySelector('.progress-bar-container');
+            
+            const audio = new Audio(audioSrc);
+            activeAudioPlayers[uniqueId] = { audio, playBtn };
+
+            audio.addEventListener('timeupdate', () => {
+                if (isFinite(audio.duration)) {
+                    const progress = (audio.currentTime / audio.duration) * 100;
+                    progressBar.style.width = `${progress}%`;
+                }
+            });
+
+            audio.addEventListener('ended', () => {
+                playBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
+                progressBar.style.width = '0%';
+                audio.currentTime = 0;
+            });
+
+            playBtn.addEventListener('click', () => {
+                if (audio.paused) {
+                    stopAllOtherPlayers(uniqueId);
+                    audio.play();
+                    playBtn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+                } else {
+                    audio.pause();
+                    playBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
+                }
+            });
+
+            progressBarContainer.addEventListener('click', (e) => {
+                if (isFinite(audio.duration)) {
+                    const rect = progressBarContainer.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const width = rect.width;
+                    const duration = audio.duration;
+                    audio.currentTime = (clickX / width) * duration;
+                }
+            });
+
+            playerEl.dataset.initialized = 'true';
+        }
+
+        function renderVoiceMessage(url, duration, uniqueId) {
+            const formatDuration = (seconds) => {
+                if (!isFinite(seconds) || seconds < 0) {
+                    return "00:00";
+                }
+                const totalSeconds = Math.floor(seconds);
+                const minutes = Math.floor(totalSeconds / 60);
+                const remainingSeconds = totalSeconds % 60;
+                const paddedMinutes = String(minutes).padStart(2, '0');
+                const paddedSeconds = String(remainingSeconds).padStart(2, '0');
+                return `${paddedMinutes}:${paddedSeconds}`;
+            };
+
+            const formattedDuration = formatDuration(duration);
+
+            return `
+                <div class="audio-player" id="player-${uniqueId}" data-audio-src="${url}">
+                    <button class="play-pause-btn"><i class="bi bi-play-fill"></i></button>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar"></div>
+                    </div>
+                    <span class="duration-text">${formattedDuration}</span>
+                </div>
+            `;
+        }
+        // --- END: Audio Player Logic ---
         
+        // --- START: Cloudinary Audio Upload ---
+        async function uploadAudioToCloudinary(audioBlob) {
+            const formData = new FormData();
+            formData.append('file', audioBlob, 'voice-message.webm');
+            formData.append('upload_preset', 'my-voice-messages');
+
+            try {
+                const response = await fetch('https://api.cloudinary.com/v1_1/dkccdradf/video/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.secure_url) {
+                    return data;
+                } else {
+                    throw new Error(data.error.message || 'Upload failed');
+                }
+            } catch (error) {
+                console.error('Error uploading to Cloudinary:', error);
+                showCustomConfirm('فشل رفع الرسالة الصوتية.', 'bi bi-exclamation-triangle-fill', () => {});
+                return null;
+            }
+        }
+        // --- END: Cloudinary Audio Upload ---
+
+        // --- START: Voice Recording Logic ---
+        
+        function getActiveChatBox() {
+            switch(activeRecordingContext) {
+                case 'public': return messagesBox;
+                case 'private': return privateMessagesBox;
+                case 'group': return groupMessagesBox;
+                default: return null;
+            }
+        }
+
+        function createVoiceMessagePlaceholder(placeholderId) {
+            const senderProfile = userProfiles[currentUserId] || {};
+            const photoURL = senderProfile.photoURL || 'https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png';
+
+            const placeholder = document.createElement('div');
+            if (activeRecordingContext === 'private') {
+                 placeholder.className = 'private-message-wrapper own';
+            } else {
+                 placeholder.className = 'message own';
+            }
+            placeholder.id = placeholderId;
+            placeholder.innerHTML = `
+                <img src="${photoURL}" alt="Avatar" class="avatar">
+                <div class="message-bubble">
+                    <div class="message-content">
+                        <div class="audio-player-placeholder">
+                             <div class="spinner-border spinner-border-sm" role="status"></div>
+                             <span>جاري الإرسال...</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return placeholder;
+        }
+
+        async function startRecording(context) {
+            if (mediaRecorder && mediaRecorder.state === 'recording') return;
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                activeRecordingContext = context;
+                audioChunks = [];
+                shouldDiscardRecording = false;
+                
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    if (isSending) {
+                        return;
+                    }
+                    
+                    stream.getTracks().forEach(track => track.stop());
+                    
+                    if (shouldDiscardRecording) {
+                        return;
+                    }
+                    
+                    isSending = true;
+
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const placeholderId = `ph-${Date.now()}`;
+                    const placeholderElement = createVoiceMessagePlaceholder(placeholderId);
+                    const chatBox = getActiveChatBox();
+                    if (chatBox) {
+                        chatBox.appendChild(placeholderElement);
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }
+
+                    (async () => {
+                        try {
+                            const uploadResult = await uploadAudioToCloudinary(audioBlob);
+                            if (uploadResult && uploadResult.secure_url) {
+                                const durationInSeconds = uploadResult.duration;
+                                let docRef;
+                                switch (activeRecordingContext) {
+                                    case 'public':
+                                        docRef = await sendVoiceMessage(uploadResult.secure_url, durationInSeconds);
+                                        break;
+                                    case 'private':
+                                        docRef = await sendPrivateVoiceMessage(uploadResult.secure_url, durationInSeconds);
+                                        break;
+                                    case 'group':
+                                        docRef = await sendGroupVoiceMessage(uploadResult.secure_url, durationInSeconds);
+                                        break;
+                                }
+                                // The placeholder is no longer manually converted to a message here.
+                                // The onSnapshot listener will handle rendering the final message.
+                            }
+                        } finally {
+                            // The placeholder is removed when the process is complete,
+                            // allowing the onSnapshot listener to be the single source of truth.
+                            document.getElementById(placeholderId)?.remove();
+                            isSending = false;
+                        }
+                    })();
+                };
+
+                mediaRecorder.start();
+                recordingStartTime = Date.now();
+
+                recordingTimerInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                    const seconds = (elapsed % 60).toString().padStart(2, '0');
+                    const formattedTime = `${minutes}:${seconds}`;
+
+                    const prefix = context === 'public' ? '' : `${context}-`;
+                    const timerEl = document.getElementById(`${prefix}recording-timer`);
+                    const lockedTimerEl = document.getElementById(`${prefix}locked-recording-timer`);
+                    if(timerEl) timerEl.textContent = formattedTime;
+                    if(lockedTimerEl) lockedTimerEl.textContent = formattedTime;
+
+                }, 1000);
+
+            } catch (err) {
+                console.error("Error accessing microphone:", err);
+                showCustomConfirm('لا يمكن الوصول إلى الميكروفون. يرجى التحقق من الأذونات.', 'bi bi-mic-mute-fill', () => {});
+                resetAllRecordingUIs(context);
+            }
+        }
+
+        function stopRecording(discard = false) {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                shouldDiscardRecording = discard;
+                mediaRecorder.stop();
+            }
+            clearInterval(recordingTimerInterval);
+            resetAllRecordingUIs(activeRecordingContext);
+            isLongPress = false;
+        }
+
+        function showRecordingUI(context, mode) {
+            const prefix = context === 'public' ? '' : `${context}-`;
+            const inputWrapper = document.querySelector(`#${prefix === '' ? 'chat-footer' : `${prefix}chat-footer`} .input-group-wrapper`);
+            const longPressUI = document.getElementById(`${prefix}recording-ui`);
+            const lockedUI = document.getElementById(`${prefix}locked-recording-ui`);
+
+            if (inputWrapper) inputWrapper.classList.add('hidden');
+            if (mode === 'long-press') {
+                if(lockedUI) lockedUI.style.display = 'none';
+                if(longPressUI) longPressUI.style.display = 'flex';
+            } else if (mode === 'locked') {
+                if(longPressUI) longPressUI.style.display = 'none';
+                if(lockedUI) lockedUI.style.display = 'flex';
+            }
+        }
+        
+        function resetAllRecordingUIs(context) {
+            if (!context) return;
+            const prefix = context === 'public' ? '' : `${context}-`;
+            const inputWrapper = document.querySelector(`#${prefix === '' ? 'chat-footer' : `${prefix}chat-footer`} .input-group-wrapper`);
+            const longPressUI = document.getElementById(`${prefix}recording-ui`);
+            const lockedUI = document.getElementById(`${prefix}locked-recording-ui`);
+            const timerEl = document.getElementById(`${prefix}recording-timer`);
+            const lockedTimerEl = document.getElementById(`${prefix}locked-recording-timer`);
+
+            if (inputWrapper) inputWrapper.classList.remove('hidden');
+            if (longPressUI) longPressUI.style.display = 'none';
+            if (lockedUI) lockedUI.style.display = 'none';
+            if (timerEl) timerEl.textContent = '00:00';
+            if (lockedTimerEl) lockedTimerEl.textContent = '00:00';
+        }
+
+        function handleMicButtonPress(e, context) {
+            e.preventDefault();
+            isLongPress = false; 
+            pressTimer = setTimeout(() => {
+                isLongPress = true;
+                startRecording(context);
+                showRecordingUI(context, 'long-press');
+            }, LONG_PRESS_DURATION);
+        }
+
+        function handleMicButtonRelease(e, context) {
+            e.preventDefault();
+            clearTimeout(pressTimer);
+            if (isLongPress) {
+                stopRecording(false);
+            } else {
+                startRecording(context);
+                showRecordingUI(context, 'locked');
+            }
+        }
+        
+        function setupMicButtonListeners(context) {
+            const prefix = context === 'public' ? '' : `${context}-`;
+            const micButton = document.getElementById(`${prefix}mic-button`);
+            const sendLockedBtn = document.getElementById(`${prefix}send-recording-btn`);
+            const cancelLockedBtn = document.getElementById(`${prefix}cancel-recording-btn`);
+
+            if(micButton) {
+                micButton.addEventListener('mousedown', (e) => handleMicButtonPress(e, context));
+                micButton.addEventListener('mouseup', (e) => handleMicButtonRelease(e, context));
+                micButton.addEventListener('mouseleave', () => {
+                    if (isLongPress && mediaRecorder && mediaRecorder.state === 'recording') {
+                        stopRecording(false);
+                    }
+                    clearTimeout(pressTimer);
+                });
+                micButton.addEventListener('touchstart', (e) => handleMicButtonPress(e, context));
+                micButton.addEventListener('touchend', (e) => handleMicButtonRelease(e, context));
+            }
+            if(sendLockedBtn) sendLockedBtn.addEventListener('click', () => stopRecording(false));
+            if(cancelLockedBtn) cancelLockedBtn.addEventListener('click', () => stopRecording(true));
+        }
+
+        setupMicButtonListeners('public');
+        setupMicButtonListeners('private');
+        setupMicButtonListeners('group');
+        // --- END: Voice Recording Logic ---
+
+
         // --- START: View Management ---
         function showMainView() {
             mainView.classList.add('active');
@@ -1272,28 +1750,38 @@
                 isMember = true;
             }
             
-            const groupChatFooter = document.getElementById('group-chat-footer');
+            const groupChatFooter = document.getElementById('group-chat-footer').querySelector('.card-footer');
 
             if (isMember) {
                 // Behavior for group members (original logic)
                 groupChatFooter.innerHTML = `
-                     <div id="group-reply-preview" class="reply-preview">
-                        <div id="cancel-group-reply" style="position: absolute; top: 5px; right: 10px; cursor: pointer; font-size: 1.5rem; line-height: 1;">&times;</div>
-                        <div class="reply-preview-sender" id="group-reply-preview-sender"></div>
-                        <div id="group-reply-preview-text" class="reply-preview-text"></div>
-                    </div>
-                     <div class="card-footer p-3">
+                     <div class="input-group-wrapper">
                         <div class="input-group">
                             <textarea id="group-message-input" class="form-control" placeholder="اكتب رسالتك في المجموعة..." rows="1"></textarea>
+                            <button id="group-mic-button" class="mic-button"><i class="bi bi-mic-fill"></i></button>
                             <button id="group-send-button" class="btn"><i class="bi bi-send-fill"></i></button>
                         </div>
+                    </div>
+                    <div id="group-locked-recording-ui" class="recording-ui" style="display: none; justify-content: space-between; width: 100%;">
+                        <button id="group-cancel-recording-btn" class="btn btn-lg text-danger"><i class="bi bi-trash-fill"></i></button>
+                        <div class="d-flex align-items: center gap-2">
+                            <span class="recording-dot"></span>
+                            <span id="group-locked-recording-timer">00:00</span>
+                        </div>
+                        <button id="group-send-recording-btn" class="mic-button"><i class="bi bi-send-fill"></i></button>
+                    </div>
+                    <div id="group-recording-ui" class="recording-ui" style="display: none;">
+                        <span class="recording-dot"></span>
+                        <span id="group-recording-timer">00:00</span>
                     </div>
                 `;
                 document.getElementById('group-send-button').addEventListener('click', sendGroupMessage);
                 const groupMessageInputNew = document.getElementById('group-message-input');
                 groupMessageInputNew.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendGroupMessage(); } });
                 groupMessageInputNew.addEventListener('input', () => { groupMessageInputNew.style.height = 'auto'; groupMessageInputNew.style.height = (groupMessageInputNew.scrollHeight) + 'px'; });
-                document.getElementById('cancel-group-reply').addEventListener('click', cancelGroupReply);
+                
+                // Re-setup listeners for the new mic button
+                setupMicButtonListeners('group');
 
                 currentGroupId = groupId;
                 groupChatNameEl.textContent = groupName;
@@ -1333,19 +1821,16 @@
                 `;
 
                 groupChatFooter.innerHTML = `
-                    <div class="card-footer p-3">
+                    <div class="p-3">
                         <button id="request-to-join-from-view-btn" class="btn btn-success w-100">
                             <i class="bi bi-person-plus-fill me-2"></i> طلب انضمام
                         </button>
                     </div>
                 `;
                 
-                // START: MODIFICATION AS PER YOUR REQUEST
-                // Removed the isVisitor check to allow visitors to request to join.
                 document.getElementById('request-to-join-from-view-btn').addEventListener('click', (e) => {
                     window.requestToJoinGroup(groupId, e.currentTarget);
                 });
-                // END: MODIFICATION AS PER YOUR REQUEST
 
                 uploadGroupPhotoContainer.style.display = 'none';
                 joinRequestsContainer.style.display = 'none';
@@ -1391,10 +1876,7 @@
                 // Set global user state
                 currentDisplayName = userData.displayName || `زائر-${user.uid.substring(0, 5)}`;
                 currentUserRole = userData.role || 'user';
-                // ### START: BUG FIX ###
-                // Changed the condition to only consider anonymous users as visitors.
                 isVisitor = user.isAnonymous;
-                // ### END: BUG FIX ###
 
                 if (isVisitor && !userData.displayName) {
                     await setDoc(userDocRef, { displayName: currentDisplayName, isVisitor: true, role: 'user' }, { merge: true });
@@ -1466,8 +1948,6 @@
         createGroupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // START: MODIFICATION AS PER YOUR REQUEST
-            // Prevent visitors from creating new groups.
             if (isVisitor) {
                 showCustomConfirm("يجب عليك تسجيل الدخول لإنشاء مجموعة جديدة.", "bi bi-box-arrow-in-right", () => {
                     window.location.href = 'index.html';
@@ -1475,7 +1955,6 @@
                 createGroupModal.hide();
                 return;
             }
-            // END: MODIFICATION AS PER YOUR REQUEST
 
             const groupName = document.getElementById('group-name-input').value.trim();
             const description = document.getElementById('group-description-input').value.trim();
@@ -1610,7 +2089,6 @@
             membersListEl.innerHTML = '';
             membersModalFooter.innerHTML = '';
 
-            // --- START: NEW FEATURE - Leave Group Button ---
             if (currentUserRoleInGroup && currentUserRoleInGroup !== 'owner') {
                  const leaveBtn = document.createElement('button');
                  leaveBtn.className = 'btn btn-danger w-100 mb-2'; // Added margin bottom
@@ -1619,7 +2097,6 @@
                  leaveBtn.onclick = () => window.leaveCurrentGroup(groupId, escapedGroupName);
                  membersModalFooter.appendChild(leaveBtn);
             }
-            // --- END: NEW FEATURE - Leave Group Button ---
 
             if (currentUserRoleInGroup === 'owner') {
                 const editDescBtn = document.createElement('button');
@@ -1639,19 +2116,15 @@
                 const userProfile = userProfiles[memberId];
                  if (!userProfile) continue;
                 
-                // ### START: MODIFICATION AS PER YOUR REQUEST ###
-                // This condition will skip any user with the 'developer' role from being displayed in the list.
                 if (userProfile.role === 'developer') {
                     continue; 
                 }
-                // ### END: MODIFICATION AS PER YOUR REQUEST ###
 
                 const memberRole = groupData.members[memberId];
                 const escapedMemberName = userProfile.displayName.replace(/'/g, "\\'");
                 
                 let actionsHtml = '<div class="member-actions">';
                 
-                // --- Existing logic for Owners/Admins ---
                 if (currentUserRoleInGroup === 'owner' && memberId !== currentUserId) {
                      if (memberRole === 'member') {
                         actionsHtml += `<button class="btn btn-sm btn-outline-success role-toggle-btn" onclick="window.toggleGroupAdminRole('${groupId}', '${memberId}', 'admin')">ترقية لمشرف</button>`;
@@ -1663,13 +2136,11 @@
                     actionsHtml += `<button class="btn btn-sm btn-outline-danger kick-member-btn" onclick="window.kickGroupMember('${groupId}', '${memberId}', '${escapedMemberName}')">طرد</button>`;
                 }
                 
-                // --- START: NEW FEATURE - Kick button for developers ---
                 const isTargetOwner = memberRole === 'owner';
                 const isTargetDeveloper = userProfile.role === 'developer';
                 if (currentUserRole === 'developer' && !isTargetOwner && !isTargetDeveloper && memberId !== currentUserId) {
                      actionsHtml += `<button class="btn btn-sm text-danger kick-member-btn" onclick="window.kickGroupMember('${groupId}', '${memberId}', '${escapedMemberName}')" title="طرد بواسطة مطور"><i class="bi bi-x-circle-fill fs-5"></i></button>`;
                 }
-                // --- END: NEW FEATURE - Kick button for developers ---
                 
                 actionsHtml += '</div>';
 
@@ -1728,7 +2199,6 @@
             );
         };
         
-        // --- START: NEW FUNCTION - Leave Group ---
         window.leaveCurrentGroup = (groupId, groupName) => {
             showCustomConfirm(
                 `هل أنت متأكد أنك تريد مغادرة مجموعة "${groupName}"؟`,
@@ -1743,7 +2213,6 @@
                 }
             );
         };
-        // --- END: NEW FUNCTION - Leave Group ---
 
         window.requestToJoinGroup = async (groupId, btn) => {
             btn.disabled = true;
@@ -1821,6 +2290,23 @@
             cancelGroupReply();
         }
 
+        async function sendGroupVoiceMessage(url, duration) {
+             if (!url || !currentUserId || !currentGroupId) return null;
+            const messagesRef = collection(db, "groups", currentGroupId, "messages");
+            const messageData = { 
+                type: 'voice',
+                text: url,
+                duration: duration,
+                senderId: currentUserId, 
+                createdAt: serverTimestamp() 
+            };
+            if(groupReplyToMessage) messageData.replyTo = groupReplyToMessage;
+
+            const docRef = await addDoc(messagesRef, messageData);
+            cancelGroupReply();
+            return docRef;
+        }
+
         function loadGroupMessages(groupId) {
              if (unsubscribeGroupMessages) unsubscribeGroupMessages();
              const messagesRef = collection(db, "groups", groupId, "messages");
@@ -1849,7 +2335,7 @@
                      msgWrapper.id = `group-message-${msgId}`;
                      msgWrapper.dataset.senderId = msg.senderId;
                      msgWrapper.dataset.senderName = displayName;
-                     msgWrapper.dataset.text = msg.text;
+                     msgWrapper.dataset.text = msg.type === 'voice' ? '[رسالة صوتية]' : msg.text;
 
                      const time = msg.createdAt ? new Date(msg.createdAt.toDate()).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '';
                      
@@ -1879,8 +2365,10 @@
                      displayedReactionsHtml += '</div>';
 
                      let actionsHtml = `<a onclick="window.setGroupReplyWrapper('${msgId}')" title="رد"><i class="bi bi-reply-fill"></i></a>`;
-                     if (isOwn) {
+                     if (isOwn && msg.type !== 'voice') {
                         actionsHtml += `<a onclick="window.editGroupMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a>`;
+                     }
+                     if (isOwn) {
                         actionsHtml += `<a onclick="window.deleteOwnGroupMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>`;
                      }
 
@@ -1895,6 +2383,15 @@
 
                      const editedBadge = msg.isEdited ? `<span class="edited-badge">(تم التعديل)</span>` : '';
 
+                    let messageContentBody;
+                    if (msg.type === 'voice') {
+                        const uniqueId = `group-${msgId}`;
+                        messageContentBody = renderVoiceMessage(msg.text, msg.duration, uniqueId);
+                        setTimeout(() => initializeAudioPlayer(uniqueId), 0);
+                    } else {
+                        messageContentBody = `<div class="message-text">${msg.text}</div>`;
+                    }
+
                      msgWrapper.innerHTML = `
                         <img src="${photoURL}" alt="${displayName}" class="avatar">
                         <div class="message-bubble">
@@ -1902,7 +2399,7 @@
                                 ${reactionsContainerHtml}
                                 ${!isOwn ? `<div class="sender">${senderNameDisplay}</div>` : ''}
                                 ${repliedToHtml}
-                                <div class="message-text">${msg.text}</div>
+                                ${messageContentBody}
                                 <div class="timestamp-wrapper">
                                     <span class="timestamp">${time}</span>
                                     ${editedBadge}
@@ -2031,7 +2528,7 @@
 
             const pinnedData = {
                 messageId: messageId,
-                text: messageData.text,
+                text: messageData.type === 'voice' ? '[رسالة صوتية]' : messageData.text,
                 senderName: userProfiles[messageData.senderId]?.displayName || 'عضو',
                 pinnedBy: currentDisplayName
             };
@@ -2107,12 +2604,14 @@
                 messageData.replyTo = privateReplyToMessage;
             }
 
-            await addDoc(messagesRef, messageData);
+            const docRef = await addDoc(messagesRef, messageData);
             
             const chatRoomRef = doc(db, "private_chats", privateChatRoomId);
             await updateDoc(chatRoomRef, {
                 lastMessage: text,
                 lastMessageTimestamp: serverTimestamp(),
+                [`last_message_id_${recipientId}`]: docRef.id,
+                [`last_message_id_${currentUserId}`]: docRef.id,
                 [`unread_count_${recipientId}`]: increment(1),
                 [`hidden_for_${currentUserId}`]: false,
                 [`hidden_for_${recipientId}`]: false
@@ -2122,6 +2621,42 @@
             privateMessageInput.style.height = 'auto';
             cancelPrivateReply();
         }
+
+        async function sendPrivateVoiceMessage(url, duration) {
+            if (!url || !currentUserId || !privateChatRoomId || !recipientId) return null;
+            
+            const messagesRef = collection(db, "private_chats", privateChatRoomId, "messages");
+            const messageData = {
+                type: 'voice',
+                text: url,
+                duration: duration,
+                senderId: currentUserId,
+                recipientId: recipientId,
+                createdAt: serverTimestamp(),
+                status: 'sent'
+            };
+            
+            if (privateReplyToMessage) {
+                messageData.replyTo = privateReplyToMessage;
+            }
+
+            const docRef = await addDoc(messagesRef, messageData);
+            
+            const chatRoomRef = doc(db, "private_chats", privateChatRoomId);
+            await updateDoc(chatRoomRef, {
+                lastMessage: '🎤 رسالة صوتية',
+                lastMessageTimestamp: serverTimestamp(),
+                [`last_message_id_${recipientId}`]: docRef.id,
+                [`last_message_id_${currentUserId}`]: docRef.id,
+                [`unread_count_${recipientId}`]: increment(1),
+                [`hidden_for_${currentUserId}`]: false,
+                [`hidden_for_${recipientId}`]: false
+            });
+
+            cancelPrivateReply();
+            return docRef;
+        }
+
 
         function loadPrivateMessages() {
             if (unsubscribePrivateChat) unsubscribePrivateChat();
@@ -2148,7 +2683,7 @@
                     msgWrapper.id = `private-message-${msgId}`;
                     msgWrapper.dataset.senderId = msg.senderId;
                     msgWrapper.dataset.senderName = senderName;
-                    msgWrapper.dataset.text = msg.text;
+                    msgWrapper.dataset.text = msg.type === 'voice' ? '[رسالة صوتية]' : msg.text;
 
                     const availableReactions = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
                     let reactionsContainerHtml = '<div class="reactions-container">';
@@ -2171,16 +2706,17 @@
 
                     const isDeveloper = currentUserRole === 'developer';
                     let copyButtonHtml = '';
-                    if (isDeveloper) {
+                    if (isDeveloper && msg.type !== 'voice') {
                         copyButtonHtml = `<a onclick="window.copyPrivateMessageText('${msgId}')" title="نسخ"><i class="bi bi-clipboard"></i></a>`;
                     }
 
                     let controls = '';
-                    if (isOwn) {
+                     if (isOwn) {
+                        let editBtn = msg.type !== 'voice' ? `<a onclick="window.editPrivateMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a>` : '';
                         controls = `
                             <div class="message-actions">
                                 ${copyButtonHtml}
-                                <a onclick="window.editPrivateMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a>
+                                ${editBtn}
                                 <a onclick="window.deletePrivateMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>
                             </div>
                         `;
@@ -2212,11 +2748,20 @@
                         }
                     }
                     
+                    let messageContentBody;
+                    if (msg.type === 'voice') {
+                        const uniqueId = `private-${msgId}`;
+                        messageContentBody = renderVoiceMessage(msg.text, msg.duration, uniqueId);
+                        setTimeout(() => initializeAudioPlayer(uniqueId), 0);
+                    } else {
+                        messageContentBody = `<div class="private-message-text">${msg.text}</div>`;
+                    }
+
                     msgWrapper.innerHTML = `
                         <div class="message-content">
                             ${reactionsContainerHtml}
                             ${repliedToHtml}
-                            <div class="private-message-text">${msg.text}</div>
+                            ${messageContentBody}
                             <div class="timestamp-wrapper" style="justify-content: flex-end;">
                                 ${receiptIcon}
                                 <span class="timestamp">${time}</span>
@@ -2527,6 +3072,25 @@
             await addDoc(collection(db, "messages"), messageData);
             messageInput.value = ""; cancelReply(); messageInput.style.height = 'auto';
         }
+
+        async function sendVoiceMessage(url, duration) {
+            if (!url || !auth.currentUser) return null;
+            if (!isVisitor) { const userStatus = await checkUserStatus(auth.currentUser.uid); if (userStatus === 'muted') { showCustomConfirm("أنت مكتوم حاليا ولا يمكنك إرسال رسائل.", "bi bi-mic-mute-fill", () => {}); return null; } }
+            const messageData = { 
+                type: 'voice',
+                text: url,
+                duration: duration,
+                senderName: currentDisplayName, 
+                senderId: auth.currentUser.uid, 
+                senderRole: currentUserRole, 
+                createdAt: serverTimestamp() 
+            };
+            if (replyToMessage) { messageData.replyTo = replyToMessage; }
+            const docRef = await addDoc(collection(db, "messages"), messageData);
+            cancelReply();
+            return docRef;
+        }
+
         sendButton.addEventListener('click', sendMessage);
         messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
         messageInput.addEventListener('input', () => { messageInput.style.height = 'auto'; messageInput.style.height = (messageInput.scrollHeight) + 'px'; });
@@ -2537,6 +3101,7 @@
             const q = query(collection(db, "messages"), orderBy("createdAt"));
             onSnapshot(q, (snapshot) => {
                 const wasScrolledToBottom = messagesBox.scrollHeight - messagesBox.clientHeight <= messagesBox.scrollTop + 150;
+                
                 messagesBox.innerHTML = "";
                 snapshot.forEach(messageDoc => {
                     const msg = messageDoc.data(); const msgId = messageDoc.id; const isOwn = msg.senderId === auth.currentUser?.uid;
@@ -2545,7 +3110,7 @@
                     msgDiv.id = `message-${msgId}`;
                     msgDiv.dataset.senderName = msg.senderName; 
                     msgDiv.dataset.senderId = msg.senderId; 
-                    msgDiv.dataset.text = msg.text;
+                    msgDiv.dataset.text = msg.type === 'voice' ? '[رسالة صوتية]' : msg.text;
                     
                     const senderProfile = userProfiles[msg.senderId] || {};
                     const displayName = senderProfile.displayName || msg.senderName;
@@ -2567,9 +3132,15 @@
                     let controls = '';
                     const pinButton = canModerate ? `<a onclick="window.pinMessage('${msgId}')" title="تثبيت"><i class="bi bi-pin-angle-fill"></i></a>` : '';
                     const replyButton = `<a onclick="window.setReplyWrapper('${msgId}')" title="رد"><i class="bi bi-reply-fill"></i></a>`;
-                    const copyButton = `<a onclick="window.copyMessageText('${msgId}')" title="نسخ"><i class="bi bi-clipboard"></i></a>`;
+                    const copyButton = msg.type !== 'voice' ? `<a onclick="window.copyMessageText('${msgId}')" title="نسخ"><i class="bi bi-clipboard"></i></a>` : '';
+                    
+                    let editBtn = '';
+                    if (isOwn && msg.type !== 'voice') {
+                        editBtn = `<a onclick="window.editPublicMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a>`;
+                    }
+                    
                     if (isOwn) {
-                        controls = `<div class="message-actions">${copyButton}${replyButton}<a onclick="window.editPublicMessage('${msgId}', \`${msg.text.replace(/`/g, '\\`')}\`)" title="تعديل"><i class="bi bi-pencil-fill"></i></a><a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`;
+                        controls = `<div class="message-actions">${copyButton}${replyButton}${editBtn}<a onclick="window.deleteOwnMessage('${msgId}')" title="حذف"><i class="bi bi-trash-fill"></i></a>${pinButton}</div>`;
                     } else {
                         let actionButtons = `${startPrivateChatIcon}${copyButton}${replyButton}`;
                         if(canModerate){
@@ -2601,16 +3172,27 @@
                     }
                     const availableReactions = ['👍', '❤️', '😂', '😮', '😢', '🙏']; let reactionsContainerHtml = '<div class="reactions-container">'; availableReactions.forEach(emoji => { reactionsContainerHtml += `<span class="reaction-emoji" onclick="window.toggleReaction('${msgId}', '${emoji}')">${emoji}</span>`; }); reactionsContainerHtml += '</div>';
                     let displayedReactionsHtml = '<div class="message-reactions">'; if (msg.reactions && msg.reactions.length > 0) { const reactionGroups = msg.reactions.reduce((acc, r) => { acc[r.emoji] = (acc[r.emoji] || 0) + 1; return acc; }, {}); for (const e in reactionGroups) { displayedReactionsHtml += `<div class="reaction-chip">${e} ${reactionGroups[e]}</div>`; } } displayedReactionsHtml += '</div>';
-                    const messageContentHtml = `<div class="message-content">${reactionsContainerHtml}${!isOwn ? `<div class="sender">${senderNameDisplay}</div>` : ''}${repliedToHtml}<div class="message-text">${msg.text}</div><div class="timestamp-wrapper"><span class="timestamp">${time}</span>${editedBadge}</div>${displayedReactionsHtml}</div>`;
+                    
+                    let messageContentBody;
+                    if (msg.type === 'voice') {
+                        const uniqueId = `public-${msgId}`;
+                        messageContentBody = renderVoiceMessage(msg.text, msg.duration, uniqueId);
+                        setTimeout(() => initializeAudioPlayer(uniqueId), 0);
+                    } else {
+                        messageContentBody = `<div class="message-text">${msg.text}</div>`;
+                    }
+
+                    const messageContentHtml = `<div class="message-content">${reactionsContainerHtml}${!isOwn ? `<div class="sender">${senderNameDisplay}</div>` : ''}${repliedToHtml}${messageContentBody}<div class="timestamp-wrapper"><span class="timestamp">${time}</span>${editedBadge}</div>${displayedReactionsHtml}</div>`;
                     messageBubble.innerHTML = messageContentHtml + controls;
                     msgDiv.innerHTML = avatarHtml; msgDiv.appendChild(messageBubble); messagesBox.appendChild(msgDiv);
                 });
+                
                 if (wasScrolledToBottom) { messagesBox.scrollTop = messagesBox.scrollHeight; }
             });
         }
         window.startPrivateChatFromGroup = (targetUserId, targetUserName, targetUserAvatar) => { showPrivateChatView(targetUserId, targetUserName, targetUserAvatar); };
         const pinnedDocRef = doc(db, "chat_config", "pinned_message");
-        window.pinMessage = async (messageId) => { if (isVisitor) return; const messageDoc = await getDoc(doc(db, "messages", messageId)); if (!messageDoc.exists()) return; const messageData = messageDoc.data(); await setDoc(pinnedDocRef, { messageId: messageId, text: messageData.text, senderName: messageData.senderName, pinnedBy: currentDisplayName, pinnedAt: serverTimestamp() }); };
+        window.pinMessage = async (messageId) => { if (isVisitor) return; const messageDoc = await getDoc(doc(db, "messages", messageId)); if (!messageDoc.exists()) return; const messageData = messageDoc.data(); await setDoc(pinnedDocRef, { messageId: messageId, text: messageData.type === 'voice' ? '[رسالة صوتية]' : messageData.text, senderName: messageData.senderName, pinnedBy: currentDisplayName, pinnedAt: serverTimestamp() }); };
         unpinButton.addEventListener('click', async (e) => { e.stopPropagation(); if(isVisitor) return; await setDoc(pinnedDocRef, { messageId: null, text: null, senderName: null, pinnedBy: null }); });
         function loadPinnedMessage() { onSnapshot(pinnedDocRef, (doc) => { if (doc.exists() && doc.data().text) { const data = doc.data(); pinnedByText.textContent = `تم التثبيت بواسطة: ${data.pinnedBy}`; pinnedMessageText.textContent = `${data.senderName}: ${data.text}`; pinnedMessageContainer.style.display = 'block'; pinnedMessageContainer.dataset.messageId = data.messageId; unpinButton.style.display = (!isVisitor && (currentUserRole === 'developer' || currentUserRole === 'admin')) ? 'block' : 'none'; } else { pinnedMessageContainer.style.display = 'none'; pinnedMessageContainer.dataset.messageId = ''; } }); }
         pinnedMessageClickableArea.addEventListener('click', () => { const messageId = pinnedMessageContainer.dataset.messageId; if (!messageId) return; const messageElement = document.getElementById(`message-${messageId}`); if (messageElement) { messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); messageElement.style.transition = 'background-color 0.5s'; messageElement.style.backgroundColor = 'rgba(255, 255, 0, 0.3)'; setTimeout(() => { messageElement.style.backgroundColor = ''; }, 2000); } });
@@ -2681,3 +3263,4 @@
     </script>
 </body>
 </html>
+
