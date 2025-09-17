@@ -5,106 +5,245 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إنشاء حساب جديد</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --primary-color: #00a884;
-            --danger-color: #ff5c5c;
-            --background-color: #121212;
-            --card-background: #1e1e1e;
-            --text-color: #FAFAFA;
-            --secondary-text-color: #CCCCCC;
-            --border-color: #383838;
+            --primary-color: #007bff; /* أزرق بوتستراب كلاسيكي */
+            --primary-color-dark: #0056b3;
+            --secondary-color: #6c757d; /* رمادي بوتستراب */
+            --secondary-color-dark: #5a6268;
+            --danger-color: #dc3545; /* أحمر بوتستراب */
+
+            /* ألوان خلفية مريحة للعين */
+            --background-start: #e0f2f7; /* أزرق فاتح جداً */
+            --background-end: #c2e0e8; /* أزرق مائي فاتح */
+
+            --card-background: rgba(255, 255, 255, 0.2); /* شفاف فاتح للبطاقة */
+            --text-color: #343a40; /* نص داكن لتباين جيد مع الخلفية الفاتحة */
+            --secondary-text-color: #6c757d; /* رمادي متوسط */
+            --border-color: rgba(0, 0, 0, 0.1); /* حدود خفيفة */
+            --input-background: rgba(255, 255, 255, 0.7); /* خلفية حقول الإدخال شبه شفافة */
+            --placeholder-color: #888; /* لون placeholder أغمق */
         }
+
         body {
-            font-family: 'Tajawal', sans-serif;
-            /* تم تغيير الخلفية لصورة طبيعة خلابة لتتناسب مع صفحة تسجيل الدخول */
-            background-image: linear-gradient(rgba(18, 18, 18, 0.4), rgba(18, 18, 18, 0.4)), url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+            font-family: 'Almarai', sans-serif;
+            background: linear-gradient(135deg, var(--background-start), var(--background-end));
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             margin: 0;
             color: var(--text-color);
+            overflow: hidden;
+            position: relative;
         }
+
+        /* Decorative circles for background - adjusted for lighter background */
+        .circle {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.05); /* دوائر أغمق قليلاً */
+            border-radius: 50%;
+            filter: blur(40px); /* بلور أقل حدة */
+            animation: float 12s ease-in-out infinite; /* سرعة أبطأ */
+            z-index: 0;
+        }
+        .circle:nth-child(1) { width: 160px; height: 160px; top: 15%; left: 10%; animation-delay: 0s; }
+        .circle:nth-child(2) { width: 220px; height: 220px; bottom: 10%; right: 15%; animation-delay: 4s; }
+        .circle:nth-child(3) { width: 120px; height: 120px; top: 25%; right: 5%; animation-delay: 8s; }
+        .circle:nth-child(4) { width: 190px; height: 190px; bottom: 25%; left: 5%; animation-delay: 2s; }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); } /* حركة أقل */
+            100% { transform: translateY(0px); }
+        }
+
         .form-container {
-            background: rgba(30, 30, 30, 0.7); /* زيادة شفافية الخلفية */
-            backdrop-filter: blur(10px); /* إضافة تأثير بلور للخلفية */
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 450px;
+            background: var(--card-background);
+            backdrop-filter: blur(15px) saturate(150%); /* بلور أقل حدة */
+            -webkit-backdrop-filter: blur(15px) saturate(150%);
+            border-radius: 25px;
+            padding: 50px;
+            max-width: 480px;
             width: 100%;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2); /* ظل أخف */
             border: 1px solid var(--border-color);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
         }
+
+        .form-container:hover {
+            transform: translateY(-5px) scale(1.005); /* حركة أقل */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            font-family: 'Cairo', sans-serif;
+            color: var(--text-color); /* لون النص الرئيسي */
+            font-weight: 700;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* ظل نص أخف */
+        }
+
+        p {
+            line-height: 1.7;
+            font-size: 0.95em;
+            color: var(--secondary-text-color);
+        }
+
+        .form-label {
+            color: var(--text-color);
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+
         .form-control {
-            border-radius: 10px;
-            padding: 12px;
-            background: var(--background-color);
+            border-radius: 15px;
+            padding: 15px 20px;
+            background: var(--input-background);
             border: 1px solid var(--border-color);
             color: var(--text-color);
+            transition: all 0.3s ease;
+            font-size: 1.05em;
         }
+
         .form-control::placeholder {
-            color: var(--secondary-text-color);
-            opacity: 0.7;
+            color: var(--placeholder-color);
+            opacity: 1;
         }
+
         .form-control:focus {
-            background-color: var(--background-color);
+            background-color: rgba(255, 255, 255, 0.9); /* يصبح أكثر وضوحاً عند التركيز */
             border-color: var(--primary-color);
             color: var(--text-color);
-            box-shadow: 0 0 0 0.25rem rgba(0, 168, 132, 0.25);
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* ظل أزرق فاتح */
+            outline: none;
         }
-        .btn-success {
-            border-radius: 10px;
-            padding: 12px;
+
+        .btn {
+            border-radius: 15px;
+            padding: 15px 25px;
             font-weight: bold;
-            background: #28a745;
             border: none;
-            transition: background 0.3s;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            letter-spacing: 0.8px;
+            font-size: 1.05em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        .btn-success:hover {
-            background: #218838;
+
+        .btn-primary {
+            background: var(--primary-color); /* لون ثابت للأزرار الأساسية */
+            color: #FFFFFF;
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
         }
-        h2 {
-            color: #FFFFFF; /* White title */
-            font-weight: 700;
+
+        .btn-primary:hover {
+            background: var(--primary-color-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.4);
         }
+
+        .btn-secondary {
+            background: var(--input-background); /* لون خلفية حقول الإدخال */
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.8); /* يصبح أكثر وضوحاً عند التركيز */
+            color: var(--text-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
         .text-muted {
             color: var(--secondary-text-color) !important;
+            font-size: 0.9em;
         }
+
         a {
-            color: #8ab4f8;
+            color: var(--primary-color); /* الروابط بنفس لون الزر الأساسي */
+            text-decoration: none;
+            transition: color 0.3s ease, text-decoration 0.3s ease;
+        }
+
+        a:hover {
+            text-decoration: underline;
+            color: var(--primary-color-dark);
+        }
+
+        .alert {
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.95em;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            border: none;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .alert-danger {
+            background-color: rgba(220, 53, 69, 0.15); /* أحمر فاتح جداً */
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+
+        .alert-success {
+            background-color: rgba(40, 167, 69, 0.15); /* أخضر فاتح جداً */
+            color: #28a745; /* أخضر بوتستراب */
+            border: 1px solid #28a745;
         }
     </style>
 </head>
 <body>
+    <!-- Decorative circles for background -->
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
 
     <div class="form-container text-center">
-        <h2>انضم إلينا!</h2>
+        <h2><i class="fas fa-user-plus me-2"></i> انضم إلينا!</h2>
         <p class="text-muted mb-4">أنشئ حسابك وابدأ الدردشة فورا</p>
         
         <div class="mb-3 text-end">
             <label for="signup-name" class="form-label">الاسم الكامل</label>
-            <input type="text" id="signup-name" class="form-control" required>
+            <input type="text" id="signup-name" class="form-control" required placeholder="أدخل اسمك الكامل">
         </div>
         <div class="mb-3 text-end">
             <label for="signup-email" class="form-label">البريد الإلكتروني</label>
-            <input type="email" id="signup-email" class="form-control" required>
+            <input type="email" id="signup-email" class="form-control" required placeholder="example@example.com">
         </div>
         <div class="mb-3 text-end">
             <label for="signup-password" class="form-label">كلمة المرور</label>
-            <input type="password" id="signup-password" class="form-control" required>
+            <input type="password" id="signup-password" class="form-control" required placeholder="********">
         </div>
         
-        <button id="signup-button" class="btn btn-success w-100 mt-3">إنشاء حساب</button>
+        <button id="signup-button" class="btn btn-primary w-100 mt-3">
+            <i class="fas fa-user-plus"></i> إنشاء حساب
+        </button>
         
         <div id="auth-message" class="alert mt-3 d-none"></div>
 
-        <p class="mt-4 text-muted">لديك حساب بالفعل؟ <a href="index.html">تسجيل الدخول</a></p>
+        <p class="mt-4 text-muted">لديك حساب بالفعل؟ <a href="index.html"><i class="fas fa-sign-in-alt me-1"></i> تسجيل الدخول</a></p>
     </div>
 
     <script type="module">
@@ -128,7 +267,8 @@
         const authMessage = document.getElementById('auth-message');
         function showAuthMessage(message, isError = true) {
             authMessage.textContent = message;
-            authMessage.className = `alert mt-3 ${isError ? 'alert-danger' : 'alert-success'}`;
+            authMessage.className = `alert mt-3 ${isError ? 'alert-danger' : 'alert-success'} show`; // Added 'show' class
+            authMessage.classList.remove('d-none');
         }
 
         const signupButton = document.getElementById('signup-button');
@@ -143,6 +283,9 @@
                 return showAuthMessage("يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.");
             }
             
+            signupButton.disabled = true; // Disable button during submission
+            signupButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> جاري إنشاء الحساب...';
+
             createUserWithEmailAndPassword(auth, email, password)
                 .then(userCredential => {
                     const user = userCredential.user;
@@ -159,14 +302,19 @@
                     ]);
                 })
                 .then(() => {
-                    showAuthMessage("تم إنشاء حسابك بنجاح! لتفعيله، يرجى التحقق من بريدك الإلكتروني. ملاحظة هامة: ستجد رسالة التفعيل في مجلد البريد المزعج (Spam)، وليس في البريد الوارد. بعد الضغط على رابط التفعيل، يمكنك تسجيل الدخول.", false);
+                    showAuthMessage("تم إنشاء حسابك بنجاح! لتفعيله، يرجى التحقق من بريدك الإلكتروني. <br><b>ملاحظة هامة:</b> ستجد رسالة التفعيل في مجلد البريد المزعج (Spam)، وليس في البريد الوارد. بعد الضغط على رابط التفعيل، يمكنك تسجيل الدخول.", false);
+                    signupButton.disabled = false;
+                    signupButton.innerHTML = '<i class="fas fa-user-plus"></i> إنشاء حساب';
                 })
                 .catch(error => {
+                    console.error("Signup failed:", error); // Log error for debugging
                     if (error.code === 'auth/email-already-in-use') {
                         showAuthMessage("هذا البريد الإلكتروني مستخدم بالفعل.");
                     } else {
                         showAuthMessage("خطأ: " + error.message);
                     }
+                    signupButton.disabled = false;
+                    signupButton.innerHTML = '<i class="fas fa-user-plus"></i> إنشاء حساب';
                 });
         });
     </script>
