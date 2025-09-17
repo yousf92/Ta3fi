@@ -766,6 +766,44 @@
             justify-content: center;
         }
         /* END: Voice Message Styles */
+        
+        /* START: Scroll to Bottom Button Styles */
+        .scroll-to-bottom-btn {
+            position: absolute;
+            bottom: 85px; /* Adjust as needed to be above the input */
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            background-color: var(--card-background);
+            color: var(--text-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            
+            /* Transition for smooth appearance */
+            opacity: 0;
+            transform: translateY(20px);
+            visibility: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+        }
+
+        .scroll-to-bottom-btn.visible {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+        }
+
+        .scroll-to-bottom-btn:hover {
+            background-color: #333;
+            transform: scale(1.05);
+        }
+        /* END: Scroll to Bottom Button Styles */
 
 
     </style>
@@ -938,6 +976,12 @@
                 </div>
             </div>
             <!-- END: Group Chat View -->
+            
+            <!-- START: Scroll to Bottom Button -->
+            <a id="scroll-to-bottom-btn" class="scroll-to-bottom-btn">
+                <i class="bi bi-chevron-down"></i>
+            </a>
+            <!-- END: Scroll to Bottom Button -->
             
         </div>
     </div>
@@ -3260,7 +3304,69 @@
         passcodeInput.addEventListener('keyup', (event) => { if (event.key === 'Enter') handleUnlock(); });
         // --- END: App Lock Logic ---
 
+        // --- START: Scroll to Bottom Button Logic ---
+        const scrollToBottomBtn = document.getElementById('scroll-to-bottom-btn');
+        const allChatBoxes = [
+            document.getElementById('messages-box'),
+            document.getElementById('private-messages-box'),
+            document.getElementById('group-messages-box')
+        ];
+        const scrollThreshold = 200; // The button will appear if scrolled up more than this many pixels
+
+        // Function to check scroll position and toggle button visibility
+        const checkScrollPosition = (chatBox) => {
+            if (!chatBox) return;
+            const isScrolledUp = (chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight) > scrollThreshold;
+            
+            if (isScrolledUp) {
+                scrollToBottomBtn.classList.add('visible');
+            } else {
+                scrollToBottomBtn.classList.remove('visible');
+            }
+        };
+
+        // Add scroll event listener to all chat boxes
+        allChatBoxes.forEach(box => {
+            if(box) {
+                box.addEventListener('scroll', () => checkScrollPosition(box));
+            }
+        });
+
+        // Handle the click event on the button
+        scrollToBottomBtn.addEventListener('click', () => {
+            let activeChatBox = null;
+
+            // Determine which chat view is currently active
+            if (document.getElementById('main-view').classList.contains('active')) {
+                 activeChatBox = document.getElementById('messages-box');
+            } else if (document.getElementById('private-chat-view').classList.contains('active')) {
+                activeChatBox = document.getElementById('private-messages-box');
+            } else if (document.getElementById('group-chat-view').classList.contains('active')) {
+                activeChatBox = document.getElementById('group-messages-box');
+            }
+
+            // If an active chat box is found, scroll it to the bottom
+            if (activeChatBox) {
+                activeChatBox.scrollTo({
+                    top: activeChatBox.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        });
+        
+        // Hide the button when switching views to prevent it from staying visible
+        const hideScrollButtonOnViewChange = () => scrollToBottomBtn.classList.remove('visible');
+        
+        // Select all elements that trigger a view change
+        const viewChangeTriggers = document.querySelectorAll(
+            '#back-to-main-view, #back-to-main-from-group, .user-list-item, .group-list-item, .conversation-list-item, .nav-link[data-bs-toggle="pill"]'
+        );
+
+        viewChangeTriggers.forEach(trigger => {
+            trigger.addEventListener('click', hideScrollButtonOnViewChange);
+        });
+        // --- END: Scroll to Bottom Button Logic ---
+
     </script>
 </body>
 </html>
-
