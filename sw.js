@@ -1,11 +1,17 @@
-// تحديد اسم ذاكرة التخزين المؤقت وإصدارها
-const CACHE_NAME = 'my-app-cache-v1';
+// --- 1. إعدادات التخزين المؤقت ---
+// CACHE_NAME: اسم ذاكرة التخزين المؤقت مع رقم الإصدار.
+// قم بتغيير رقم الإصدار (v6, v7, etc.) في كل مرة تقوم فيها بتحديث ملفات التطبيق.
+// هذا سيؤدي إلى حذف ذاكرة التخزين المؤقت القديمة وتخزين الملفات الجديدة.
+const CACHE_NAME = 'my-app-cache-v6';
 
-// قائمة بالملفات الأساسية التي سيتم تخزينها مؤقتًا
+// FILES_TO_CACHE: قائمة بالملفات الأساسية للتطبيق التي سيتم تخزينها مؤقتًا.
 const FILES_TO_CACHE = [
   '/',
   '/index.html',
+  '/login.html', // زیادکرا
+  '/signup.html', // زیادکرا
   '/main.html',
+  '/recovery_program.html',
   '/library.html',
   '/diaries.html',
   '/articles.html',
@@ -24,52 +30,73 @@ const FILES_TO_CACHE = [
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80'
 ];
 
-// --- حدث التثبيت (Install Event) ---
+// --- 2. حدث التثبيت (Install Event) ---
 // يتم تشغيل هذا الحدث عند تثبيت الـ Service Worker لأول مرة.
-// يقوم بفتح ذاكرة التخزين المؤقت وإضافة جميع الملفات الأساسية إليها.
+// يقوم بتخزين الملفات الأساسية للتطبيق (App Shell) في ذاكرة التخزين المؤقت.
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Opened cache');
+        console.log('[Service Worker] Caching app shell');
         return cache.addAll(FILES_TO_CACHE);
       })
   );
 });
 
-// --- حدث الجلب (Fetch Event) ---
-// يتم تشغيل هذا الحدث عند إرسال أي طلب (مثل طلب صفحة، صورة، أو ملف CSS) من التطبيق.
-// يطبق استراتيجية "Cache First": يبحث عن الاستجابة في ذاكرة التخزين المؤقت أولاً،
-// وإذا لم يجدها، يطلبها من الشبكة.
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // إذا تم العثور على الطلب في ذاكرة التخزين المؤقت، قم بإرجاعه
-        if (response) {
-          return response;
-        }
-        // إذا لم يتم العثور عليه، اطلبه من الشبكة
-        return fetch(event.request);
-      })
-  );
-});
-
-// --- حدث التفعيل (Activate Event) ---
-// يتم تشغيل هذا الحدث بعد تثبيت الـ Service Worker وتفعيله.
-// يستخدم لتنظيف ذاكرات التخزين المؤقت القديمة لضمان استخدام أحدث إصدار فقط.
+// --- 3. حدث التفعيل (Activate Event) ---
+// هذا هو الجزء الأهم لتحديث ذاكرة التخزين المؤقت.
+// يتم تشغيله بعد تثبيت الـ Service Worker وتفعيله.
+// يقوم بحذف أي ذاكرة تخزين مؤقت قديمة لا تتطابق مع CACHE_NAME الحالي.
 self.addEventListener('activate', (event) => {
-  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          // إذا كان اسم ذاكرة التخزين المؤقت لا يتطابق مع الاسم الحالي، قم بحذفه
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
+          // إذا كان اسم ذاكرة التخزين المؤقت لا يطابق الإصدار الحالي، قم بحذفه.
+          if (cacheName !== CACHE_NAME) {
+            console.log('[Service Worker] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     })
   );
+  // يجعل الـ Service Worker يتحكم في الصفحة فورًا.
+  return self.clients.claim();
 });
+
+// --- 4. حدث الجلب (Fetch Event) ---
+// يعترض جميع طلبات الشبكة من التطبيق.
+// يطبق استراتيجية "Stale-While-Revalidate".
+self.addEventListener('fetch', (event) => {
+  // نحن لا نخزن طلبات غير GET مؤقتًا
+  if (event.request.method !== 'GET') {
+    return;
+  }
+    
+  event.respondWith(
+    caches.open(CACHE_NAME).then((cache) => {
+      // أولاً: ابحث عن الطلب في ذاكرة التخزين المؤقت.
+      return cache.match(event.request).then((cachedResponse) => {
+        // ثانيًا (في الخلفية): أرسل طلبًا إلى الشبكة لجلب نسخة محدثة.
+        const fetchPromise = fetch(event.request).then((networkResponse) => {
+          // إذا نجح الطلب، قم بتحديث ذاكرة التخزين المؤقت بالنسخة الجديدة.
+          // نحتاج إلى استنساخ الاستجابة لأنها قابلة للاستخدام مرة واحدة فقط.
+          console.log(`[Service Worker] Caching new resource: ${event.request.url}`);
+          cache.put(event.request, networkResponse.clone());
+          // أرجع النسخة الجديدة من الشبكة.
+          return networkResponse;
+        }).catch(error => {
+          console.error('[Service Worker] Fetch failed; returning offline page instead.', error);
+          // يمكنك هنا إرجاع صفحة "أنت غير متصل" مخصصة إذا أردت
+        });
+
+        // ثالثًا: أرجع النسخة المخزنة مؤقتًا فورًا إذا كانت موجودة.
+        // إذا لم تكن موجودة، انتظر استجابة الشبكة.
+        // هذا يجعل التطبيق سريعًا جدًا عند التحميلات المتكررة.
+        return cachedResponse || fetchPromise;
+      });
+    })
+  );
+});
+
